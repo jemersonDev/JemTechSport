@@ -438,12 +438,12 @@ function Index() {
               players.map((p, i) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-3 rounded-xl bg-secondary/60 border border-border px-3 py-2.5 hover:border-neon/50 transition"
+                  className={`flex items-center gap-3 rounded-xl bg-secondary/60 border px-3 py-2.5 transition ${p.isGoalkeeper ? "border-keeper/70" : "border-border hover:border-neon/50"}`}
                 >
                   <div className="relative shrink-0">
                     <button
                       onClick={() => openPhotoPicker(p.id)}
-                      className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-neon/40 hover:ring-neon transition flex items-center justify-center bg-black/40"
+                      className={`w-10 h-10 rounded-full overflow-hidden ring-2 transition flex items-center justify-center bg-black/40 ${p.isGoalkeeper ? "ring-keeper" : "ring-neon/40 hover:ring-neon"}`}
                       aria-label={`Foto de ${p.name}`}
                     >
                       {p.photo ? (
@@ -463,18 +463,30 @@ function Index() {
                   <div className="w-6 h-6 rounded-full bg-neon/20 text-neon font-bold flex items-center justify-center text-[10px] shrink-0">
                     {i + 1}
                   </div>
-                  <span className="flex-1 text-sm font-medium text-foreground truncate">
-                    {p.name}
-                  </span>
-                  {p.photo && (
-                    <button
-                      onClick={() => removePhoto(p.id)}
-                      className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-neon transition px-1.5 py-1"
-                      aria-label={`Remover foto de ${p.name}`}
-                    >
-                      Foto
-                    </button>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                    {p.isGoalkeeper && (
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-keeper leading-none mt-0.5">
+                        Goleiro fixo
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => toggleGoalkeeper(p.id)}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${
+                      p.isGoalkeeper
+                        ? "bg-keeper text-black shadow"
+                        : "bg-secondary border border-border text-muted-foreground hover:text-keeper hover:border-keeper/60"
+                    }`}
+                    aria-label={
+                      p.isGoalkeeper
+                        ? `Tirar ${p.name} do gol`
+                        : `Marcar ${p.name} como goleiro`
+                    }
+                    title={p.isGoalkeeper ? "Goleiro (clique p/ tirar)" : "Marcar como goleiro"}
+                  >
+                    <Shield className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
                   <button
                     onClick={() => removePlayer(p.id)}
                     className="w-8 h-8 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center"
