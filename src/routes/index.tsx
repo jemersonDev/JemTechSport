@@ -1,6 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Plus, X, Shuffle, Trash2, MapPin, Send, DollarSign, Users } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import {
+  Plus,
+  X,
+  Shuffle,
+  Trash2,
+  MapPin,
+  Send,
+  DollarSign,
+  Users,
+  Camera,
+  User as UserIcon,
+} from "lucide-react";
 import { SoccerField, type Player } from "@/components/SoccerField";
 
 export const Route = createFileRoute("/")({
@@ -36,6 +47,9 @@ function Index() {
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
+
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
@@ -53,6 +67,52 @@ function Index() {
     setPlayers((p) => p.filter((x) => x.id !== id));
     setTeamA((t) => t.filter((x) => x.id !== id));
     setTeamB((t) => t.filter((x) => x.id !== id));
+  }
+
+  function openPhotoPicker(playerId: string) {
+    setPhotoTargetId(playerId);
+    fileInputRef.current?.click();
+  }
+
+  function handlePhotoSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const targetId = photoTargetId;
+    e.target.value = "";
+    if (!file || !targetId) return;
+
+    // Resize to keep payload light (max 256px, JPEG)
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 256;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        const apply = (list: Player[]) =>
+          list.map((p) => (p.id === targetId ? { ...p, photo: dataUrl } : p));
+        setPlayers(apply);
+        setTeamA(apply);
+        setTeamB(apply);
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removePhoto(playerId: string) {
+    const apply = (list: Player[]) =>
+      list.map((p) => (p.id === playerId ? { ...p, photo: undefined } : p));
+    setPlayers(apply);
+    setTeamA(apply);
+    setTeamB(apply);
   }
 
   function shuffleTeams() {
@@ -113,6 +173,14 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="user"
+        className="hidden"
+        onChange={handlePhotoSelected}
+      />
       <div className="mx-auto max-w-2xl px-4 py-6 pb-32 space-y-5">
         {/* Header */}
         <header className="flex items-center justify-between">
@@ -301,12 +369,41 @@ function Index() {
                   key={p.id}
                   className="flex items-center gap-3 rounded-xl bg-secondary/60 border border-border px-3 py-2.5 hover:border-neon/50 transition"
                 >
-                  <div className="w-7 h-7 rounded-full bg-neon/20 text-neon font-bold flex items-center justify-center text-xs">
+                  <div className="relative shrink-0">
+                    <button
+                      onClick={() => openPhotoPicker(p.id)}
+                      className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-neon/40 hover:ring-neon transition flex items-center justify-center bg-black/40"
+                      aria-label={`Foto de ${p.name}`}
+                    >
+                      {p.photo ? (
+                        <img
+                          src={p.photo}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <UserIcon className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </button>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-neon flex items-center justify-center shadow-neon pointer-events-none">
+                      <Camera className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+                    </span>
+                  </div>
+                  <div className="w-6 h-6 rounded-full bg-neon/20 text-neon font-bold flex items-center justify-center text-[10px] shrink-0">
                     {i + 1}
                   </div>
                   <span className="flex-1 text-sm font-medium text-foreground truncate">
                     {p.name}
                   </span>
+                  {p.photo && (
+                    <button
+                      onClick={() => removePhoto(p.id)}
+                      className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-neon transition px-1.5 py-1"
+                      aria-label={`Remover foto de ${p.name}`}
+                    >
+                      Foto
+                    </button>
+                  )}
                   <button
                     onClick={() => removePlayer(p.id)}
                     className="w-8 h-8 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center"
