@@ -205,16 +205,25 @@ function PlayerPin({
 
   return (
     <div className="flex flex-col items-center gap-0.5 w-[58px]">
-      <div
-        className={`w-9 h-9 rounded-full ${dotColor} flex items-center justify-center overflow-hidden ring-2 ${ringColor} shadow-card`}
-      >
-        {player.photo ? (
-          <img src={player.photo} alt={player.name} className="w-full h-full object-cover" />
-        ) : (
-          <User className="w-4 h-4 text-black" strokeWidth={2.5} />
+      <div className="relative">
+        <div
+          className={`w-9 h-9 rounded-full ${player.isGoalkeeper ? "bg-amber-400" : dotColor} flex items-center justify-center overflow-hidden ring-2 ${player.isGoalkeeper ? "ring-amber-300" : ringColor} shadow-card`}
+        >
+          {player.photo ? (
+            <img src={player.photo} alt={player.name} className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-4 h-4 text-black" strokeWidth={2.5} />
+          )}
+        </div>
+        {player.isGoalkeeper && (
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 flex items-center justify-center ring-1 ring-black shadow">
+            <Shield className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+          </span>
         )}
       </div>
-      <p className="text-[9px] font-bold text-foreground leading-none bg-black/70 px-1 py-0.5 rounded max-w-full truncate">
+      <p
+        className={`text-[9px] font-bold leading-none px-1 py-0.5 rounded max-w-full truncate ${player.isGoalkeeper ? "bg-amber-400/90 text-black" : "bg-black/70 text-foreground"}`}
+      >
         {player.name.split(" ")[0]}
       </p>
       <div className="flex items-center gap-0.5">
