@@ -30,6 +30,20 @@ const TABS: { id: TabId; label: string; icon: typeof LayoutGrid }[] = [
   { id: "match", label: "Partida", icon: Trophy },
 ];
 
+const PIX_TYPE_LABEL = {
+  cpf: "CPF",
+  telefone: "Telefone",
+  email: "E-mail",
+  aleatoria: "Chave aleatória",
+} as const;
+
+const PIX_TYPES: { id: keyof typeof PIX_TYPE_LABEL; label: string }[] = [
+  { id: "telefone", label: "Telefone" },
+  { id: "cpf", label: "CPF" },
+  { id: "email", label: "E-mail" },
+  { id: "aleatoria", label: "Aleatória" },
+];
+
 const FIELD_MODES: { id: FieldMode; label: string; sub: string }[] = [
   { id: "futsal", label: "Quadra", sub: "Futsal · 5x5" },
   { id: "society", label: "Society", sub: "7x7" },
