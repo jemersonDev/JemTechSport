@@ -252,6 +252,15 @@ function Index() {
       lines.push("👥 *Confirmados:*");
       players.forEach((p) => lines.push(`• ${p.name}`));
     }
+    if (pixKey.trim()) {
+      lines.push("");
+      lines.push("💸 *PAGAMENTO PIX*");
+      lines.push(`🔑 *${PIX_TYPE_LABEL[pixKeyType]}:* ${pixKey.trim()}`);
+      if (pixOwner.trim()) lines.push(`👤 *Favorecido:* ${pixOwner.trim()}`);
+      if (valuePerPerson > 0) {
+        lines.push(`💵 *Valor por pessoa:* R$ ${valuePerPerson.toFixed(2).replace(".", ",")}`);
+      }
+    }
     lines.push("");
     lines.push("_Bora pro jogo! 🔥_");
     return lines.join("\n");
@@ -267,6 +276,17 @@ function Index() {
       await navigator.clipboard.writeText(buildShareText());
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 1800);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function copyPixKey() {
+    if (!pixKey.trim()) return;
+    try {
+      await navigator.clipboard.writeText(pixKey.trim());
+      setPixCopied(true);
+      setTimeout(() => setPixCopied(false), 1800);
     } catch {
       // ignore
     }
