@@ -170,18 +170,17 @@ function Index() {
     const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
     const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
     const extraKeepers = shuffledKeepers.slice(2);
-    // Distribute extra keepers as field players (no GK role for them in this match)
     extraKeepers.forEach((k, i) => {
       const stripped = { ...k, isGoalkeeper: false };
       if (i % 2 === 0) fieldA.push(stripped);
       else fieldB.push(stripped);
     });
 
-    // Final teams: keeper first (slot 0 = GK position on field)
     setTeamA([...keeperA, ...fieldA].map((p) => ({ ...p, goals: 0 })));
     setTeamB([...keeperB, ...fieldB].map((p) => ({ ...p, goals: 0 })));
     setScoreA(0);
     setScoreB(0);
+    setActiveTab("tactical");
   }
 
   function clearAll() {
