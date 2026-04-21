@@ -109,7 +109,6 @@ function Index() {
     e.target.value = "";
     if (!file || !targetId) return;
 
-    // Resize to keep payload light (max 256px, JPEG)
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
@@ -136,14 +135,6 @@ function Index() {
     reader.readAsDataURL(file);
   }
 
-  function removePhoto(playerId: string) {
-    const apply = (list: Player[]) =>
-      list.map((p) => (p.id === playerId ? { ...p, photo: undefined } : p));
-    setPlayers(apply);
-    setTeamA(apply);
-    setTeamB(apply);
-  }
-
   function toggleGoalkeeper(id: string) {
     const apply = (list: Player[]) =>
       list.map((p) => (p.id === id ? { ...p, isGoalkeeper: !p.isGoalkeeper } : p));
@@ -158,14 +149,11 @@ function Index() {
     const keepers = players.filter((p) => p.isGoalkeeper);
     const fieldPlayers = players.filter((p) => !p.isGoalkeeper);
 
-    // Shuffle field players randomly
     const shuffled = [...fieldPlayers].sort(() => Math.random() - 0.5);
     const half = Math.ceil(shuffled.length / 2);
     const fieldA = shuffled.slice(0, half);
     const fieldB = shuffled.slice(half);
 
-    // Distribute keepers: 1 fixed per team. If only 1 keeper, goes to A.
-    // If more than 2 keepers, extras join field rotation randomly.
     const shuffledKeepers = [...keepers].sort(() => Math.random() - 0.5);
     const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
     const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
@@ -260,312 +248,443 @@ function Index() {
         className="hidden"
         onChange={handlePhotoSelected}
       />
-      <div className="mx-auto max-w-2xl px-4 py-6 pb-32 space-y-5">
-        {/* Header */}
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight">
-              <span className="text-neon text-glow">JemTech</span> Sports
-            </h1>
-            <p className="text-xs text-muted-foreground uppercase tracking-widest">
-              Racha sem zica ⚽
-            </p>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-neon flex items-center justify-center shadow-neon">
-            <span className="text-black font-black text-lg">JT</span>
-          </div>
-        </header>
 
-        {/* Financial card */}
-        <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-neon" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Financeiro Tático
-            </h2>
-          </div>
-
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1.5">Valor total do racha</label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">
-                R$
-              </span>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={totalValue}
-                onChange={(e) => setTotalValue(e.target.value)}
-                placeholder="140"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border text-foreground text-lg font-bold focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
-              />
+      {/* ============== TOP NAV (sticky) ============== */}
+      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-lg border-b border-border">
+        <div className="mx-auto max-w-2xl px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-neon flex items-center justify-center shadow-neon">
+              <span className="text-black font-black text-sm tracking-tight">JT</span>
+            </div>
+            <div className="leading-tight">
+              <h1 className="text-base font-black tracking-tight">
+                <span className="text-neon">JemTech</span> Sports
+              </h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                Racha sem zica
+              </p>
             </div>
           </div>
 
-          <div className="rounded-xl bg-black/60 border border-neon/30 p-4 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
-              Cada jogador paga
-            </p>
-            <p className="text-3xl font-black text-neon text-glow">
-              R$ {valuePerPerson.toFixed(2).replace(".", ",")}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
+          {teamsReady ? (
+            <div className="flex items-center gap-2 text-base font-black tabular-nums">
+              <span className="text-[var(--team-a)]">{scoreA}</span>
+              <span className="text-muted-foreground text-xs">×</span>
+              <span className="text-[var(--team-b)]">{scoreB}</span>
+            </div>
+          ) : (
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
               {players.length} {players.length === 1 ? "jogador" : "jogadores"}
-            </p>
-          </div>
+            </span>
+          )}
+        </div>
 
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1.5">
-              Local (opcional)
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Quadra do Zé, 19h"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Soccer Field */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Escalação
-            </h2>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[var(--team-a)]" />
-                <span className="text-muted-foreground">Time A</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[var(--team-b)]" />
-                <span className="text-muted-foreground">Time B</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Modality selector */}
-          <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-graphite border border-border">
-            {FIELD_MODES.map((m) => {
-              const active = fieldMode === m.id;
+        {/* Tabs */}
+        <nav className="mx-auto max-w-2xl px-4 pb-2">
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-graphite border border-border">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = activeTab === t.id;
               return (
                 <button
-                  key={m.id}
-                  onClick={() => setFieldMode(m.id)}
-                  className={`py-2 rounded-lg text-center transition ${
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id)}
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
                     active
                       ? "bg-neon text-black shadow-neon"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <p className="text-xs font-black uppercase tracking-wider leading-none">
-                    {m.label}
-                  </p>
-                  <p
-                    className={`text-[9px] mt-0.5 leading-none ${active ? "text-black/70" : "text-muted-foreground"}`}
-                  >
-                    {m.sub}
-                  </p>
+                  <Icon className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  {t.label}
                 </button>
               );
             })}
           </div>
+        </nav>
+      </header>
 
-          <SoccerField
-            teamA={teamA}
-            teamB={teamB}
-            mode={fieldMode}
-            onGoalChange={handleGoalChange}
-          />
-
-
-          {/* Scoreboard */}
-          <div className="rounded-2xl bg-graphite border border-border p-4 shadow-card">
-            <p className="text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-              Placar
-            </p>
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-              <div className="text-center">
-                <p className="text-[10px] uppercase tracking-wider text-[var(--team-a)] font-bold mb-1">
-                  Time A
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => setScoreA((s) => Math.max(0, s - 1))}
-                    className="w-7 h-7 rounded-lg bg-secondary text-foreground hover:bg-muted transition flex items-center justify-center"
-                  >
-                    −
-                  </button>
-                  <span className="text-4xl font-black text-foreground tabular-nums w-10 text-center">
-                    {scoreA}
+      {/* ============== MAIN ============== */}
+      <main className="mx-auto max-w-2xl px-4 py-5 pb-32">
+        {/* ─────────────── TAB: TÁTICO ─────────────── */}
+        {activeTab === "tactical" && (
+          <div className="space-y-5">
+            {/* Hero scoreboard */}
+            <section className="rounded-2xl bg-graphite border border-border shadow-card overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Placar ao vivo
+                </span>
+                {location.trim() && (
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> {location.trim()}
                   </span>
-                  <button
-                    onClick={() => setScoreA((s) => s + 1)}
-                    className="w-7 h-7 rounded-lg bg-[var(--team-a)] text-black font-bold hover:brightness-110 transition flex items-center justify-center"
-                  >
-                    +
-                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 p-4">
+                <TeamScore
+                  label="Time A"
+                  color="var(--team-a)"
+                  score={scoreA}
+                  onMinus={() => setScoreA((s) => Math.max(0, s - 1))}
+                  onPlus={() => setScoreA((s) => s + 1)}
+                />
+                <span className="text-3xl font-black text-muted-foreground">×</span>
+                <TeamScore
+                  label="Time B"
+                  color="var(--team-b)"
+                  score={scoreB}
+                  onMinus={() => setScoreB((s) => Math.max(0, s - 1))}
+                  onPlus={() => setScoreB((s) => s + 1)}
+                />
+              </div>
+            </section>
+
+            {/* Modality */}
+            <section className="space-y-2">
+              <SectionTitle icon={LayoutGrid} title="Modalidade" />
+              <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-graphite border border-border">
+                {FIELD_MODES.map((m) => {
+                  const active = fieldMode === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => setFieldMode(m.id)}
+                      className={`py-2.5 rounded-lg text-center transition ${
+                        active
+                          ? "bg-neon text-black shadow-neon"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <p className="text-xs font-black uppercase tracking-wider leading-none">
+                        {m.label}
+                      </p>
+                      <p
+                        className={`text-[9px] mt-1 leading-none ${active ? "text-black/70" : "text-muted-foreground"}`}
+                      >
+                        {m.sub}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Field */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between">
+                <SectionTitle icon={Trophy} title="Escalação" />
+                <div className="flex items-center gap-3 text-[10px]">
+                  <Legend color="var(--team-a)" label="A" />
+                  <Legend color="var(--team-b)" label="B" />
+                  <Legend color="var(--keeper)" label="GK" />
                 </div>
               </div>
-              <span className="text-2xl font-black text-muted-foreground">×</span>
-              <div className="text-center">
-                <p className="text-[10px] uppercase tracking-wider text-[var(--team-b)] font-bold mb-1">
-                  Time B
+              <SoccerField
+                teamA={teamA}
+                teamB={teamB}
+                mode={fieldMode}
+                onGoalChange={handleGoalChange}
+              />
+              {!teamsReady && (
+                <p className="text-center text-xs text-muted-foreground italic pt-1">
+                  Adicione jogadores e sorteie pra ver a formação aqui.
                 </p>
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => setScoreB((s) => Math.max(0, s - 1))}
-                    className="w-7 h-7 rounded-lg bg-secondary text-foreground hover:bg-muted transition flex items-center justify-center"
-                  >
-                    −
-                  </button>
-                  <span className="text-4xl font-black text-foreground tabular-nums w-10 text-center">
-                    {scoreB}
+              )}
+            </section>
+
+            {/* Quick actions */}
+            <section className="grid grid-cols-2 gap-3">
+              <button
+                onClick={shuffleTeams}
+                disabled={players.length < 2}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                <Shuffle className="w-4 h-4" strokeWidth={2.5} />
+                Re-sortear
+              </button>
+              <button
+                onClick={() => setActiveTab("roster")}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
+              >
+                <Users className="w-4 h-4" strokeWidth={2.5} />
+                Editar elenco
+              </button>
+            </section>
+          </div>
+        )}
+
+        {/* ─────────────── TAB: ELENCO ─────────────── */}
+        {activeTab === "roster" && (
+          <div className="space-y-5">
+            <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <SectionTitle icon={Users} title="Elenco" />
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    Adicione jogadores e marque os goleiros fixos.
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-neon/15 text-neon font-bold whitespace-nowrap">
+                    {players.length} {players.length === 1 ? "jogador" : "jogadores"}
                   </span>
-                  <button
-                    onClick={() => setScoreB((s) => s + 1)}
-                    className="w-7 h-7 rounded-lg bg-[var(--team-b)] text-black font-bold hover:brightness-110 transition flex items-center justify-center"
-                  >
-                    +
-                  </button>
+                  {goalkeeperCount > 0 && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-keeper/20 text-keeper font-bold flex items-center gap-1 whitespace-nowrap">
+                      <Shield className="w-2.5 h-2.5" strokeWidth={3} />
+                      {goalkeeperCount} {goalkeeperCount === 1 ? "goleiro" : "goleiros"}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addPlayer()}
+                  placeholder="Nome do jogador"
+                  className="flex-1 px-4 py-3 rounded-xl bg-input border border-border text-foreground focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                />
+                <button
+                  onClick={addPlayer}
+                  className="w-12 h-12 rounded-xl bg-neon text-black flex items-center justify-center font-bold shadow-neon hover:brightness-110 active:scale-95 transition"
+                  aria-label="Adicionar jogador"
+                >
+                  <Plus className="w-6 h-6" strokeWidth={3} />
+                </button>
+              </div>
+
+              <div className="max-h-[55vh] overflow-y-auto space-y-2 pr-1 -mr-1 scroll-smooth">
+                {players.length === 0 ? (
+                  <div className="text-center py-10 px-4">
+                    <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mx-auto mb-3">
+                      <UserIcon className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sem jogadores ainda. Adicione a galera aí em cima 👆
+                    </p>
+                  </div>
+                ) : (
+                  players.map((p, i) => (
+                    <div
+                      key={p.id}
+                      className={`flex items-center gap-3 rounded-xl bg-secondary/60 border px-3 py-2.5 transition ${p.isGoalkeeper ? "border-keeper/70" : "border-border hover:border-neon/50"}`}
+                    >
+                      <span className="w-5 text-center text-[10px] font-bold text-muted-foreground tabular-nums">
+                        {i + 1}
+                      </span>
+
+                      <div className="relative shrink-0">
+                        <button
+                          onClick={() => openPhotoPicker(p.id)}
+                          className={`w-11 h-11 rounded-full overflow-hidden ring-2 transition flex items-center justify-center bg-black/40 ${p.isGoalkeeper ? "ring-keeper" : "ring-neon/40 hover:ring-neon"}`}
+                          aria-label={`Foto de ${p.name}`}
+                        >
+                          {p.photo ? (
+                            <img
+                              src={p.photo}
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <UserIcon className="w-5 h-5 text-muted-foreground" />
+                          )}
+                        </button>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-neon flex items-center justify-center shadow-neon pointer-events-none">
+                          <Camera className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+                        </span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">
+                          {p.name}
+                        </p>
+                        <p
+                          className={`text-[10px] font-bold uppercase tracking-wider leading-none mt-0.5 ${p.isGoalkeeper ? "text-keeper" : "text-muted-foreground"}`}
+                        >
+                          {p.isGoalkeeper ? "Goleiro fixo" : "Linha"}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => toggleGoalkeeper(p.id)}
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition ${
+                          p.isGoalkeeper
+                            ? "bg-keeper text-black"
+                            : "bg-secondary border border-border text-muted-foreground hover:text-keeper hover:border-keeper/60"
+                        }`}
+                        aria-label={
+                          p.isGoalkeeper
+                            ? `Tirar ${p.name} do gol`
+                            : `Marcar ${p.name} como goleiro`
+                        }
+                        title={p.isGoalkeeper ? "Goleiro (clique p/ tirar)" : "Marcar goleiro"}
+                      >
+                        <Shield className="w-4 h-4" strokeWidth={2.5} />
+                      </button>
+
+                      <button
+                        onClick={() => removePlayer(p.id)}
+                        className="w-9 h-9 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center"
+                        aria-label={`Remover ${p.name}`}
+                      >
+                        <X className="w-4 h-4" strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button
+                  onClick={shuffleTeams}
+                  disabled={players.length < 2}
+                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  <Shuffle className="w-4 h-4" strokeWidth={2.5} />
+                  Sortear
+                </button>
+                <button
+                  onClick={clearAll}
+                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition"
+                >
+                  <Trash2 className="w-4 h-4" strokeWidth={2.5} />
+                  Limpar
+                </button>
+              </div>
+            </section>
+
+            <div className="rounded-xl bg-graphite/60 border border-border px-4 py-3 text-[11px] text-muted-foreground space-y-1.5">
+              <p className="flex items-start gap-1.5">
+                <Shield className="w-3 h-3 mt-0.5 text-keeper shrink-0" />
+                <span>
+                  <strong className="text-keeper">Goleiros</strong> não entram no sorteio — vão
+                  fixos (até 2).
+                </span>
+              </p>
+              <p className="flex items-start gap-1.5">
+                <Camera className="w-3 h-3 mt-0.5 text-neon shrink-0" />
+                <span>
+                  <strong className="text-neon">Toque na foto</strong> pra adicionar imagem do
+                  jogador.
+                </span>
+              </p>
             </div>
           </div>
-        </section>
+        )}
 
-        {/* Player management */}
-        <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-neon" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Jogadores
-            </h2>
-            <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-neon/15 text-neon font-bold">
-              {players.length}
-            </span>
-          </div>
+        {/* ─────────────── TAB: PARTIDA ─────────────── */}
+        {activeTab === "match" && (
+          <div className="space-y-5">
+            <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
+              <SectionTitle icon={DollarSign} title="Financeiro" />
 
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addPlayer()}
-              placeholder="Nome do jogador"
-              className="flex-1 px-4 py-3 rounded-xl bg-input border border-border text-foreground focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
-            />
-            <button
-              onClick={addPlayer}
-              className="w-12 h-12 rounded-xl bg-neon text-black flex items-center justify-center font-bold shadow-neon hover:brightness-110 active:scale-95 transition"
-              aria-label="Adicionar jogador"
-            >
-              <Plus className="w-6 h-6" strokeWidth={3} />
-            </button>
-          </div>
-
-          {/* Scrollable list */}
-          <div className="max-h-64 overflow-y-auto space-y-2 pr-1 -mr-1 scroll-smooth">
-            {players.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground italic py-8">
-                Nenhum jogador ainda. Adicione a galera aí 👆
-              </p>
-            ) : (
-              players.map((p, i) => (
-                <div
-                  key={p.id}
-                  className={`flex items-center gap-3 rounded-xl bg-secondary/60 border px-3 py-2.5 transition ${p.isGoalkeeper ? "border-keeper/70" : "border-border hover:border-neon/50"}`}
-                >
-                  <div className="relative shrink-0">
-                    <button
-                      onClick={() => openPhotoPicker(p.id)}
-                      className={`w-10 h-10 rounded-full overflow-hidden ring-2 transition flex items-center justify-center bg-black/40 ${p.isGoalkeeper ? "ring-keeper" : "ring-neon/40 hover:ring-neon"}`}
-                      aria-label={`Foto de ${p.name}`}
-                    >
-                      {p.photo ? (
-                        <img
-                          src={p.photo}
-                          alt={p.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <UserIcon className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </button>
-                    <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-neon flex items-center justify-center shadow-neon pointer-events-none">
-                      <Camera className="w-2.5 h-2.5 text-black" strokeWidth={3} />
-                    </span>
-                  </div>
-                  <div className="w-6 h-6 rounded-full bg-neon/20 text-neon font-bold flex items-center justify-center text-[10px] shrink-0">
-                    {i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
-                    {p.isGoalkeeper && (
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-keeper leading-none mt-0.5">
-                        Goleiro fixo
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => toggleGoalkeeper(p.id)}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${
-                      p.isGoalkeeper
-                        ? "bg-keeper text-black shadow"
-                        : "bg-secondary border border-border text-muted-foreground hover:text-keeper hover:border-keeper/60"
-                    }`}
-                    aria-label={
-                      p.isGoalkeeper
-                        ? `Tirar ${p.name} do gol`
-                        : `Marcar ${p.name} como goleiro`
-                    }
-                    title={p.isGoalkeeper ? "Goleiro (clique p/ tirar)" : "Marcar como goleiro"}
-                  >
-                    <Shield className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={() => removePlayer(p.id)}
-                    className="w-8 h-8 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center"
-                    aria-label={`Remover ${p.name}`}
-                  >
-                    <X className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1.5">
+                  Valor total do racha
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">
+                    R$
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={totalValue}
+                    onChange={(e) => setTotalValue(e.target.value)}
+                    placeholder="140"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border text-foreground text-lg font-bold focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                  />
                 </div>
-              ))
-            )}
-          </div>
+              </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <button
-              onClick={shuffleTeams}
-              disabled={players.length < 2}
-              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-            >
-              <Shuffle className="w-4 h-4" strokeWidth={2.5} />
-              Sortear
-            </button>
-            <button
-              onClick={clearAll}
-              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition"
-            >
-              <Trash2 className="w-4 h-4" strokeWidth={2.5} />
-              Limpar
-            </button>
-          </div>
-        </section>
-      </div>
+              <div className="rounded-xl bg-black/60 border border-neon/30 p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                    <Calculator className="w-3 h-3" /> Cada jogador paga
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {players.length} {players.length === 1 ? "pessoa" : "pessoas"}
+                  </p>
+                </div>
+                <p className="text-3xl font-black text-neon text-glow">
+                  R$ {valuePerPerson.toFixed(2).replace(".", ",")}
+                </p>
+              </div>
 
-      {/* Sticky WhatsApp CTA */}
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1.5">
+                  Local (opcional)
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Quadra do Zé, 19h"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-3">
+              <SectionTitle icon={Trophy} title="Resumo da partida" />
+              {teamsReady ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <TeamSummary
+                    label="Time A"
+                    color="var(--team-a)"
+                    players={teamA}
+                    score={scoreA}
+                  />
+                  <TeamSummary
+                    label="Time B"
+                    color="var(--team-b)"
+                    players={teamB}
+                    score={scoreB}
+                  />
+                </div>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground italic py-6">
+                  Sorteie os times pra ver o resumo aqui.
+                </p>
+              )}
+            </section>
+
+            <section className="space-y-2">
+              <SectionTitle icon={Send} title="Compartilhar" />
+              <button
+                onClick={copyShareText}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
+              >
+                {shareCopied ? (
+                  <>
+                    <Check className="w-4 h-4 text-neon" strokeWidth={2.5} />
+                    <span className="text-neon">Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Clipboard className="w-4 h-4" strokeWidth={2.5} />
+                    Copiar texto
+                  </>
+                )}
+              </button>
+            </section>
+          </div>
+        )}
+      </main>
+
+      {/* ============== STICKY CTA ============== */}
       <div className="fixed bottom-0 inset-x-0 z-50 p-4 bg-gradient-to-t from-black via-black/95 to-transparent">
         <div className="mx-auto max-w-2xl">
           <button
             onClick={sendToWhatsApp}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-neon text-black font-black uppercase tracking-widest text-base shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition"
+            disabled={players.length === 0}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-neon text-black font-black uppercase tracking-widest text-base shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <Send className="w-5 h-5" strokeWidth={2.5} />
             Mandar pro Zap
@@ -573,6 +692,119 @@ function Index() {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Subcomponents
+   ============================================================ */
+
+function SectionTitle({
+  icon: Icon,
+  title,
+}: {
+  icon: typeof LayoutGrid;
+  title: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-neon" />
+      <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+      <span className="text-muted-foreground uppercase tracking-wider">{label}</span>
+    </span>
+  );
+}
+
+function TeamScore({
+  label,
+  color,
+  score,
+  onMinus,
+  onPlus,
+}: {
+  label: string;
+  color: string;
+  score: number;
+  onMinus: () => void;
+  onPlus: () => void;
+}) {
+  return (
+    <div className="text-center">
+      <p
+        className="text-[10px] uppercase tracking-widest font-bold mb-1.5"
+        style={{ color }}
+      >
+        {label}
+      </p>
+      <p className="text-5xl font-black text-foreground tabular-nums leading-none mb-2">
+        {score}
+      </p>
+      <div className="flex items-center justify-center gap-1.5">
+        <button
+          onClick={onMinus}
+          className="w-7 h-7 rounded-lg bg-secondary text-foreground hover:bg-muted transition flex items-center justify-center text-base font-bold"
+        >
+          −
+        </button>
+        <button
+          onClick={onPlus}
+          className="w-7 h-7 rounded-lg text-black font-bold hover:brightness-110 transition flex items-center justify-center text-base"
+          style={{ backgroundColor: color }}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TeamSummary({
+  label,
+  color,
+  players,
+  score,
+}: {
+  label: string;
+  color: string;
+  players: Player[];
+  score: number;
+}) {
+  return (
+    <div className="rounded-xl bg-secondary/40 border border-border p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <span
+          className="text-[10px] font-bold uppercase tracking-widest"
+          style={{ color }}
+        >
+          {label}
+        </span>
+        <span className="text-xl font-black tabular-nums">{score}</span>
+      </div>
+      <ul className="space-y-1">
+        {players.map((p) => (
+          <li
+            key={p.id}
+            className="text-xs text-foreground flex items-center gap-1.5"
+          >
+            {p.isGoalkeeper && <Shield className="w-3 h-3 text-keeper shrink-0" />}
+            <span className="truncate flex-1 min-w-0">{p.name}</span>
+            {p.goals > 0 && (
+              <span className="text-neon font-bold shrink-0">⚽{p.goals}</span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
