@@ -12,8 +12,21 @@ import {
   Camera,
   Shield,
   User as UserIcon,
+  LayoutGrid,
+  Trophy,
+  Clipboard,
+  Check,
+  Calculator,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
+
+type TabId = "tactical" | "roster" | "match";
+
+const TABS: { id: TabId; label: string; icon: typeof LayoutGrid }[] = [
+  { id: "tactical", label: "Tático", icon: LayoutGrid },
+  { id: "roster", label: "Elenco", icon: Users },
+  { id: "match", label: "Partida", icon: Trophy },
+];
 
 const FIELD_MODES: { id: FieldMode; label: string; sub: string }[] = [
   { id: "futsal", label: "Quadra", sub: "Futsal · 5x5" },
@@ -57,12 +70,20 @@ function Index() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>("roster");
+  const [shareCopied, setShareCopied] = useState(false);
 
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
     return total / players.length;
   }, [totalValue, players.length]);
+
+  const goalkeeperCount = useMemo(
+    () => players.filter((p) => p.isGoalkeeper).length,
+    [players],
+  );
+  const teamsReady = teamA.length > 0 || teamB.length > 0;
 
   function addPlayer() {
     const name = newName.trim();
