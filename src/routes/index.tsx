@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
   X,
@@ -17,6 +17,8 @@ import {
   Clipboard,
   Check,
   Calculator,
+  QrCode,
+  CreditCard,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
 
