@@ -12,7 +12,13 @@ import {
   Camera,
   User as UserIcon,
 } from "lucide-react";
-import { SoccerField, type Player } from "@/components/SoccerField";
+import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
+
+const FIELD_MODES: { id: FieldMode; label: string; sub: string }[] = [
+  { id: "futsal", label: "Quadra", sub: "Futsal · 5x5" },
+  { id: "society", label: "Society", sub: "7x7" },
+  { id: "campo", label: "Campo", sub: "11x11" },
+];
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -46,6 +52,7 @@ function Index() {
   const [teamB, setTeamB] = useState<Player[]>([]);
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
+  const [fieldMode, setFieldMode] = useState<FieldMode>("society");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
@@ -270,7 +277,40 @@ function Index() {
             </div>
           </div>
 
-          <SoccerField teamA={teamA} teamB={teamB} onGoalChange={handleGoalChange} />
+          {/* Modality selector */}
+          <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-graphite border border-border">
+            {FIELD_MODES.map((m) => {
+              const active = fieldMode === m.id;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setFieldMode(m.id)}
+                  className={`py-2 rounded-lg text-center transition ${
+                    active
+                      ? "bg-neon text-black shadow-neon"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <p className="text-xs font-black uppercase tracking-wider leading-none">
+                    {m.label}
+                  </p>
+                  <p
+                    className={`text-[9px] mt-0.5 leading-none ${active ? "text-black/70" : "text-muted-foreground"}`}
+                  >
+                    {m.sub}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <SoccerField
+            teamA={teamA}
+            teamB={teamB}
+            mode={fieldMode}
+            onGoalChange={handleGoalChange}
+          />
+
 
           {/* Scoreboard */}
           <div className="rounded-2xl bg-graphite border border-border p-4 shadow-card">
