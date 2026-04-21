@@ -121,10 +121,11 @@ function Index() {
     }
   }, [pixKey, pixKeyType, pixOwner]);
 
+  const APP_FEE = 0.2; // R$ 0,20 por jogador para manter o app no ar
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
-    return total / players.length;
+    return total / players.length + APP_FEE;
   }, [totalValue, players.length]);
 
   const goalkeeperCount = useMemo(
