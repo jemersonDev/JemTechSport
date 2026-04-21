@@ -194,10 +194,18 @@ function Index() {
     lines.push("");
     if (teamA.length > 0 || teamB.length > 0) {
       lines.push(`🟢 *TIME A* (${scoreA})`);
-      teamA.forEach((p) => lines.push(`• ${p.name}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`));
+      teamA.forEach((p) =>
+        lines.push(
+          `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
+        ),
+      );
       lines.push("");
       lines.push(`🔵 *TIME B* (${scoreB})`);
-      teamB.forEach((p) => lines.push(`• ${p.name}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`));
+      teamB.forEach((p) =>
+        lines.push(
+          `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
+        ),
+      );
     } else if (players.length > 0) {
       lines.push("👥 *Confirmados:*");
       players.forEach((p) => lines.push(`• ${p.name}`));
