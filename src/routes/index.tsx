@@ -10,6 +10,7 @@ import {
   DollarSign,
   Users,
   Camera,
+  Shield,
   User as UserIcon,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
@@ -122,12 +123,42 @@ function Index() {
     setTeamB(apply);
   }
 
+  function toggleGoalkeeper(id: string) {
+    const apply = (list: Player[]) =>
+      list.map((p) => (p.id === id ? { ...p, isGoalkeeper: !p.isGoalkeeper } : p));
+    setPlayers(apply);
+    setTeamA(apply);
+    setTeamB(apply);
+  }
+
   function shuffleTeams() {
     if (players.length < 2) return;
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
+
+    const keepers = players.filter((p) => p.isGoalkeeper);
+    const fieldPlayers = players.filter((p) => !p.isGoalkeeper);
+
+    // Shuffle field players randomly
+    const shuffled = [...fieldPlayers].sort(() => Math.random() - 0.5);
     const half = Math.ceil(shuffled.length / 2);
-    setTeamA(shuffled.slice(0, half).map((p) => ({ ...p, goals: 0 })));
-    setTeamB(shuffled.slice(half).map((p) => ({ ...p, goals: 0 })));
+    const fieldA = shuffled.slice(0, half);
+    const fieldB = shuffled.slice(half);
+
+    // Distribute keepers: 1 fixed per team. If only 1 keeper, goes to A.
+    // If more than 2 keepers, extras join field rotation randomly.
+    const shuffledKeepers = [...keepers].sort(() => Math.random() - 0.5);
+    const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
+    const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
+    const extraKeepers = shuffledKeepers.slice(2);
+    // Distribute extra keepers as field players (no GK role for them in this match)
+    extraKeepers.forEach((k, i) => {
+      const stripped = { ...k, isGoalkeeper: false };
+      if (i % 2 === 0) fieldA.push(stripped);
+      else fieldB.push(stripped);
+    });
+
+    // Final teams: keeper first (slot 0 = GK position on field)
+    setTeamA([...keeperA, ...fieldA].map((p) => ({ ...p, goals: 0 })));
+    setTeamB([...keeperB, ...fieldB].map((p) => ({ ...p, goals: 0 })));
     setScoreA(0);
     setScoreB(0);
   }
@@ -163,10 +194,18 @@ function Index() {
     lines.push("");
     if (teamA.length > 0 || teamB.length > 0) {
       lines.push(`🟢 *TIME A* (${scoreA})`);
-      teamA.forEach((p) => lines.push(`• ${p.name}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`));
+      teamA.forEach((p) =>
+        lines.push(
+          `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
+        ),
+      );
       lines.push("");
       lines.push(`🔵 *TIME B* (${scoreB})`);
-      teamB.forEach((p) => lines.push(`• ${p.name}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`));
+      teamB.forEach((p) =>
+        lines.push(
+          `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
+        ),
+      );
     } else if (players.length > 0) {
       lines.push("👥 *Confirmados:*");
       players.forEach((p) => lines.push(`• ${p.name}`));
@@ -407,12 +446,12 @@ function Index() {
               players.map((p, i) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-3 rounded-xl bg-secondary/60 border border-border px-3 py-2.5 hover:border-neon/50 transition"
+                  className={`flex items-center gap-3 rounded-xl bg-secondary/60 border px-3 py-2.5 transition ${p.isGoalkeeper ? "border-keeper/70" : "border-border hover:border-neon/50"}`}
                 >
                   <div className="relative shrink-0">
                     <button
                       onClick={() => openPhotoPicker(p.id)}
-                      className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-neon/40 hover:ring-neon transition flex items-center justify-center bg-black/40"
+                      className={`w-10 h-10 rounded-full overflow-hidden ring-2 transition flex items-center justify-center bg-black/40 ${p.isGoalkeeper ? "ring-keeper" : "ring-neon/40 hover:ring-neon"}`}
                       aria-label={`Foto de ${p.name}`}
                     >
                       {p.photo ? (
@@ -432,18 +471,30 @@ function Index() {
                   <div className="w-6 h-6 rounded-full bg-neon/20 text-neon font-bold flex items-center justify-center text-[10px] shrink-0">
                     {i + 1}
                   </div>
-                  <span className="flex-1 text-sm font-medium text-foreground truncate">
-                    {p.name}
-                  </span>
-                  {p.photo && (
-                    <button
-                      onClick={() => removePhoto(p.id)}
-                      className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-neon transition px-1.5 py-1"
-                      aria-label={`Remover foto de ${p.name}`}
-                    >
-                      Foto
-                    </button>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                    {p.isGoalkeeper && (
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-keeper leading-none mt-0.5">
+                        Goleiro fixo
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => toggleGoalkeeper(p.id)}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition ${
+                      p.isGoalkeeper
+                        ? "bg-keeper text-black shadow"
+                        : "bg-secondary border border-border text-muted-foreground hover:text-keeper hover:border-keeper/60"
+                    }`}
+                    aria-label={
+                      p.isGoalkeeper
+                        ? `Tirar ${p.name} do gol`
+                        : `Marcar ${p.name} como goleiro`
+                    }
+                    title={p.isGoalkeeper ? "Goleiro (clique p/ tirar)" : "Marcar como goleiro"}
+                  >
+                    <Shield className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
                   <button
                     onClick={() => removePlayer(p.id)}
                     className="w-8 h-8 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center"
