@@ -1,6 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Plus, X, Shuffle, Trash2, MapPin, Send, DollarSign, Users } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import {
+  Plus,
+  X,
+  Shuffle,
+  Trash2,
+  MapPin,
+  Send,
+  DollarSign,
+  Users,
+  Camera,
+  User as UserIcon,
+} from "lucide-react";
 import { SoccerField, type Player } from "@/components/SoccerField";
 
 export const Route = createFileRoute("/")({

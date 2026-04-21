@@ -4,6 +4,7 @@ export type Player = {
   id: string;
   name: string;
   goals: number;
+  photo?: string;
 };
 
 type Props = {
@@ -28,8 +29,18 @@ function PlayerCard({
     <div
       className={`flex items-center gap-1.5 rounded-lg bg-graphite/95 backdrop-blur px-2 py-1.5 ring-2 ${ringColor} shadow-card min-w-[110px]`}
     >
-      <div className={`w-6 h-6 rounded-full ${dotColor} flex items-center justify-center shrink-0`}>
-        <User className="w-3.5 h-3.5 text-black" strokeWidth={2.5} />
+      <div
+        className={`w-7 h-7 rounded-full ${dotColor} flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-black/40`}
+      >
+        {player.photo ? (
+          <img
+            src={player.photo}
+            alt={player.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <User className="w-3.5 h-3.5 text-black" strokeWidth={2.5} />
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] font-semibold text-foreground truncate leading-tight">
