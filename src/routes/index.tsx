@@ -199,7 +199,7 @@ function Index() {
     setTeamB(updater);
   }
 
-  function sendToWhatsApp() {
+  function buildShareText() {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     const lines: string[] = [];
     lines.push("⚽ *RACHA — JEMTECH SPORTS* ⚽");
@@ -232,9 +232,22 @@ function Index() {
     }
     lines.push("");
     lines.push("_Bora pro jogo! 🔥_");
+    return lines.join("\n");
+  }
 
-    const text = encodeURIComponent(lines.join("\n"));
+  function sendToWhatsApp() {
+    const text = encodeURIComponent(buildShareText());
     window.open(`https://wa.me/?text=${text}`, "_blank");
+  }
+
+  async function copyShareText() {
+    try {
+      await navigator.clipboard.writeText(buildShareText());
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 1800);
+    } catch {
+      // ignore
+    }
   }
 
   return (
