@@ -75,6 +75,38 @@ function Index() {
   const [activeTab, setActiveTab] = useState<TabId>("roster");
   const [shareCopied, setShareCopied] = useState(false);
 
+  // PIX
+  type PixKeyType = "cpf" | "telefone" | "email" | "aleatoria";
+  const [pixKey, setPixKey] = useState<string>("");
+  const [pixKeyType, setPixKeyType] = useState<PixKeyType>("telefone");
+  const [pixOwner, setPixOwner] = useState<string>("");
+  const [pixCopied, setPixCopied] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("jemtech_pix");
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.key) setPixKey(data.key);
+        if (data.type) setPixKeyType(data.type);
+        if (data.owner) setPixOwner(data.owner);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "jemtech_pix",
+        JSON.stringify({ key: pixKey, type: pixKeyType, owner: pixOwner }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [pixKey, pixKeyType, pixOwner]);
+
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
