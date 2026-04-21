@@ -1,10 +1,11 @@
-import { Minus, Plus, User } from "lucide-react";
+import { Minus, Plus, Shield, User } from "lucide-react";
 
 export type Player = {
   id: string;
   name: string;
   goals: number;
   photo?: string;
+  isGoalkeeper?: boolean;
 };
 
 export type FieldMode = "futsal" | "society" | "campo";
