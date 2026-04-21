@@ -121,10 +121,11 @@ function Index() {
     }
   }, [pixKey, pixKeyType, pixOwner]);
 
+  const APP_FEE = 0.2; // R$ 0,20 por jogador para manter o app no ar
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
-    return total / players.length;
+    return total / players.length + APP_FEE;
   }, [totalValue, players.length]);
 
   const goalkeeperCount = useMemo(
@@ -680,6 +681,15 @@ function Index() {
                 <p className="text-3xl font-black text-neon text-glow">
                   R$ {valuePerPerson.toFixed(2).replace(".", ",")}
                 </p>
+                {players.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed flex items-start gap-1">
+                    <span className="text-neon">⚡</span>
+                    <span>
+                      Inclui <span className="text-neon font-bold">R$ 0,20</span> de força extra pra
+                      manter a bola rolando aqui no app — valeu por jogar com a gente! 🙌
+                    </span>
+                  </p>
+                )}
               </div>
 
               <div>
