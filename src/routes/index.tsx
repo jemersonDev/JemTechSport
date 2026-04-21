@@ -173,6 +173,14 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="user"
+        className="hidden"
+        onChange={handlePhotoSelected}
+      />
       <div className="mx-auto max-w-2xl px-4 py-6 pb-32 space-y-5">
         {/* Header */}
         <header className="flex items-center justify-between">
