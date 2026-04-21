@@ -10,6 +10,7 @@ import {
   DollarSign,
   Users,
   Camera,
+  Shield,
   User as UserIcon,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
@@ -122,12 +123,42 @@ function Index() {
     setTeamB(apply);
   }
 
+  function toggleGoalkeeper(id: string) {
+    const apply = (list: Player[]) =>
+      list.map((p) => (p.id === id ? { ...p, isGoalkeeper: !p.isGoalkeeper } : p));
+    setPlayers(apply);
+    setTeamA(apply);
+    setTeamB(apply);
+  }
+
   function shuffleTeams() {
     if (players.length < 2) return;
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
+
+    const keepers = players.filter((p) => p.isGoalkeeper);
+    const fieldPlayers = players.filter((p) => !p.isGoalkeeper);
+
+    // Shuffle field players randomly
+    const shuffled = [...fieldPlayers].sort(() => Math.random() - 0.5);
     const half = Math.ceil(shuffled.length / 2);
-    setTeamA(shuffled.slice(0, half).map((p) => ({ ...p, goals: 0 })));
-    setTeamB(shuffled.slice(half).map((p) => ({ ...p, goals: 0 })));
+    const fieldA = shuffled.slice(0, half);
+    const fieldB = shuffled.slice(half);
+
+    // Distribute keepers: 1 fixed per team. If only 1 keeper, goes to A.
+    // If more than 2 keepers, extras join field rotation randomly.
+    const shuffledKeepers = [...keepers].sort(() => Math.random() - 0.5);
+    const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
+    const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
+    const extraKeepers = shuffledKeepers.slice(2);
+    // Distribute extra keepers as field players (no GK role for them in this match)
+    extraKeepers.forEach((k, i) => {
+      const stripped = { ...k, isGoalkeeper: false };
+      if (i % 2 === 0) fieldA.push(stripped);
+      else fieldB.push(stripped);
+    });
+
+    // Final teams: keeper first (slot 0 = GK position on field)
+    setTeamA([...keeperA, ...fieldA].map((p) => ({ ...p, goals: 0 })));
+    setTeamB([...keeperB, ...fieldB].map((p) => ({ ...p, goals: 0 })));
     setScoreA(0);
     setScoreB(0);
   }
