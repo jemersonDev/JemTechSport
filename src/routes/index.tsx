@@ -47,6 +47,9 @@ function Index() {
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
+
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
@@ -64,6 +67,52 @@ function Index() {
     setPlayers((p) => p.filter((x) => x.id !== id));
     setTeamA((t) => t.filter((x) => x.id !== id));
     setTeamB((t) => t.filter((x) => x.id !== id));
+  }
+
+  function openPhotoPicker(playerId: string) {
+    setPhotoTargetId(playerId);
+    fileInputRef.current?.click();
+  }
+
+  function handlePhotoSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const targetId = photoTargetId;
+    e.target.value = "";
+    if (!file || !targetId) return;
+
+    // Resize to keep payload light (max 256px, JPEG)
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 256;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        const apply = (list: Player[]) =>
+          list.map((p) => (p.id === targetId ? { ...p, photo: dataUrl } : p));
+        setPlayers(apply);
+        setTeamA(apply);
+        setTeamB(apply);
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removePhoto(playerId: string) {
+    const apply = (list: Player[]) =>
+      list.map((p) => (p.id === playerId ? { ...p, photo: undefined } : p));
+    setPlayers(apply);
+    setTeamA(apply);
+    setTeamB(apply);
   }
 
   function shuffleTeams() {
