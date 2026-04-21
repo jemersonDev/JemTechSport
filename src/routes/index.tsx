@@ -723,6 +723,125 @@ function Index() {
               )}
             </section>
 
+            {/* PIX */}
+            <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <SectionTitle icon={QrCode} title="Pagamento PIX" />
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    Sua chave aparece junto na mensagem do Zap.
+                  </p>
+                </div>
+                <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-neon/15 text-neon font-bold flex items-center gap-1">
+                  <CreditCard className="w-3 h-3" strokeWidth={2.5} /> Salvo
+                </span>
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1.5">
+                  Tipo de chave
+                </label>
+                <div className="grid grid-cols-4 gap-1 p-1 rounded-xl bg-input border border-border">
+                  {PIX_TYPES.map((t) => {
+                    const active = pixKeyType === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => setPixKeyType(t.id)}
+                        className={`py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition ${
+                          active
+                            ? "bg-neon text-black shadow-neon"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1.5">
+                  Chave PIX
+                </label>
+                <input
+                  type="text"
+                  value={pixKey}
+                  onChange={(e) => setPixKey(e.target.value)}
+                  placeholder={
+                    pixKeyType === "telefone"
+                      ? "(11) 99999-9999"
+                      : pixKeyType === "cpf"
+                        ? "000.000.000-00"
+                        : pixKeyType === "email"
+                          ? "voce@email.com"
+                          : "Chave aleatória"
+                  }
+                  className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1.5">
+                  Favorecido (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={pixOwner}
+                  onChange={(e) => setPixOwner(e.target.value)}
+                  placeholder="Nome de quem recebe"
+                  className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                />
+              </div>
+
+              {pixKey.trim() && (
+                <div className="rounded-xl bg-black/60 border border-neon/30 p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">
+                        {PIX_TYPE_LABEL[pixKeyType]}
+                      </p>
+                      <p className="text-sm font-bold text-foreground truncate">
+                        {pixKey.trim()}
+                      </p>
+                    </div>
+                    {valuePerPerson > 0 && (
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">
+                          Valor
+                        </p>
+                        <p className="text-lg font-black text-neon text-glow leading-none">
+                          R$ {valuePerPerson.toFixed(2).replace(".", ",")}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={copyPixKey}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-neon text-black font-bold uppercase tracking-wider text-xs shadow-neon hover:brightness-110 active:scale-95 transition"
+                  >
+                    {pixCopied ? (
+                      <>
+                        <Check className="w-4 h-4" strokeWidth={2.5} />
+                        Chave copiada!
+                      </>
+                    ) : (
+                      <>
+                        <Clipboard className="w-4 h-4" strokeWidth={2.5} />
+                        Copiar chave PIX
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              <p className="text-[10px] text-muted-foreground italic leading-relaxed">
+                💡 Cartão de crédito/débito? Use o app do seu banco com a chave PIX acima — a maioria
+                aceita pagar PIX no crédito.
+              </p>
+            </section>
+
             <section className="space-y-2">
               <SectionTitle icon={Send} title="Compartilhar" />
               <button
