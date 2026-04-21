@@ -35,6 +35,7 @@
   --color-field-line: var(--field-line);
   --color-team-a: var(--team-a);
   --color-team-b: var(--team-b);
+  --color-keeper: var(--keeper);
 
   --shadow-neon: 0 0 20px color-mix(in oklab, var(--neon) 35%, transparent);
   --shadow-neon-strong: 0 0 30px color-mix(in oklab, var(--neon) 60%, transparent);
@@ -84,6 +85,9 @@
   /* Team colors */
   --team-a: oklch(0.78 0.21 145);
   --team-b: oklch(0.7 0.18 250);
+
+  /* Goalkeeper accent (amber) */
+  --keeper: oklch(0.82 0.17 80);
 
   --chart-1: oklch(0.78 0.21 145);
   --chart-2: oklch(0.7 0.18 250);
