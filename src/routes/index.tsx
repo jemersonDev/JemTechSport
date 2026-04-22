@@ -413,36 +413,7 @@ function Index() {
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
           <div className="space-y-5">
-            {/* Hero scoreboard */}
-            <section className="rounded-2xl bg-graphite border border-border shadow-card overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Placar ao vivo
-                </span>
-                {location.trim() && (
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <MapPin className="w-3 h-3" /> {location.trim()}
-                  </span>
-                )}
-              </div>
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 p-4">
-                <TeamScore
-                  label="Time A"
-                  color="var(--team-a)"
-                  score={scoreA}
-                  onMinus={() => setScoreA((s) => Math.max(0, s - 1))}
-                  onPlus={() => setScoreA((s) => s + 1)}
-                />
-                <span className="text-3xl font-black text-muted-foreground">×</span>
-                <TeamScore
-                  label="Time B"
-                  color="var(--team-b)"
-                  score={scoreB}
-                  onMinus={() => setScoreB((s) => Math.max(0, s - 1))}
-                  onPlus={() => setScoreB((s) => s + 1)}
-                />
-              </div>
-            </section>
+            {/* Placar ao vivo removido a pedido do usuário */}
 
             {/* Modality */}
             <section className="space-y-2">
