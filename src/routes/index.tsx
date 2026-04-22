@@ -940,22 +940,33 @@ function Index() {
 
             <section className="space-y-2">
               <SectionTitle icon={Send} title="Compartilhar" />
-              <button
-                onClick={copyShareText}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
-              >
-                {shareCopied ? (
-                  <>
-                    <Check className="w-4 h-4 text-neon" strokeWidth={2.5} />
-                    <span className="text-neon">Copiado!</span>
-                  </>
-                ) : (
-                  <>
-                    <Clipboard className="w-4 h-4" strokeWidth={2.5} />
-                    Copiar texto
-                  </>
-                )}
-              </button>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={sendToWhatsApp}
+                  disabled={players.length === 0}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-neon text-black font-black uppercase tracking-widest text-sm shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  <Send className="w-5 h-5" strokeWidth={2.5} />
+                  Mandar pro Zap
+                  <span className="text-lg">📱</span>
+                </button>
+                <button
+                  onClick={copyShareText}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
+                >
+                  {shareCopied ? (
+                    <>
+                      <Check className="w-4 h-4 text-neon" strokeWidth={2.5} />
+                      <span className="text-neon">Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clipboard className="w-4 h-4" strokeWidth={2.5} />
+                      Copiar texto
+                    </>
+                  )}
+                </button>
+              </div>
             </section>
           </div>
         )}
