@@ -205,26 +205,38 @@ function Index() {
   function shuffleTeams() {
     if (players.length < 2) return;
 
+    const teamSize = TEAM_SIZE[fieldMode];
+    const maxFieldPerTeam = teamSize - 1; // 1 vaga reservada pro goleiro
+
     const keepers = players.filter((p) => p.isGoalkeeper);
     const fieldPlayers = players.filter((p) => !p.isGoalkeeper);
 
     const shuffled = [...fieldPlayers].sort(() => Math.random() - 0.5);
-    const half = Math.ceil(shuffled.length / 2);
-    const fieldA = shuffled.slice(0, half);
-    const fieldB = shuffled.slice(half);
+    const fieldA: Player[] = [];
+    const fieldB: Player[] = [];
+    const fieldReserves: Player[] = [];
+
+    // Distribui linha alternando A/B até preencher; o resto vira reserva
+    shuffled.forEach((p) => {
+      if (fieldA.length <= fieldB.length && fieldA.length < maxFieldPerTeam) {
+        fieldA.push(p);
+      } else if (fieldB.length < maxFieldPerTeam) {
+        fieldB.push(p);
+      } else {
+        fieldReserves.push(p);
+      }
+    });
 
     const shuffledKeepers = [...keepers].sort(() => Math.random() - 0.5);
     const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
     const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
     const extraKeepers = shuffledKeepers.slice(2);
-    extraKeepers.forEach((k, i) => {
-      const stripped = { ...k, isGoalkeeper: false };
-      if (i % 2 === 0) fieldA.push(stripped);
-      else fieldB.push(stripped);
-    });
+    // Goleiros extras viram reservas (mantém marcação de goleiro)
+    const reservesAll = [...extraKeepers, ...fieldReserves];
 
     setTeamA([...keeperA, ...fieldA].map((p) => ({ ...p, goals: 0 })));
     setTeamB([...keeperB, ...fieldB].map((p) => ({ ...p, goals: 0 })));
+    setReserves(reservesAll.map((p) => ({ ...p, goals: 0 })));
     setScoreA(0);
     setScoreB(0);
     setActiveTab("tactical");
@@ -234,6 +246,7 @@ function Index() {
     setPlayers([]);
     setTeamA([]);
     setTeamB([]);
+    setReserves([]);
     setScoreA(0);
     setScoreB(0);
     setNewName("");
