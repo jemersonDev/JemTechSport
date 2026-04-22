@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
@@ -19,8 +19,11 @@ import {
   Calculator,
   QrCode,
   CreditCard,
+  Loader2,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type TabId = "tactical" | "roster" | "match";
 
@@ -74,6 +77,15 @@ function uid() {
 }
 
 function Index() {
+  const { user, profile, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [user, authLoading, navigate]);
+
   const [players, setPlayers] = useState<Player[]>([]);
   const [newName, setNewName] = useState("");
   const [totalValue, setTotalValue] = useState<string>("140");
@@ -342,6 +354,21 @@ function Index() {
     }
   }
 
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const profileInitials = (profile?.display_name ?? "?")
+    .split(" ")
+    .map((s) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <input
@@ -383,17 +410,31 @@ function Index() {
             </div>
           </div>
 
-          {teamsReady ? (
-            <div className="flex items-center gap-2 text-base font-black tabular-nums">
-              <span className="text-[var(--team-a)]">{scoreA}</span>
-              <span className="text-muted-foreground text-xs">×</span>
-              <span className="text-[var(--team-b)]">{scoreB}</span>
-            </div>
-          ) : (
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              {players.length} {players.length === 1 ? "jogador" : "jogadores"}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {teamsReady ? (
+              <div className="flex items-center gap-2 text-base font-black tabular-nums">
+                <span className="text-[var(--team-a)]">{scoreA}</span>
+                <span className="text-muted-foreground text-xs">×</span>
+                <span className="text-[var(--team-b)]">{scoreB}</span>
+              </div>
+            ) : (
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground hidden sm:inline">
+                {players.length} {players.length === 1 ? "jogador" : "jogadores"}
+              </span>
+            )}
+            <Link
+              to="/perfil"
+              aria-label="Meu perfil"
+              className="rounded-full ring-2 ring-transparent hover:ring-neon/60 transition"
+            >
+              <Avatar className="w-9 h-9">
+                <AvatarImage src={profile?.avatar_url ?? undefined} alt={profile?.display_name ?? "Perfil"} />
+                <AvatarFallback className="text-xs bg-secondary text-foreground">
+                  {profileInitials || "??"}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
         </div>
 
         {/* Tabs */}

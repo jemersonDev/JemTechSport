@@ -1,0 +1,239 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowLeft, Camera, LogOut, Loader2, Shield, User as UserIcon } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/perfil")({
+  component: PerfilPage,
+  head: () => ({
+    meta: [
+      { title: "Meu perfil — JemTech Sports" },
+      { name: "description", content: "Edite seu nome, foto e posição preferida." },
+    ],
+  }),
+});
+
+function PerfilPage() {
+  const { user, profile, loading, signOut, refreshProfile } = useAuth();
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [displayName, setDisplayName] = useState("");
+  const [position, setPosition] = useState<"goleiro" | "linha">("linha");
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name);
+      setPosition(profile.preferred_position);
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    if (!user || !profile) return;
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      toast.error("Coloca um nome aí, craque");
+      return;
+    }
+    if (trimmed.length > 40) {
+      toast.error("Nome muito longo (máx 40)");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: trimmed, preferred_position: position })
+      .eq("user_id", user.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Erro ao salvar: " + error.message);
+      return;
+    }
+    await refreshProfile();
+    toast.success("Perfil atualizado!");
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 5MB)");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Arquivo precisa ser uma imagem");
+      return;
+    }
+
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = `${user.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true, cacheControl: "0" });
+
+    if (uploadError) {
+      setUploading(false);
+      toast.error("Erro no upload: " + uploadError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const url = `${data.publicUrl}?t=${Date.now()}`;
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ avatar_url: url })
+      .eq("user_id", user.id);
+
+    setUploading(false);
+    if (updateError) {
+      toast.error("Erro ao salvar foto: " + updateError.message);
+      return;
+    }
+    await refreshProfile();
+    toast.success("Foto atualizada!");
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/login" });
+  };
+
+  if (loading || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const initials = displayName
+    .split(" ")
+    .map((s) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border/40 bg-card/40 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+          <Link to="/">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
+          <h1 className="font-semibold">Meu perfil</h1>
+        </div>
+      </header>
+
+      <main className="max-w-2xl mx-auto p-4 space-y-4">
+        <Card className="p-6 space-y-6">
+          {/* Avatar */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative">
+              <Avatar className="w-24 h-24 border-4 border-primary/20">
+                <AvatarImage src={profile.avatar_url ?? undefined} alt={displayName} />
+                <AvatarFallback className="text-2xl">{initials || "??"}</AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition disabled:opacity-50"
+                aria-label="Trocar foto"
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Toque na câmera pra trocar a foto
+            </p>
+          </div>
+
+          {/* Nome */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <UserIcon className="w-4 h-4" /> Como te chamam?
+            </label>
+            <Input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Seu apelido na bola"
+              maxLength={40}
+            />
+          </div>
+
+          {/* Posição */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Shield className="w-4 h-4" /> Posição preferida
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setPosition("linha")}
+                className={`h-12 rounded-md border-2 font-medium transition ${
+                  position === "linha"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-muted-foreground"
+                }`}
+              >
+                ⚽ Linha
+              </button>
+              <button
+                type="button"
+                onClick={() => setPosition("goleiro")}
+                className={`h-12 rounded-md border-2 font-medium transition ${
+                  position === "goleiro"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-muted-foreground"
+                }`}
+              >
+                🧤 Goleiro
+              </button>
+            </div>
+          </div>
+
+          <Button onClick={handleSave} disabled={saving} className="w-full h-11">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar perfil"}
+          </Button>
+        </Card>
+
+        <Card className="p-4">
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-4 h-4" /> Sair da conta
+          </Button>
+        </Card>
+      </main>
+    </div>
+  );
+}
