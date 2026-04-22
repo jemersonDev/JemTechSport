@@ -152,6 +152,7 @@ function Index() {
     setPlayers((p) => p.filter((x) => x.id !== id));
     setTeamA((t) => t.filter((x) => x.id !== id));
     setTeamB((t) => t.filter((x) => x.id !== id));
+    setReserves((t) => t.filter((x) => x.id !== id));
   }
 
   function openPhotoPicker(playerId: string) {
