@@ -20,6 +20,7 @@ import {
   QrCode,
   CreditCard,
   Loader2,
+  KeyRound,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
 import { useAuth } from "@/hooks/useAuth";
@@ -872,7 +873,7 @@ function Index() {
                     </span>
                   </p>
                   <p className="flex items-start gap-1.5">
-                    <KeyRoundIcon />
+                    <KeyRound className="w-3 h-3 mt-0.5 text-neon shrink-0" />
                     <span>
                       Compartilhe o <strong className="text-neon">código de convite</strong> pra galera entrar na lista.
                     </span>
@@ -1170,6 +1171,115 @@ function Legend({ color, label }: { color: string; label: string }) {
       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
       <span className="text-muted-foreground uppercase tracking-wider">{label}</span>
     </span>
+  );
+}
+
+type RachaInscricao = {
+  id: string;
+  user_id: string;
+  position: "goleiro" | "linha";
+  paid: boolean;
+  display_name: string;
+  avatar_url: string | null;
+};
+
+function RachaListItem({
+  index,
+  inscricao,
+  isMe,
+  isAdmin,
+  showPosition,
+  onRemove,
+}: {
+  index: number;
+  inscricao: RachaInscricao;
+  isMe: boolean;
+  isAdmin: boolean;
+  showPosition: "goleiro" | "linha";
+  onRemove: () => void;
+}) {
+  const initials = inscricao.display_name
+    .split(" ")
+    .map((s) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const isKeeper = showPosition === "goleiro";
+  const ringClass = isKeeper ? "ring-keeper" : "ring-neon/40";
+  const numberClass = isKeeper
+    ? "bg-keeper/20 text-keeper"
+    : "bg-neon/20 text-neon";
+
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
+        inscricao.paid
+          ? "bg-green-500/5 border-green-500/40"
+          : "bg-secondary/60 border-border"
+      } ${isMe ? "ring-1 ring-neon/40" : ""}`}
+    >
+      <span
+        className={`w-6 h-6 rounded-full ${numberClass} text-[10px] font-black flex items-center justify-center shrink-0 tabular-nums`}
+      >
+        {isKeeper ? "🧤" : index}
+      </span>
+
+      <div
+        className={`w-10 h-10 rounded-full overflow-hidden ring-2 ${ringClass} bg-black/40 flex items-center justify-center shrink-0`}
+      >
+        {inscricao.avatar_url ? (
+          <img
+            src={inscricao.avatar_url}
+            alt={inscricao.display_name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-[11px] font-bold text-muted-foreground">
+            {initials || "??"}
+          </span>
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground truncate flex items-center gap-1.5">
+          {inscricao.display_name}
+          {isMe && (
+            <span className="text-[9px] font-bold uppercase text-neon bg-neon/15 px-1.5 py-0.5 rounded">
+              você
+            </span>
+          )}
+        </p>
+        <p className="text-[10px] font-bold uppercase tracking-wider leading-none mt-0.5 text-muted-foreground">
+          {isKeeper ? "Goleiro" : "Linha"}
+        </p>
+      </div>
+
+      {inscricao.paid ? (
+        <span
+          className="w-8 h-8 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center shrink-0"
+          title="Já pagou"
+        >
+          <Check className="w-4 h-4" strokeWidth={3} />
+        </span>
+      ) : (
+        <span
+          className="w-8 h-8 rounded-lg bg-secondary/40 text-muted-foreground/40 flex items-center justify-center shrink-0"
+          title="Aguardando pagamento"
+        >
+          <DollarSign className="w-4 h-4" />
+        </span>
+      )}
+
+      {isAdmin && !isMe && (
+        <button
+          onClick={onRemove}
+          className="w-8 h-8 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center shrink-0"
+          aria-label={`Remover ${inscricao.display_name}`}
+        >
+          <X className="w-4 h-4" strokeWidth={2.5} />
+        </button>
+      )}
+    </div>
   );
 }
 
