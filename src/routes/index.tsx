@@ -646,161 +646,240 @@ function Index() {
         {/* ─────────────── TAB: ELENCO ─────────────── */}
         {activeTab === "roster" && (
           <div className="space-y-5">
-            <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
-              <div className="flex items-start justify-between gap-3">
+            {!activeRachaId || !racha ? (
+              <section className="rounded-2xl bg-graphite border border-border p-6 shadow-card text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-neon/15 flex items-center justify-center mx-auto">
+                  <Trophy className="w-7 h-7 text-neon" />
+                </div>
                 <div>
-                  <SectionTitle icon={Users} title="Elenco" />
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Adicione jogadores e marque os goleiros fixos.
+                  <h3 className="font-bold text-foreground">Nenhum racha selecionado</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Crie um racha ou entre com um código pra ver a lista.
                   </p>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-neon/15 text-neon font-bold whitespace-nowrap">
-                    {players.length} {players.length === 1 ? "jogador" : "jogadores"}
-                  </span>
-                  {goalkeeperCount > 0 && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-keeper/20 text-keeper font-bold flex items-center gap-1 whitespace-nowrap">
-                      <Shield className="w-2.5 h-2.5" strokeWidth={3} />
-                      {goalkeeperCount} {goalkeeperCount === 1 ? "goleiro" : "goleiros"}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addPlayer()}
-                  placeholder="Nome do jogador"
-                  className="flex-1 px-4 py-3 rounded-xl bg-input border border-border text-foreground focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
-                />
-                <button
-                  onClick={addPlayer}
-                  className="w-12 h-12 rounded-xl bg-neon text-black flex items-center justify-center font-bold shadow-neon hover:brightness-110 active:scale-95 transition"
-                  aria-label="Adicionar jogador"
+                <Link
+                  to="/rachas"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition"
                 >
-                  <Plus className="w-6 h-6" strokeWidth={3} />
-                </button>
-              </div>
-
-              <div className="max-h-[55vh] overflow-y-auto space-y-2 pr-1 -mr-1 scroll-smooth">
-                {players.length === 0 ? (
-                  <div className="text-center py-10 px-4">
-                    <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mx-auto mb-3">
-                      <UserIcon className="w-6 h-6 text-muted-foreground" />
+                  <Users className="w-4 h-4" strokeWidth={2.5} />
+                  Meus rachas
+                </Link>
+              </section>
+            ) : (
+              <>
+                {/* Lista do racha */}
+                <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <SectionTitle icon={Users} title="Lista do racha" />
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {isAdmin ? "Você é o organizador. " : ""}
+                        Cada jogador entra na própria lista.
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Sem jogadores ainda. Adicione a galera aí em cima 👆
-                    </p>
-                  </div>
-                ) : (
-                  players.map((p, i) => (
-                    <div
-                      key={p.id}
-                      className={`flex items-center gap-3 rounded-xl bg-secondary/60 border px-3 py-2.5 transition ${p.isGoalkeeper ? "border-keeper/70" : "border-border hover:border-neon/50"}`}
-                    >
-                      <span className="w-5 text-center text-[10px] font-bold text-muted-foreground tabular-nums">
-                        {i + 1}
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-neon/15 text-neon font-bold whitespace-nowrap">
+                        {inscricoes.length}/{racha.max_players}
                       </span>
+                    </div>
+                  </div>
 
-                      <div className="relative shrink-0">
+                  {/* Código de convite */}
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(racha.invite_code);
+                      toast.success("Código copiado!");
+                    }}
+                    className="w-full flex items-center justify-between gap-3 rounded-xl bg-black/40 border border-neon/30 px-4 py-3 hover:border-neon/60 transition"
+                  >
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Código de convite
+                    </span>
+                    <span className="font-mono font-black text-lg text-neon tracking-widest">
+                      {racha.invite_code}
+                    </span>
+                    <Clipboard className="w-4 h-4 text-muted-foreground" />
+                  </button>
+
+                  {/* Botões: vou jogar / sair / pago */}
+                  {!myInscricao ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-center text-muted-foreground">
+                        Você ainda não está na lista
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
                         <button
-                          onClick={() => openPhotoPicker(p.id)}
-                          className={`w-11 h-11 rounded-full overflow-hidden ring-2 transition flex items-center justify-center bg-black/40 ${p.isGoalkeeper ? "ring-keeper" : "ring-neon/40 hover:ring-neon"}`}
-                          aria-label={`Foto de ${p.name}`}
+                          onClick={async () => {
+                            const { error } = await joinList("linha");
+                            if (error) toast.error(error);
+                            else toast.success("Bora pro racha! ⚽");
+                          }}
+                          disabled={inscricoes.length >= racha.max_players}
+                          className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40"
                         >
-                          {p.photo ? (
-                            <img
-                              src={p.photo}
-                              alt={p.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <UserIcon className="w-5 h-5 text-muted-foreground" />
-                          )}
+                          ⚽ Vou jogar (Linha)
                         </button>
-                        <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-neon flex items-center justify-center shadow-neon pointer-events-none">
-                          <Camera className="w-2.5 h-2.5 text-black" strokeWidth={3} />
-                        </span>
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">
-                          {p.name}
-                        </p>
-                        <p
-                          className={`text-[10px] font-bold uppercase tracking-wider leading-none mt-0.5 ${p.isGoalkeeper ? "text-keeper" : "text-muted-foreground"}`}
+                        <button
+                          onClick={async () => {
+                            const { error } = await joinList("goleiro");
+                            if (error) toast.error(error);
+                            else toast.success("No gol! 🧤");
+                          }}
+                          disabled={inscricoes.length >= racha.max_players}
+                          className="flex items-center justify-center gap-2 py-3 rounded-xl bg-keeper text-black font-bold uppercase tracking-wider text-sm hover:brightness-110 active:scale-95 transition disabled:opacity-40"
                         >
-                          {p.isGoalkeeper ? "Goleiro fixo" : "Linha"}
-                        </p>
+                          🧤 Goleiro
+                        </button>
                       </div>
-
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => toggleGoalkeeper(p.id)}
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition ${
-                          p.isGoalkeeper
-                            ? "bg-keeper text-black"
-                            : "bg-secondary border border-border text-muted-foreground hover:text-keeper hover:border-keeper/60"
+                        onClick={async () => {
+                          const { error } = await togglePaid(!myInscricao.paid);
+                          if (error) toast.error(error);
+                          else toast.success(myInscricao.paid ? "Pagamento desmarcado" : "Pago! ✅");
+                        }}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition active:scale-95 ${
+                          myInscricao.paid
+                            ? "bg-green-500/20 border border-green-500 text-green-400"
+                            : "bg-secondary border border-border text-foreground hover:border-green-500/60"
                         }`}
-                        aria-label={
-                          p.isGoalkeeper
-                            ? `Tirar ${p.name} do gol`
-                            : `Marcar ${p.name} como goleiro`
-                        }
-                        title={p.isGoalkeeper ? "Goleiro (clique p/ tirar)" : "Marcar goleiro"}
                       >
-                        <Shield className="w-4 h-4" strokeWidth={2.5} />
+                        {myInscricao.paid ? (
+                          <>
+                            <Check className="w-4 h-4" strokeWidth={3} /> Pago
+                          </>
+                        ) : (
+                          <>
+                            <DollarSign className="w-4 h-4" /> Já paguei
+                          </>
+                        )}
                       </button>
-
                       <button
-                        onClick={() => removePlayer(p.id)}
-                        className="w-9 h-9 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center"
-                        aria-label={`Remover ${p.name}`}
+                        onClick={async () => {
+                          if (!confirm("Sair do racha?")) return;
+                          const { error } = await leaveList();
+                          if (error) toast.error(error);
+                          else toast.success("Você saiu da lista");
+                        }}
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-muted-foreground hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition uppercase tracking-wider text-sm font-bold"
                       >
                         <X className="w-4 h-4" strokeWidth={2.5} />
+                        Sair
                       </button>
                     </div>
-                  ))
-                )}
-              </div>
+                  )}
 
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <button
-                  onClick={shuffleTeams}
-                  disabled={players.length < 2}
-                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-                >
-                  <Shuffle className="w-4 h-4" strokeWidth={2.5} />
-                  Sortear
-                </button>
-                <button
-                  onClick={clearAll}
-                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition"
-                >
-                  <Trash2 className="w-4 h-4" strokeWidth={2.5} />
-                  Limpar
-                </button>
-              </div>
-            </section>
+                  {/* Lista de inscritos: goleiros e linha */}
+                  <div className="max-h-[55vh] overflow-y-auto space-y-3 pr-1 -mr-1 scroll-smooth">
+                    {inscricoes.length === 0 ? (
+                      <div className="text-center py-10 px-4">
+                        <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mx-auto mb-3">
+                          <UserIcon className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Sem ninguém na lista ainda. Seja o primeiro! 🥇
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Goleiros */}
+                        {inscricoes.filter((i) => i.position === "goleiro").length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-keeper px-1">
+                              🧤 Goleiros
+                            </p>
+                            {inscricoes
+                              .filter((i) => i.position === "goleiro")
+                              .map((i, idx) => (
+                                <RachaListItem
+                                  key={i.id}
+                                  index={idx + 1}
+                                  inscricao={i}
+                                  isMe={i.user_id === user?.id}
+                                  isAdmin={isAdmin}
+                                  showPosition="goleiro"
+                                  onRemove={async () => {
+                                    if (!confirm(`Remover ${i.display_name} do racha?`)) return;
+                                    const { error } = await removeInscricao(i.user_id);
+                                    if (error) toast.error(error);
+                                  }}
+                                />
+                              ))}
+                          </div>
+                        )}
 
-            <div className="rounded-xl bg-graphite/60 border border-border px-4 py-3 text-[11px] text-muted-foreground space-y-1.5">
-              <p className="flex items-start gap-1.5">
-                <Shield className="w-3 h-3 mt-0.5 text-keeper shrink-0" />
-                <span>
-                  <strong className="text-keeper">Goleiros</strong> não entram no sorteio — vão
-                  fixos (até 2).
-                </span>
-              </p>
-              <p className="flex items-start gap-1.5">
-                <Camera className="w-3 h-3 mt-0.5 text-neon shrink-0" />
-                <span>
-                  <strong className="text-neon">Toque na foto</strong> pra adicionar imagem do
-                  jogador.
-                </span>
-              </p>
-            </div>
+                        {/* Linha */}
+                        {inscricoes.filter((i) => i.position === "linha").length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-neon px-1">
+                              ⚽ Jogadores
+                            </p>
+                            {inscricoes
+                              .filter((i) => i.position === "linha")
+                              .map((i, idx) => (
+                                <RachaListItem
+                                  key={i.id}
+                                  index={idx + 1}
+                                  inscricao={i}
+                                  isMe={i.user_id === user?.id}
+                                  isAdmin={isAdmin}
+                                  showPosition="linha"
+                                  onRemove={async () => {
+                                    if (!confirm(`Remover ${i.display_name} do racha?`)) return;
+                                    const { error } = await removeInscricao(i.user_id);
+                                    if (error) toast.error(error);
+                                  }}
+                                />
+                              ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <button
+                      onClick={shuffleTeams}
+                      disabled={players.length < 2}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                    >
+                      <Shuffle className="w-4 h-4" strokeWidth={2.5} />
+                      Sortear times
+                    </button>
+                    <Link
+                      to="/rachas"
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/60 active:scale-95 transition"
+                    >
+                      <Trophy className="w-4 h-4" strokeWidth={2.5} />
+                      Trocar racha
+                    </Link>
+                  </div>
+                </section>
+
+                <div className="rounded-xl bg-graphite/60 border border-border px-4 py-3 text-[11px] text-muted-foreground space-y-1.5">
+                  <p className="flex items-start gap-1.5">
+                    <Shield className="w-3 h-3 mt-0.5 text-keeper shrink-0" />
+                    <span>
+                      <strong className="text-keeper">Goleiros</strong> aparecem separados — não entram no sorteio.
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <Check className="w-3 h-3 mt-0.5 text-green-400 shrink-0" />
+                    <span>
+                      <strong className="text-green-400">Verde</strong> = jogador já pagou via Pix.
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <KeyRoundIcon />
+                    <span>
+                      Compartilhe o <strong className="text-neon">código de convite</strong> pra galera entrar na lista.
+                    </span>
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         )}
 
