@@ -186,6 +186,7 @@ function Index() {
         setPlayers(apply);
         setTeamA(apply);
         setTeamB(apply);
+        setReserves(apply);
       };
       img.src = reader.result as string;
     };
@@ -198,6 +199,7 @@ function Index() {
     setPlayers(apply);
     setTeamA(apply);
     setTeamB(apply);
+    setReserves(apply);
   }
 
   function shuffleTeams() {
