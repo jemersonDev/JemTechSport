@@ -80,9 +80,16 @@ function Index() {
   const [location, setLocation] = useState<string>("");
   const [teamA, setTeamA] = useState<Player[]>([]);
   const [teamB, setTeamB] = useState<Player[]>([]);
+  const [reserves, setReserves] = useState<Player[]>([]);
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
+
+  const TEAM_SIZE: Record<FieldMode, number> = {
+    futsal: 5,
+    society: 7,
+    campo: 11,
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
@@ -145,6 +152,7 @@ function Index() {
     setPlayers((p) => p.filter((x) => x.id !== id));
     setTeamA((t) => t.filter((x) => x.id !== id));
     setTeamB((t) => t.filter((x) => x.id !== id));
+    setReserves((t) => t.filter((x) => x.id !== id));
   }
 
   function openPhotoPicker(playerId: string) {
@@ -178,6 +186,7 @@ function Index() {
         setPlayers(apply);
         setTeamA(apply);
         setTeamB(apply);
+        setReserves(apply);
       };
       img.src = reader.result as string;
     };
@@ -190,31 +199,44 @@ function Index() {
     setPlayers(apply);
     setTeamA(apply);
     setTeamB(apply);
+    setReserves(apply);
   }
 
   function shuffleTeams() {
     if (players.length < 2) return;
 
+    const teamSize = TEAM_SIZE[fieldMode];
+    const maxFieldPerTeam = teamSize - 1; // 1 vaga reservada pro goleiro
+
     const keepers = players.filter((p) => p.isGoalkeeper);
     const fieldPlayers = players.filter((p) => !p.isGoalkeeper);
 
     const shuffled = [...fieldPlayers].sort(() => Math.random() - 0.5);
-    const half = Math.ceil(shuffled.length / 2);
-    const fieldA = shuffled.slice(0, half);
-    const fieldB = shuffled.slice(half);
+    const fieldA: Player[] = [];
+    const fieldB: Player[] = [];
+    const fieldReserves: Player[] = [];
+
+    // Distribui linha alternando A/B até preencher; o resto vira reserva
+    shuffled.forEach((p) => {
+      if (fieldA.length <= fieldB.length && fieldA.length < maxFieldPerTeam) {
+        fieldA.push(p);
+      } else if (fieldB.length < maxFieldPerTeam) {
+        fieldB.push(p);
+      } else {
+        fieldReserves.push(p);
+      }
+    });
 
     const shuffledKeepers = [...keepers].sort(() => Math.random() - 0.5);
     const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
     const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
     const extraKeepers = shuffledKeepers.slice(2);
-    extraKeepers.forEach((k, i) => {
-      const stripped = { ...k, isGoalkeeper: false };
-      if (i % 2 === 0) fieldA.push(stripped);
-      else fieldB.push(stripped);
-    });
+    // Goleiros extras viram reservas (mantém marcação de goleiro)
+    const reservesAll = [...extraKeepers, ...fieldReserves];
 
     setTeamA([...keeperA, ...fieldA].map((p) => ({ ...p, goals: 0 })));
     setTeamB([...keeperB, ...fieldB].map((p) => ({ ...p, goals: 0 })));
+    setReserves(reservesAll.map((p) => ({ ...p, goals: 0 })));
     setScoreA(0);
     setScoreB(0);
     setActiveTab("tactical");
@@ -224,6 +246,7 @@ function Index() {
     setPlayers([]);
     setTeamA([]);
     setTeamB([]);
+    setReserves([]);
     setScoreA(0);
     setScoreB(0);
     setNewName("");
@@ -263,6 +286,13 @@ function Index() {
           `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
         ),
       );
+      if (reserves.length > 0) {
+        lines.push("");
+        lines.push(`⏳ *RESERVAS* (próximos a entrar — ${reserves.length})`);
+        reserves.forEach((p) =>
+          lines.push(`• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}`),
+        );
+      }
     } else if (players.length > 0) {
       lines.push("👥 *Confirmados:*");
       players.forEach((p) => lines.push(`• ${p.name}`));
@@ -374,7 +404,7 @@ function Index() {
       </header>
 
       {/* ============== MAIN ============== */}
-      <main className="mx-auto max-w-2xl px-4 py-5 pb-32">
+      <main className="mx-auto max-w-2xl px-4 py-5 pb-10">
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
           <div className="space-y-5">
@@ -462,12 +492,56 @@ function Index() {
               )}
             </section>
 
+            {/* Reservas — próximos a entrar */}
+            {teamsReady && reserves.length > 0 && (
+              <section className="rounded-2xl bg-graphite border border-border p-4 shadow-card space-y-3">
+                <div className="flex items-center justify-between">
+                  <SectionTitle icon={Users} title="Reservas" />
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-neon/15 text-neon font-bold">
+                    Próximo time · {reserves.length}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground -mt-1">
+                  Quem fica de fora dessa rodada — entra no próximo jogo.
+                </p>
+                <ul className="grid grid-cols-2 gap-2">
+                  {reserves.map((p, i) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center gap-2 rounded-lg bg-secondary/60 border border-border px-2.5 py-2"
+                    >
+                      <span className="w-5 h-5 rounded-full bg-neon/20 text-neon text-[10px] font-black flex items-center justify-center shrink-0">
+                        {i + 1}
+                      </span>
+                      <div className="w-7 h-7 rounded-full overflow-hidden bg-black/40 flex items-center justify-center shrink-0 ring-1 ring-border">
+                        {p.photo ? (
+                          <img
+                            src={p.photo}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <UserIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <span className="text-xs font-semibold text-foreground truncate flex-1 min-w-0">
+                        {p.name}
+                      </span>
+                      {p.isGoalkeeper && (
+                        <Shield className="w-3 h-3 text-keeper shrink-0" strokeWidth={3} />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {/* Quick actions */}
             <section className="grid grid-cols-2 gap-3">
               <button
                 onClick={shuffleTeams}
                 disabled={players.length < 2}
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Shuffle className="w-4 h-4" strokeWidth={2.5} />
                 Re-sortear
@@ -480,6 +554,18 @@ function Index() {
                 Editar elenco
               </button>
             </section>
+
+            {/* Mandar pro Zap — aparece só depois do sorteio */}
+            {teamsReady && (
+              <button
+                onClick={sendToWhatsApp}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-neon text-black font-black uppercase tracking-widest text-base shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition"
+              >
+                <Send className="w-5 h-5" strokeWidth={2.5} />
+                Mandar pro Zap
+                <span className="text-xl">📱</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -854,41 +940,38 @@ function Index() {
 
             <section className="space-y-2">
               <SectionTitle icon={Send} title="Compartilhar" />
-              <button
-                onClick={copyShareText}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
-              >
-                {shareCopied ? (
-                  <>
-                    <Check className="w-4 h-4 text-neon" strokeWidth={2.5} />
-                    <span className="text-neon">Copiado!</span>
-                  </>
-                ) : (
-                  <>
-                    <Clipboard className="w-4 h-4" strokeWidth={2.5} />
-                    Copiar texto
-                  </>
-                )}
-              </button>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={sendToWhatsApp}
+                  disabled={players.length === 0}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-neon text-black font-black uppercase tracking-widest text-sm shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                >
+                  <Send className="w-5 h-5" strokeWidth={2.5} />
+                  Mandar pro Zap
+                  <span className="text-lg">📱</span>
+                </button>
+                <button
+                  onClick={copyShareText}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
+                >
+                  {shareCopied ? (
+                    <>
+                      <Check className="w-4 h-4 text-neon" strokeWidth={2.5} />
+                      <span className="text-neon">Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clipboard className="w-4 h-4" strokeWidth={2.5} />
+                      Copiar texto
+                    </>
+                  )}
+                </button>
+              </div>
             </section>
           </div>
         )}
       </main>
 
-      {/* ============== STICKY CTA ============== */}
-      <div className="fixed bottom-0 inset-x-0 z-50 p-4 bg-gradient-to-t from-black via-black/95 to-transparent">
-        <div className="mx-auto max-w-2xl">
-          <button
-            onClick={sendToWhatsApp}
-            disabled={players.length === 0}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-neon text-black font-black uppercase tracking-widest text-base shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-          >
-            <Send className="w-5 h-5" strokeWidth={2.5} />
-            Mandar pro Zap
-            <span className="text-xl">📱</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
