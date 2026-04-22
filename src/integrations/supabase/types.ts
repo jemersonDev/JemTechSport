@@ -14,16 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      inscricoes: {
+        Row: {
+          created_at: string
+          id: string
+          paid: boolean
+          paid_at: string | null
+          position: Database["public"]["Enums"]["player_position"]
+          racha_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paid?: boolean
+          paid_at?: string | null
+          position?: Database["public"]["Enums"]["player_position"]
+          racha_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paid?: boolean
+          paid_at?: string | null
+          position?: Database["public"]["Enums"]["player_position"]
+          racha_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inscricoes_racha_id_fkey"
+            columns: ["racha_id"]
+            isOneToOne: false
+            referencedRelation: "rachas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          preferred_position: Database["public"]["Enums"]["player_position"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          preferred_position?: Database["public"]["Enums"]["player_position"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          preferred_position?: Database["public"]["Enums"]["player_position"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      racha_membros: {
+        Row: {
+          id: string
+          joined_at: string
+          racha_id: string
+          role: Database["public"]["Enums"]["racha_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          racha_id: string
+          role?: Database["public"]["Enums"]["racha_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          racha_id?: string
+          role?: Database["public"]["Enums"]["racha_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "racha_membros_racha_id_fkey"
+            columns: ["racha_id"]
+            isOneToOne: false
+            referencedRelation: "rachas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rachas: {
+        Row: {
+          address: string | null
+          admin_id: string
+          app_fee: number
+          created_at: string
+          field_mode: Database["public"]["Enums"]["field_mode"]
+          id: string
+          invite_code: string
+          location: string | null
+          max_players: number
+          name: string
+          pix_holder: string | null
+          pix_key: string | null
+          pix_key_type: string | null
+          scheduled_at: string | null
+          total_value: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          admin_id: string
+          app_fee?: number
+          created_at?: string
+          field_mode?: Database["public"]["Enums"]["field_mode"]
+          id?: string
+          invite_code?: string
+          location?: string | null
+          max_players?: number
+          name: string
+          pix_holder?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          scheduled_at?: string | null
+          total_value?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          admin_id?: string
+          app_fee?: number
+          created_at?: string
+          field_mode?: Database["public"]["Enums"]["field_mode"]
+          id?: string
+          invite_code?: string
+          location?: string | null
+          max_players?: number
+          name?: string
+          pix_holder?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          scheduled_at?: string | null
+          total_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gen_invite_code: { Args: never; Returns: string }
+      is_racha_admin: {
+        Args: { _racha_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_racha_member: {
+        Args: { _racha_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      field_mode: "futsal" | "society" | "campo"
+      player_position: "goleiro" | "linha"
+      racha_role: "admin" | "jogador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +319,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      field_mode: ["futsal", "society", "campo"],
+      player_position: ["goleiro", "linha"],
+      racha_role: ["admin", "jogador"],
+    },
   },
 } as const
