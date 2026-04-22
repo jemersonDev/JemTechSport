@@ -24,6 +24,8 @@ import {
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRacha, useActiveRachaId } from "@/hooks/useRacha";
+import { toast } from "sonner";
 
 type TabId = "tactical" | "roster" | "match";
 
@@ -79,6 +81,17 @@ function uid() {
 function Index() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { activeRachaId, setActiveRachaId } = useActiveRachaId();
+  const {
+    racha,
+    inscricoes,
+    myInscricao,
+    isAdmin,
+    joinList,
+    leaveList,
+    togglePaid,
+    removeInscricao,
+  } = useRacha(activeRachaId);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -96,6 +109,31 @@ function Index() {
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
+
+  // Sync local players list from racha inscricoes (so sorteio still works)
+  useEffect(() => {
+    if (!activeRachaId) return;
+    setPlayers(
+      inscricoes.map((i) => ({
+        id: i.user_id,
+        name: i.display_name,
+        photo: i.avatar_url ?? undefined,
+        isGoalkeeper: i.position === "goleiro",
+        goals: 0,
+      })),
+    );
+  }, [inscricoes, activeRachaId]);
+
+  // Sync location/total/field from racha
+  useEffect(() => {
+    if (!racha) return;
+    if (racha.location || racha.address) {
+      setLocation(racha.address || racha.location || "");
+    }
+    if (racha.total_value > 0) setTotalValue(String(racha.total_value));
+    if (racha.field_mode) setFieldMode(racha.field_mode);
+  }, [racha]);
+
 
   const TEAM_SIZE: Record<FieldMode, number> = {
     futsal: 5,
