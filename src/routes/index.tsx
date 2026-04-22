@@ -360,13 +360,26 @@ function Index() {
             <div className="w-9 h-9 rounded-xl bg-neon flex items-center justify-center shadow-neon">
               <span className="text-black font-black text-sm tracking-tight">JT</span>
             </div>
-            <div className="leading-tight">
+            <div className="leading-tight min-w-0">
               <h1 className="text-base font-black tracking-tight">
                 <span className="text-neon">JemTech</span> Sports
               </h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                Racha sem zica
-              </p>
+              {location.trim() ? (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-neon uppercase tracking-widest flex items-center gap-1 hover:underline truncate max-w-[180px]"
+                  title={location.trim()}
+                >
+                  <MapPin className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />
+                  <span className="truncate">{location.trim()}</span>
+                </a>
+              ) : (
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                  Racha sem zica
+                </p>
+              )}
             </div>
           </div>
 
