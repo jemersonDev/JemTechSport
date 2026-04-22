@@ -264,7 +264,12 @@ function Index() {
     const lines: string[] = [];
     lines.push("⚽ *RACHA — JEMTECH SPORTS* ⚽");
     lines.push("");
-    if (location.trim()) lines.push(`📍 *Local:* ${location.trim()}`);
+    if (location.trim()) {
+      lines.push(`📍 *Local:* ${location.trim()}`);
+      lines.push(
+        `🗺️ Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`,
+      );
+    }
     if (total > 0 && players.length > 0) {
       lines.push(`💰 *Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
       lines.push(
