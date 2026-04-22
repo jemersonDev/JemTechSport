@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 
+const RachasRoute = RachasRouteImport.update({
+  id: '/rachas',
+  path: '/rachas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -33,34 +39,45 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
+  '/rachas': typeof RachasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
+  '/rachas': typeof RachasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
+  '/rachas': typeof RachasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/perfil'
+  fullPaths: '/' | '/login' | '/perfil' | '/rachas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/perfil'
-  id: '__root__' | '/' | '/login' | '/perfil'
+  to: '/' | '/login' | '/perfil' | '/rachas'
+  id: '__root__' | '/' | '/login' | '/perfil' | '/rachas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   PerfilRoute: typeof PerfilRoute
+  RachasRoute: typeof RachasRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rachas': {
+      id: '/rachas'
+      path: '/rachas'
+      fullPath: '/rachas'
+      preLoaderRoute: typeof RachasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   PerfilRoute: PerfilRoute,
+  RachasRoute: RachasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
