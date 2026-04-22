@@ -426,23 +426,29 @@ function Index() {
               <span className="text-black font-black text-sm tracking-tight">JT</span>
             </div>
             <div className="leading-tight min-w-0">
-              <h1 className="text-base font-black tracking-tight">
-                <span className="text-neon">JemTech</span> Sports
-              </h1>
-              {location.trim() ? (
+              <Link
+                to="/rachas"
+                className="block hover:opacity-80 transition"
+                title="Trocar de racha"
+              >
+                <h1 className="text-base font-black tracking-tight truncate max-w-[200px]">
+                  {racha ? racha.name : <><span className="text-neon">JemTech</span> Sports</>}
+                </h1>
+              </Link>
+              {racha && (racha.address || racha.location) ? (
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[10px] text-neon uppercase tracking-widest flex items-center gap-1 hover:underline truncate max-w-[180px]"
-                  title={location.trim()}
+                  className="text-[10px] text-neon uppercase tracking-widest flex items-center gap-1 hover:underline truncate max-w-[200px]"
+                  title={racha.address || racha.location || ""}
                 >
                   <MapPin className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />
-                  <span className="truncate">{location.trim()}</span>
+                  <span className="truncate">{racha.address || racha.location}</span>
                 </a>
               ) : (
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                  Racha sem zica
+                  {racha ? "Toque pra trocar racha" : "Racha sem zica"}
                 </p>
               )}
             </div>
