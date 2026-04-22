@@ -80,9 +80,16 @@ function Index() {
   const [location, setLocation] = useState<string>("");
   const [teamA, setTeamA] = useState<Player[]>([]);
   const [teamB, setTeamB] = useState<Player[]>([]);
+  const [reserves, setReserves] = useState<Player[]>([]);
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
+
+  const TEAM_SIZE: Record<FieldMode, number> = {
+    futsal: 5,
+    society: 7,
+    campo: 11,
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
