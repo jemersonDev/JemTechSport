@@ -286,6 +286,13 @@ function Index() {
           `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
         ),
       );
+      if (reserves.length > 0) {
+        lines.push("");
+        lines.push(`⏳ *RESERVAS* (próximos a entrar — ${reserves.length})`);
+        reserves.forEach((p) =>
+          lines.push(`• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}`),
+        );
+      }
     } else if (players.length > 0) {
       lines.push("👥 *Confirmados:*");
       players.forEach((p) => lines.push(`• ${p.name}`));
