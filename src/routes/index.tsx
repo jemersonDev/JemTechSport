@@ -404,7 +404,7 @@ function Index() {
       </header>
 
       {/* ============== MAIN ============== */}
-      <main className="mx-auto max-w-2xl px-4 py-5 pb-32">
+      <main className="mx-auto max-w-2xl px-4 py-5 pb-10">
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
           <div className="space-y-5">
