@@ -972,20 +972,6 @@ function Index() {
         )}
       </main>
 
-      {/* ============== STICKY CTA ============== */}
-      <div className="fixed bottom-0 inset-x-0 z-50 p-4 bg-gradient-to-t from-black via-black/95 to-transparent">
-        <div className="mx-auto max-w-2xl">
-          <button
-            onClick={sendToWhatsApp}
-            disabled={players.length === 0}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-neon text-black font-black uppercase tracking-widest text-base shadow-neon-strong hover:brightness-110 active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-          >
-            <Send className="w-5 h-5" strokeWidth={2.5} />
-            Mandar pro Zap
-            <span className="text-xl">📱</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
