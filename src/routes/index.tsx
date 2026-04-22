@@ -264,7 +264,12 @@ function Index() {
     const lines: string[] = [];
     lines.push("⚽ *RACHA — JEMTECH SPORTS* ⚽");
     lines.push("");
-    if (location.trim()) lines.push(`📍 *Local:* ${location.trim()}`);
+    if (location.trim()) {
+      lines.push(`📍 *Local:* ${location.trim()}`);
+      lines.push(
+        `🗺️ Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`,
+      );
+    }
     if (total > 0 && players.length > 0) {
       lines.push(`💰 *Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
       lines.push(
@@ -780,7 +785,7 @@ function Index() {
 
               <div>
                 <label className="text-xs text-muted-foreground block mb-1.5">
-                  Local (opcional)
+                  Endereço da quadra
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -788,10 +793,24 @@ function Index() {
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Quadra do Zé, 19h"
+                    placeholder="Ex: Quadra Atlanta, Rua X, 123"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
                   />
                 </div>
+                {location.trim() && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-xs font-bold uppercase tracking-wider hover:border-neon/50 active:scale-[0.98] transition"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-neon" strokeWidth={2.5} />
+                    Abrir no Google Maps
+                  </a>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
+                  Cole o endereço da quadra (Atlanta, society ou qualquer outra) — a galera abre direto no Maps. 📍
+                </p>
               </div>
             </section>
 
