@@ -122,8 +122,6 @@ function ResenhaPage() {
         </div>
       )}
 
-      <BottomNav />
-
       <ResenhaUpload
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}

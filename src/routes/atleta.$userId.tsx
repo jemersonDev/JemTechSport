@@ -176,8 +176,6 @@ function AthleteProfile() {
           </div>
         )}
       </section>
-
-      <BottomNav />
     </div>
   );
 }
