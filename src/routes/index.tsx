@@ -92,6 +92,7 @@ function Index() {
     leaveList,
     togglePaid,
     removeInscricao,
+    updateRacha,
   } = useRacha(activeRachaId);
 
   useEffect(() => {
