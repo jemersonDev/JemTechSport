@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useResenha";
-import { BottomNav } from "@/components/BottomNav";
+
 
 export const Route = createFileRoute("/atleta/$userId")({
   component: AthleteProfile,
