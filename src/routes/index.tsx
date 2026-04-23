@@ -92,6 +92,7 @@ function Index() {
     leaveList,
     togglePaid,
     removeInscricao,
+    updateRacha,
   } = useRacha(activeRachaId);
 
   useEffect(() => {
@@ -313,22 +314,70 @@ function Index() {
   function buildShareText() {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     const lines: string[] = [];
-    lines.push("⚽ *RACHA — JEMTECH SPORTS* ⚽");
-    lines.push("");
-    if (location.trim()) {
-      lines.push(`📍 *Local:* ${location.trim()}`);
-      lines.push(
-        `🗺️ Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`,
-      );
+
+    // ===== Cabeçalho estilo "Racha Atlanta segunda 20:30* data 03/04/2026" =====
+    const rachaName = racha?.name?.trim() || "Racha JemTech";
+    let header = `*${rachaName}*`;
+    if (racha?.scheduled_at) {
+      const d = new Date(racha.scheduled_at);
+      const weekdays = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+      const wd = weekdays[d.getDay()];
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mo = String(d.getMonth() + 1).padStart(2, "0");
+      const yy = d.getFullYear();
+      header = `*${rachaName} ${wd} ${hh}:${mm}* data ${dd}/${mo}/${yy}`;
     }
-    if (total > 0 && players.length > 0) {
-      lines.push(`💰 *Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
-      lines.push(
-        `👥 *Por pessoa:* R$ ${valuePerPerson.toFixed(2).replace(".", ",")} (${players.length} jogadores)`,
-      );
-    }
+    lines.push(header);
     lines.push("");
+    lines.push("");
+
+    // ===== Regras / avisos =====
+    const maxP = racha?.max_players ?? 12;
+    lines.push(`*${maxP} atletas já fecha a lista*`);
+    lines.push("");
+    lines.push("*retirar o nome da lista até domingo*");
+    lines.push("");
+    lines.push("*Pagamento antecipado pra segurar o horário da quadra*");
+    lines.push("");
+
+    // Local (se tiver)
+    if (location.trim() || racha?.address || racha?.location) {
+      const loc = location.trim() || racha?.address || racha?.location || "";
+      lines.push(`📍 *Local:* ${loc}`);
+      lines.push(
+        `🗺️ Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`,
+      );
+      lines.push("");
+    }
+
+    // ===== Goleiros =====
+    const goleiros = inscricoes.filter((i) => i.position === "goleiro");
+    const linha = inscricoes.filter((i) => i.position === "linha");
+
+    if (goleiros.length > 0) {
+      lines.push("Goleiros:");
+      goleiros.forEach((g) => {
+        const paid = g.paid ? " ✅" : "";
+        lines.push(`🧤${g.display_name}${paid}`);
+      });
+      lines.push("");
+    }
+
+    // ===== Jogadores numerados =====
+    if (linha.length > 0) {
+      lines.push("Jogadores:");
+      linha.forEach((p, idx) => {
+        const paid = p.paid ? " ✅" : "";
+        lines.push(`⚽️${idx + 1} ${p.display_name}${paid}`);
+      });
+      lines.push("");
+    }
+
+    // ===== Times sorteados (se houver) =====
     if (teamA.length > 0 || teamB.length > 0) {
+      lines.push("");
       lines.push(`🟢 *TIME A* (${scoreA})`);
       teamA.forEach((p) =>
         lines.push(
@@ -344,24 +393,30 @@ function Index() {
       );
       if (reserves.length > 0) {
         lines.push("");
-        lines.push(`⏳ *RESERVAS* (próximos a entrar — ${reserves.length})`);
+        lines.push(`⏳ *RESERVAS* (${reserves.length})`);
         reserves.forEach((p) =>
           lines.push(`• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}`),
         );
       }
-    } else if (players.length > 0) {
-      lines.push("👥 *Confirmados:*");
-      players.forEach((p) => lines.push(`• ${p.name}`));
     }
+
+    // ===== Financeiro =====
+    if (total > 0 && inscricoes.length > 0) {
+      lines.push("");
+      lines.push(`💰 *Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
+      lines.push(
+        `💵 *Por pessoa:* R$ ${valuePerPerson.toFixed(2).replace(".", ",")}`,
+      );
+    }
+
+    // ===== PIX =====
     if (pixKey.trim()) {
       lines.push("");
       lines.push("💸 *PAGAMENTO PIX*");
       lines.push(`🔑 *${PIX_TYPE_LABEL[pixKeyType]}:* ${pixKey.trim()}`);
       if (pixOwner.trim()) lines.push(`👤 *Favorecido:* ${pixOwner.trim()}`);
-      if (valuePerPerson > 0) {
-        lines.push(`💵 *Valor por pessoa:* R$ ${valuePerPerson.toFixed(2).replace(".", ",")}`);
-      }
     }
+
     lines.push("");
     lines.push("_Bora pro jogo! 🔥_");
     return lines.join("\n");
@@ -701,6 +756,51 @@ function Index() {
                     </span>
                     <Clipboard className="w-4 h-4 text-muted-foreground" />
                   </button>
+
+                  {/* Data/hora — admin define, todos veem */}
+                  {isAdmin ? (
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-1.5">
+                        Data e hora do racha
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={
+                          racha.scheduled_at
+                            ? new Date(
+                                new Date(racha.scheduled_at).getTime() -
+                                  new Date(racha.scheduled_at).getTimezoneOffset() * 60000,
+                              )
+                                .toISOString()
+                                .slice(0, 16)
+                            : ""
+                        }
+                        onChange={async (e) => {
+                          const v = e.target.value;
+                          const iso = v ? new Date(v).toISOString() : null;
+                          const { error } = await updateRacha({ scheduled_at: iso });
+                          if (error) toast.error(error);
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                      />
+                    </div>
+                  ) : racha.scheduled_at ? (
+                    <div className="rounded-xl bg-black/40 border border-border px-4 py-3 text-center">
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
+                        Quando
+                      </p>
+                      <p className="text-sm font-bold text-foreground">
+                        {new Date(racha.scheduled_at).toLocaleString("pt-BR", {
+                          weekday: "long",
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  ) : null}
 
                   {/* Botões: vou jogar / sair / pago */}
                   {!myInscricao ? (
