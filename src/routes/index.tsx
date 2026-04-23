@@ -757,6 +757,51 @@ function Index() {
                     <Clipboard className="w-4 h-4 text-muted-foreground" />
                   </button>
 
+                  {/* Data/hora — admin define, todos veem */}
+                  {isAdmin ? (
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-1.5">
+                        Data e hora do racha
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={
+                          racha.scheduled_at
+                            ? new Date(
+                                new Date(racha.scheduled_at).getTime() -
+                                  new Date(racha.scheduled_at).getTimezoneOffset() * 60000,
+                              )
+                                .toISOString()
+                                .slice(0, 16)
+                            : ""
+                        }
+                        onChange={async (e) => {
+                          const v = e.target.value;
+                          const iso = v ? new Date(v).toISOString() : null;
+                          const { error } = await updateRacha({ scheduled_at: iso });
+                          if (error) toast.error(error);
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                      />
+                    </div>
+                  ) : racha.scheduled_at ? (
+                    <div className="rounded-xl bg-black/40 border border-border px-4 py-3 text-center">
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">
+                        Quando
+                      </p>
+                      <p className="text-sm font-bold text-foreground">
+                        {new Date(racha.scheduled_at).toLocaleString("pt-BR", {
+                          weekday: "long",
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  ) : null}
+
                   {/* Botões: vou jogar / sair / pago */}
                   {!myInscricao ? (
                     <div className="space-y-2">
