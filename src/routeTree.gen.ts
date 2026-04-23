@@ -9,11 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResenhaRouteImport } from './routes/resenha'
 import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
 
+const ResenhaRoute = ResenhaRouteImport.update({
+  id: '/resenha',
+  path: '/resenha',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RachasRoute = RachasRouteImport.update({
   id: '/rachas',
   path: '/rachas',
@@ -34,18 +41,27 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaUserIdRoute = AtletaUserIdRouteImport.update({
+  id: '/atleta/$userId',
+  path: '/atleta/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
+  '/resenha': typeof ResenhaRoute
+  '/atleta/$userId': typeof AtletaUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
+  '/resenha': typeof ResenhaRoute
+  '/atleta/$userId': typeof AtletaUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,28 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
+  '/resenha': typeof ResenhaRoute
+  '/atleta/$userId': typeof AtletaUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/perfil' | '/rachas'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/perfil'
+    | '/rachas'
+    | '/resenha'
+    | '/atleta/$userId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/perfil' | '/rachas'
-  id: '__root__' | '/' | '/login' | '/perfil' | '/rachas'
+  to: '/' | '/login' | '/perfil' | '/rachas' | '/resenha' | '/atleta/$userId'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/perfil'
+    | '/rachas'
+    | '/resenha'
+    | '/atleta/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +98,19 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PerfilRoute: typeof PerfilRoute
   RachasRoute: typeof RachasRoute
+  ResenhaRoute: typeof ResenhaRoute
+  AtletaUserIdRoute: typeof AtletaUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/resenha': {
+      id: '/resenha'
+      path: '/resenha'
+      fullPath: '/resenha'
+      preLoaderRoute: typeof ResenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rachas': {
       id: '/rachas'
       path: '/rachas'
@@ -99,6 +139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/$userId': {
+      id: '/atleta/$userId'
+      path: '/atleta/$userId'
+      fullPath: '/atleta/$userId'
+      preLoaderRoute: typeof AtletaUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +154,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PerfilRoute: PerfilRoute,
   RachasRoute: RachasRoute,
+  ResenhaRoute: ResenhaRoute,
+  AtletaUserIdRoute: AtletaUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

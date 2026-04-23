@@ -174,6 +174,168 @@ export type Database = {
         }
         Relationships: []
       }
+      resenha_comentarios: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resenha_comentarios_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "resenha_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resenha_denuncias: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resenha_denuncias_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "resenha_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resenha_follows: {
+        Row: {
+          created_at: string
+          followed_id: string
+          follower_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          followed_id: string
+          follower_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          followed_id?: string
+          follower_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      resenha_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resenha_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "resenha_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resenha_posts: {
+        Row: {
+          caption: string | null
+          comments_count: number
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          is_hidden: boolean
+          likes_count: number
+          region: string | null
+          reports_count: number
+          thumb_url: string | null
+          updated_at: string
+          user_id: string
+          video_url: string
+        }
+        Insert: {
+          caption?: string | null
+          comments_count?: number
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_hidden?: boolean
+          likes_count?: number
+          region?: string | null
+          reports_count?: number
+          thumb_url?: string | null
+          updated_at?: string
+          user_id: string
+          video_url: string
+        }
+        Update: {
+          caption?: string | null
+          comments_count?: number
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_hidden?: boolean
+          likes_count?: number
+          region?: string | null
+          reports_count?: number
+          thumb_url?: string | null
+          updated_at?: string
+          user_id?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
