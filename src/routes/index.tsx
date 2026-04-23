@@ -987,6 +987,190 @@ function Index() {
         {/* ─────────────── TAB: PARTIDA ─────────────── */}
         {activeTab === "match" && (
           <div className="space-y-5">
+            {/* ============== PAINEL FINANCEIRO DO ORGANIZADOR ============== */}
+            {isAdmin && racha && inscricoes.length > 0 && (
+              <section className="rounded-2xl bg-gradient-to-br from-neon/10 via-graphite to-graphite border border-neon/40 p-5 shadow-card space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <SectionTitle icon={DollarSign} title="Painel do organizador" />
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Quem pagou, quem deve, total arrecadado.
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-neon/20 text-neon font-bold uppercase tracking-wider">
+                    Admin
+                  </span>
+                </div>
+
+                {(() => {
+                  const total = parseFloat(totalValue.replace(",", ".")) || 0;
+                  const valorBase = inscricoes.length > 0 ? total / inscricoes.length : 0;
+                  const valorComTaxa = valorBase + APP_FEE;
+                  const pagos = inscricoes.filter((i) => i.paid);
+                  const devendo = inscricoes.filter((i) => !i.paid);
+                  const arrecadado = pagos.length * valorComTaxa;
+                  const aReceber = devendo.length * valorComTaxa;
+                  const pct = inscricoes.length > 0 ? (pagos.length / inscricoes.length) * 100 : 0;
+
+                  return (
+                    <>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-center">
+                          <p className="text-[9px] uppercase tracking-widest text-green-400/80 mb-1">Pagaram</p>
+                          <p className="text-2xl font-black text-green-400 leading-none">{pagos.length}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">R$ {arrecadado.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 p-3 text-center">
+                          <p className="text-[9px] uppercase tracking-widest text-orange-400/80 mb-1">Devendo</p>
+                          <p className="text-2xl font-black text-orange-400 leading-none">{devendo.length}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">R$ {aReceber.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="rounded-xl bg-neon/10 border border-neon/30 p-3 text-center">
+                          <p className="text-[9px] uppercase tracking-widest text-neon/80 mb-1">Total</p>
+                          <p className="text-2xl font-black text-neon leading-none">{inscricoes.length}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">de {racha.max_players}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                          <span>Pagamentos</span>
+                          <span className="text-neon font-bold">{pct.toFixed(0)}%</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-green-500 to-neon transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+
+                      {devendo.length > 0 && (
+                        <div className="rounded-xl bg-black/40 border border-orange-500/20 p-3 space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                            ⚠️ Falta pagar ({devendo.length})
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {devendo.map((d) => (
+                              <span key={d.id} className="text-[11px] px-2 py-1 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30">
+                                {d.position === "goleiro" ? "🧤" : "⚽"} {d.display_name}
+                              </span>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => {
+                              const nomes = devendo.map((d) => d.display_name).join(", ");
+                              const valor = valorComTaxa.toFixed(2).replace(".", ",");
+                              const lines = [
+                                `⚠️ *Cobrança do racha — ${racha.name}*`,
+                                "",
+                                `Galera, falta pagar: ${nomes}`,
+                                `💵 Valor por pessoa: R$ ${valor}`,
+                              ];
+                              if (pixKey.trim()) {
+                                lines.push("");
+                                lines.push(`🔑 *PIX (${PIX_TYPE_LABEL[pixKeyType]}):* ${pixKey.trim()}`);
+                                if (pixOwner.trim()) lines.push(`👤 ${pixOwner.trim()}`);
+                              }
+                              lines.push("");
+                              lines.push("_Bora fechar a grana! 💸_");
+                              window.open(`https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`, "_blank");
+                            }}
+                            className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-orange-500 text-black font-bold uppercase tracking-wider text-xs hover:brightness-110 active:scale-95 transition"
+                          >
+                            <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
+                            Cobrar no Zap
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="rounded-xl bg-black/60 border border-neon/30 p-3 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Valor por pessoa</p>
+                          <p className="text-xl font-black text-neon">R$ {valorComTaxa.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Meta total</p>
+                          <p className="text-xl font-black text-foreground">R$ {(total + APP_FEE * inscricoes.length).toFixed(2).replace(".", ",")}</p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </section>
+            )}
+
+            {/* ============== EDITAR RACHA (admin) ============== */}
+            {isAdmin && racha && (
+              <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
+                <SectionTitle icon={Trophy} title="Editar racha" />
+
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1.5">Nome do racha</label>
+                  <input
+                    type="text"
+                    defaultValue={racha.name}
+                    key={`name-${racha.id}-${racha.name}`}
+                    onBlur={async (e) => {
+                      const v = e.target.value.trim();
+                      if (!v || v === racha.name) return;
+                      const { error } = await updateRacha({ name: v });
+                      if (error) toast.error(error);
+                      else toast.success("Nome atualizado");
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1.5">Máximo de jogadores</label>
+                  <input
+                    type="number"
+                    min={2}
+                    max={30}
+                    defaultValue={racha.max_players}
+                    key={`max-${racha.id}-${racha.max_players}`}
+                    onBlur={async (e) => {
+                      const v = parseInt(e.target.value, 10);
+                      if (!v || v === racha.max_players) return;
+                      const { error } = await updateRacha({ max_players: v });
+                      if (error) toast.error(error);
+                      else toast.success("Limite atualizado");
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1.5">Modalidade</label>
+                  <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-input border border-border">
+                    {FIELD_MODES.map((m) => {
+                      const active = racha.field_mode === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={async () => {
+                            if (active) return;
+                            const { error } = await updateRacha({ field_mode: m.id });
+                            if (error) toast.error(error);
+                            else {
+                              setFieldMode(m.id);
+                              toast.success(`Modalidade: ${m.label}`);
+                            }
+                          }}
+                          className={`py-2 rounded-lg text-center transition ${
+                            active ? "bg-neon text-black shadow-neon" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          <p className="text-[11px] font-black uppercase tracking-wider leading-none">{m.label}</p>
+                          <p className={`text-[9px] mt-1 leading-none ${active ? "text-black/70" : "text-muted-foreground"}`}>
+                            {m.sub}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
+
             <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
               <SectionTitle icon={DollarSign} title="Financeiro" />
 
