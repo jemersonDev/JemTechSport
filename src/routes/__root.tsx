@@ -1,8 +1,11 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useLocation } from "@tanstack/react-router";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Toaster } from "@/components/ui/sonner";
+import { BottomNav } from "@/components/BottomNav";
 
 import appCss from "../styles.css?url";
+
+const HIDE_NAV_ON = new Set(["/login"]);
 
 function NotFoundComponent() {
   return (
@@ -67,9 +70,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const location = useLocation();
+  const hideNav = HIDE_NAV_ON.has(location.pathname) || location.pathname === "/resenha";
   return (
     <AuthProvider>
-      <Outlet />
+      <div className={hideNav ? "" : "pb-20"}>
+        <Outlet />
+      </div>
+      {!hideNav && <BottomNav />}
       <Toaster />
     </AuthProvider>
   );
