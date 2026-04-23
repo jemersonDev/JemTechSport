@@ -1187,6 +1187,14 @@ function Index() {
                     inputMode="decimal"
                     value={totalValue}
                     onChange={(e) => setTotalValue(e.target.value)}
+                    onBlur={async () => {
+                      if (!isAdmin || !racha) return;
+                      const v = parseFloat(totalValue.replace(",", ".")) || 0;
+                      if (v === Number(racha.total_value)) return;
+                      const { error } = await updateRacha({ total_value: v });
+                      if (error) toast.error(error);
+                      else toast.success("Valor salvo no racha");
+                    }}
                     placeholder="140"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border text-foreground text-lg font-bold focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
                   />
@@ -1226,6 +1234,14 @@ function Index() {
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
+                    onBlur={async () => {
+                      if (!isAdmin || !racha) return;
+                      const v = location.trim();
+                      if (v === (racha.address ?? "")) return;
+                      const { error } = await updateRacha({ address: v || null, location: v || null });
+                      if (error) toast.error(error);
+                      else toast.success("Endereço salvo");
+                    }}
                     placeholder="Ex: Quadra Atlanta, Rua X, 123"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
                   />
