@@ -20,8 +20,6 @@ import { useResenhaFeed, type ResenhaPost, useFollow } from "@/hooks/useResenha"
 import { ResenhaUpload } from "@/components/ResenhaUpload";
 import { ResenhaComments } from "@/components/ResenhaComments";
 import { ReportDialog } from "@/components/ReportDialog";
-import { BottomNav } from "@/components/BottomNav";
-import { BottomNav } from "@/components/BottomNav";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/resenha")({
