@@ -206,6 +206,33 @@ export type Database = {
           },
         ]
       }
+      resenha_conversas: {
+        Row: {
+          created_at: string
+          id: string
+          last_message: string | null
+          last_message_at: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       resenha_denuncias: {
         Row: {
           created_at: string
@@ -288,15 +315,52 @@ export type Database = {
           },
         ]
       }
+      resenha_mensagens: {
+        Row: {
+          content: string
+          conversa_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversa_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversa_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resenha_mensagens_conversa_id_fkey"
+            columns: ["conversa_id"]
+            isOneToOne: false
+            referencedRelation: "resenha_conversas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resenha_posts: {
         Row: {
           caption: string | null
+          cheia_count: number
           comments_count: number
           created_at: string
           duration_seconds: number | null
           id: string
           is_hidden: boolean
           likes_count: number
+          murcha_count: number
           region: string | null
           reports_count: number
           thumb_url: string | null
@@ -306,12 +370,14 @@ export type Database = {
         }
         Insert: {
           caption?: string | null
+          cheia_count?: number
           comments_count?: number
           created_at?: string
           duration_seconds?: number | null
           id?: string
           is_hidden?: boolean
           likes_count?: number
+          murcha_count?: number
           region?: string | null
           reports_count?: number
           thumb_url?: string | null
@@ -321,18 +387,47 @@ export type Database = {
         }
         Update: {
           caption?: string | null
+          cheia_count?: number
           comments_count?: number
           created_at?: string
           duration_seconds?: number | null
           id?: string
           is_hidden?: boolean
           likes_count?: number
+          murcha_count?: number
           region?: string | null
           reports_count?: number
           thumb_url?: string | null
           updated_at?: string
           user_id?: string
           video_url?: string
+        }
+        Relationships: []
+      }
+      resenha_votos: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+          voto: Database["public"]["Enums"]["resenha_voto_tipo"]
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+          voto: Database["public"]["Enums"]["resenha_voto_tipo"]
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+          voto?: Database["public"]["Enums"]["resenha_voto_tipo"]
+          week_start?: string
         }
         Relationships: []
       }
@@ -350,11 +445,16 @@ export type Database = {
         Args: { _racha_id: string; _user_id: string }
         Returns: boolean
       }
+      resenha_get_or_create_conversa: {
+        Args: { _other_user: string }
+        Returns: string
+      }
     }
     Enums: {
       field_mode: "futsal" | "society" | "campo"
       player_position: "goleiro" | "linha"
       racha_role: "admin" | "jogador"
+      resenha_voto_tipo: "cheia" | "murcha"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -485,6 +585,7 @@ export const Constants = {
       field_mode: ["futsal", "society", "campo"],
       player_position: ["goleiro", "linha"],
       racha_role: ["admin", "jogador"],
+      resenha_voto_tipo: ["cheia", "murcha"],
     },
   },
 } as const

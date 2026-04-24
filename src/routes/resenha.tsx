@@ -11,15 +11,16 @@ import {
   Loader2,
   Video as VideoIcon,
   Flag,
-  UserPlus,
-  UserCheck,
+  Trophy,
+  Inbox,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { useResenhaFeed, type ResenhaPost, useFollow } from "@/hooks/useResenha";
+import { useResenhaFeed, type ResenhaPost } from "@/hooks/useResenha";
 import { ResenhaUpload } from "@/components/ResenhaUpload";
 import { ResenhaComments } from "@/components/ResenhaComments";
 import { ReportDialog } from "@/components/ReportDialog";
+import { PostVoteButtons } from "@/components/PostVoteButtons";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/resenha")({
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/resenha")({
 });
 
 function ResenhaPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { posts, loading, reload, toggleLike, reportPost } = useResenhaFeed();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [commentsFor, setCommentsFor] = useState<string | null>(null);
@@ -69,19 +70,35 @@ function ResenhaPage() {
       {/* Header */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-black/70 to-transparent p-4">
         <h1 className="pointer-events-auto text-xl font-bold tracking-tight">Resenha</h1>
-        <button
-          onClick={() => {
-            if (!user) {
-              toast.error("Faça login pra postar");
-              return;
-            }
-            setUploadOpen(true);
-          }}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
-          aria-label="Postar vídeo"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
+        <div className="pointer-events-auto flex items-center gap-2">
+          <Link
+            to="/ranking"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur"
+            aria-label="Ranking"
+          >
+            <Trophy className="h-5 w-5" />
+          </Link>
+          <Link
+            to="/inbox"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur"
+            aria-label="Mensagens"
+          >
+            <Inbox className="h-5 w-5" />
+          </Link>
+          <button
+            onClick={() => {
+              if (!user) {
+                toast.error("Faça login pra postar");
+                return;
+              }
+              setUploadOpen(true);
+            }}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
+            aria-label="Postar vídeo"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        </div>
       </header>
 
       {loading ? (
@@ -282,6 +299,13 @@ function VideoSlide({
           {post.caption && (
             <p className="mt-1 line-clamp-3 text-sm text-white/90">{post.caption}</p>
           )}
+          <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+            <PostVoteButtons
+              postId={post.id}
+              cheiaCount={post.cheia_count ?? 0}
+              murchaCount={post.murcha_count ?? 0}
+            />
+          </div>
         </div>
       </div>
 

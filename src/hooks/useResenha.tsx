@@ -13,6 +13,8 @@ export type ResenhaPost = {
   comments_count: number;
   created_at: string;
   is_hidden: boolean;
+  cheia_count?: number;
+  murcha_count?: number;
   author?: {
     display_name: string;
     avatar_url: string | null;

@@ -10,15 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResenhaRouteImport } from './routes/resenha'
+import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
+import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 
 const ResenhaRoute = ResenhaRouteImport.update({
   id: '/resenha',
   path: '/resenha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingRoute = RankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RachasRoute = RachasRouteImport.update({
@@ -36,6 +44,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InboxRoute = InboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -46,60 +59,92 @@ const AtletaUserIdRoute = AtletaUserIdRouteImport.update({
   path: '/atleta/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
+  id: '/chat/$conversaId',
+  path: '/chat/$conversaId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
+  '/ranking': typeof RankingRoute
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
+  '/chat/$conversaId': typeof ChatConversaIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
+  '/ranking': typeof RankingRoute
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
+  '/chat/$conversaId': typeof ChatConversaIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
+  '/ranking': typeof RankingRoute
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
+  '/chat/$conversaId': typeof ChatConversaIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/inbox'
     | '/login'
     | '/perfil'
     | '/rachas'
+    | '/ranking'
     | '/resenha'
     | '/atleta/$userId'
+    | '/chat/$conversaId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/perfil' | '/rachas' | '/resenha' | '/atleta/$userId'
+  to:
+    | '/'
+    | '/inbox'
+    | '/login'
+    | '/perfil'
+    | '/rachas'
+    | '/ranking'
+    | '/resenha'
+    | '/atleta/$userId'
+    | '/chat/$conversaId'
   id:
     | '__root__'
     | '/'
+    | '/inbox'
     | '/login'
     | '/perfil'
     | '/rachas'
+    | '/ranking'
     | '/resenha'
     | '/atleta/$userId'
+    | '/chat/$conversaId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  InboxRoute: typeof InboxRoute
   LoginRoute: typeof LoginRoute
   PerfilRoute: typeof PerfilRoute
   RachasRoute: typeof RachasRoute
+  RankingRoute: typeof RankingRoute
   ResenhaRoute: typeof ResenhaRoute
   AtletaUserIdRoute: typeof AtletaUserIdRoute
+  ChatConversaIdRoute: typeof ChatConversaIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -109,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/resenha'
       fullPath: '/resenha'
       preLoaderRoute: typeof ResenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking': {
+      id: '/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof RankingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rachas': {
@@ -132,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -146,16 +205,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$conversaId': {
+      id: '/chat/$conversaId'
+      path: '/chat/$conversaId'
+      fullPath: '/chat/$conversaId'
+      preLoaderRoute: typeof ChatConversaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  InboxRoute: InboxRoute,
   LoginRoute: LoginRoute,
   PerfilRoute: PerfilRoute,
   RachasRoute: RachasRoute,
+  RankingRoute: RankingRoute,
   ResenhaRoute: ResenhaRoute,
   AtletaUserIdRoute: AtletaUserIdRoute,
+  ChatConversaIdRoute: ChatConversaIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
