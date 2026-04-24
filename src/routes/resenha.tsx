@@ -20,6 +20,7 @@ import { useResenhaFeed, type ResenhaPost, useFollow } from "@/hooks/useResenha"
 import { ResenhaUpload } from "@/components/ResenhaUpload";
 import { ResenhaComments } from "@/components/ResenhaComments";
 import { ReportDialog } from "@/components/ReportDialog";
+import { PostVoteButtons } from "@/components/PostVoteButtons";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/resenha")({
@@ -282,6 +283,13 @@ function VideoSlide({
           {post.caption && (
             <p className="mt-1 line-clamp-3 text-sm text-white/90">{post.caption}</p>
           )}
+          <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+            <PostVoteButtons
+              postId={post.id}
+              cheiaCount={post.cheia_count ?? 0}
+              murchaCount={post.murcha_count ?? 0}
+            />
+          </div>
         </div>
       </div>
 
