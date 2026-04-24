@@ -55,6 +55,135 @@ export type Database = {
           },
         ]
       }
+      mp_contas: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          mp_user_id: string | null
+          public_key: string | null
+          refresh_token: string | null
+          scope: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          mp_user_id?: string | null
+          public_key?: string | null
+          refresh_token?: string | null
+          scope?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          mp_user_id?: string | null
+          public_key?: string | null
+          refresh_token?: string | null
+          scope?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      organizador_saldo: {
+        Row: {
+          id: string
+          organizador_id: string
+          total_devido_plataforma: number
+          total_recebido_plataforma: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organizador_id: string
+          total_devido_plataforma?: number
+          total_recebido_plataforma?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organizador_id?: string
+          total_devido_plataforma?: number
+          total_recebido_plataforma?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pagamentos: {
+        Row: {
+          created_at: string
+          id: string
+          inscricao_id: string | null
+          metodo: Database["public"]["Enums"]["pagamento_metodo"]
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          mp_qr_code: string | null
+          mp_qr_code_base64: string | null
+          mp_ticket_url: string | null
+          organizador_id: string
+          paid_at: string | null
+          payer_user_id: string
+          racha_id: string
+          raw: Json | null
+          status: Database["public"]["Enums"]["pagamento_status"]
+          updated_at: string
+          valor_organizador: number
+          valor_plataforma: number
+          valor_total: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inscricao_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          mp_qr_code?: string | null
+          mp_qr_code_base64?: string | null
+          mp_ticket_url?: string | null
+          organizador_id: string
+          paid_at?: string | null
+          payer_user_id: string
+          racha_id: string
+          raw?: Json | null
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          updated_at?: string
+          valor_organizador: number
+          valor_plataforma: number
+          valor_total: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inscricao_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          mp_qr_code?: string | null
+          mp_qr_code_base64?: string | null
+          mp_ticket_url?: string | null
+          organizador_id?: string
+          paid_at?: string | null
+          payer_user_id?: string
+          racha_id?: string
+          raw?: Json | null
+          status?: Database["public"]["Enums"]["pagamento_status"]
+          updated_at?: string
+          valor_organizador?: number
+          valor_plataforma?: number
+          valor_total?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -126,12 +255,15 @@ export type Database = {
           field_mode: Database["public"]["Enums"]["field_mode"]
           id: string
           invite_code: string
+          lat: number | null
+          lng: number | null
           location: string | null
           max_players: number
           name: string
           pix_holder: string | null
           pix_key: string | null
           pix_key_type: string | null
+          place_id: string | null
           scheduled_at: string | null
           total_value: number
           updated_at: string
@@ -144,12 +276,15 @@ export type Database = {
           field_mode?: Database["public"]["Enums"]["field_mode"]
           id?: string
           invite_code?: string
+          lat?: number | null
+          lng?: number | null
           location?: string | null
           max_players?: number
           name: string
           pix_holder?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          place_id?: string | null
           scheduled_at?: string | null
           total_value?: number
           updated_at?: string
@@ -162,12 +297,15 @@ export type Database = {
           field_mode?: Database["public"]["Enums"]["field_mode"]
           id?: string
           invite_code?: string
+          lat?: number | null
+          lng?: number | null
           location?: string | null
           max_players?: number
           name?: string
           pix_holder?: string | null
           pix_key?: string | null
           pix_key_type?: string | null
+          place_id?: string | null
           scheduled_at?: string | null
           total_value?: number
           updated_at?: string
@@ -361,6 +499,7 @@ export type Database = {
           is_hidden: boolean
           likes_count: number
           murcha_count: number
+          overlays: Json
           region: string | null
           reports_count: number
           thumb_url: string | null
@@ -378,6 +517,7 @@ export type Database = {
           is_hidden?: boolean
           likes_count?: number
           murcha_count?: number
+          overlays?: Json
           region?: string | null
           reports_count?: number
           thumb_url?: string | null
@@ -395,6 +535,7 @@ export type Database = {
           is_hidden?: boolean
           likes_count?: number
           murcha_count?: number
+          overlays?: Json
           region?: string | null
           reports_count?: number
           thumb_url?: string | null
@@ -431,12 +572,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       gen_invite_code: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_racha_admin: {
         Args: { _racha_id: string; _user_id: string }
         Returns: boolean
@@ -451,7 +624,15 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "super_admin" | "moderador"
       field_mode: "futsal" | "society" | "campo"
+      pagamento_metodo: "pix_mp" | "dinheiro" | "outro"
+      pagamento_status:
+        | "pendente"
+        | "aprovado"
+        | "recusado"
+        | "reembolsado"
+        | "cancelado"
       player_position: "goleiro" | "linha"
       racha_role: "admin" | "jogador"
       resenha_voto_tipo: "cheia" | "murcha"
@@ -582,7 +763,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["super_admin", "moderador"],
       field_mode: ["futsal", "society", "campo"],
+      pagamento_metodo: ["pix_mp", "dinheiro", "outro"],
+      pagamento_status: [
+        "pendente",
+        "aprovado",
+        "recusado",
+        "reembolsado",
+        "cancelado",
+      ],
       player_position: ["goleiro", "linha"],
       racha_role: ["admin", "jogador"],
       resenha_voto_tipo: ["cheia", "murcha"],
