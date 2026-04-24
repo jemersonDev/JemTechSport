@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Play, UserPlus, UserCheck, Heart, MessageCircle } from "lucide-react";
+import { ArrowLeft, Loader2, Play, UserPlus, UserCheck, Heart, MessageCircle, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useResenha";
+import { openOrCreateConversa } from "@/hooks/useResenhaDM";
 
 
 export const Route = createFileRoute("/atleta/$userId")({
@@ -115,21 +116,33 @@ function AthleteProfile() {
         </div>
 
         {!isMe && user && (
-          <Button
-            onClick={toggle}
-            variant={isFollowing ? "outline" : "default"}
-            className="mt-4 w-full"
-          >
-            {isFollowing ? (
-              <>
-                <UserCheck className="mr-2 h-4 w-4" /> Seguindo
-              </>
-            ) : (
-              <>
-                <UserPlus className="mr-2 h-4 w-4" /> Seguir
-              </>
-            )}
-          </Button>
+          <div className="mt-4 flex gap-2">
+            <Button
+              onClick={toggle}
+              variant={isFollowing ? "outline" : "default"}
+              className="flex-1"
+            >
+              {isFollowing ? (
+                <>
+                  <UserCheck className="mr-2 h-4 w-4" /> Seguindo
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" /> Seguir
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={async () => {
+                const id = await openOrCreateConversa(userId);
+                if (id) navigate({ to: "/chat/$conversaId", params: { conversaId: id } });
+              }}
+            >
+              <Send className="mr-2 h-4 w-4" /> Mensagem
+            </Button>
+          </div>
         )}
         {isMe && (
           <Link
