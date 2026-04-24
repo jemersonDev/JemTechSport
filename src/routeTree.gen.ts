@@ -16,8 +16,8 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
+import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 
 const ResenhaRoute = ResenhaRouteImport.update({
   id: '/resenha',
@@ -54,14 +54,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
-  id: '/chat/$conversaId',
-  path: '/chat/$conversaId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AtletaUserIdRoute = AtletaUserIdRouteImport.update({
   id: '/atleta/$userId',
   path: '/atleta/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
+  id: '/chat/$conversaId',
+  path: '/chat/$conversaId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -198,18 +198,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat/$conversaId': {
-      id: '/chat/$conversaId'
-      path: '/chat/$conversaId'
-      fullPath: '/chat/$conversaId'
-      preLoaderRoute: typeof ChatConversaIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/atleta/$userId': {
       id: '/atleta/$userId'
       path: '/atleta/$userId'
       fullPath: '/atleta/$userId'
       preLoaderRoute: typeof AtletaUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/$conversaId': {
+      id: '/chat/$conversaId'
+      path: '/chat/$conversaId'
+      fullPath: '/chat/$conversaId'
+      preLoaderRoute: typeof ChatConversaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

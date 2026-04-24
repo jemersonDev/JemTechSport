@@ -1,11 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, Trophy, Video, User as UserIcon } from "lucide-react";
+import { Home, Trophy, Video, User as UserIcon, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { to: "/" as const, icon: Home, label: "Racha" },
   { to: "/rachas" as const, icon: Trophy, label: "Meus" },
   { to: "/resenha" as const, icon: Video, label: "Resenha", center: true },
+  { to: "/inbox" as const, icon: MessageSquare, label: "Inbox" },
   { to: "/perfil" as const, icon: UserIcon, label: "Perfil" },
 ];
 
