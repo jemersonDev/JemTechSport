@@ -71,8 +71,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const location = useLocation();
-  const isFullscreen = location.pathname === "/resenha";
-  const hideNav = HIDE_NAV_ON.has(location.pathname);
+  const isFullscreen =
+    location.pathname === "/resenha" || location.pathname.startsWith("/chat/");
+  const hideNav = HIDE_NAV_ON.has(location.pathname) || isFullscreen;
   return (
     <AuthProvider>
       <div className={hideNav || isFullscreen ? "" : "pb-20"}>
