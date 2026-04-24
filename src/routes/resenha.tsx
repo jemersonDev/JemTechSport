@@ -36,7 +36,7 @@ export const Route = createFileRoute("/resenha")({
 });
 
 function ResenhaPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { posts, loading, reload, toggleLike, reportPost } = useResenhaFeed();
   const [uploadOpen, setUploadOpen] = useState(false);
   const [commentsFor, setCommentsFor] = useState<string | null>(null);
