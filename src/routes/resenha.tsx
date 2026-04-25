@@ -21,6 +21,7 @@ import { ResenhaUpload } from "@/components/ResenhaUpload";
 import { ResenhaComments } from "@/components/ResenhaComments";
 import { ReportDialog } from "@/components/ReportDialog";
 import { PostVoteButtons } from "@/components/PostVoteButtons";
+import { OverlayLayer, type Overlay } from "@/components/OverlayEditor";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/resenha")({
@@ -259,6 +260,9 @@ function VideoSlide({
         playsInline
         className="h-full w-full object-cover"
       />
+
+      {/* overlays do criador */}
+      <OverlayLayer overlays={(Array.isArray(post.overlays) ? post.overlays : []) as Overlay[]} />
 
       {/* mute indicator */}
       <div className="pointer-events-none absolute right-4 top-20 z-10">

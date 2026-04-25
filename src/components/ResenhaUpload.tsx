@@ -3,6 +3,7 @@ import { Upload, X, Loader2, Video as VideoIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { OverlayEditor, type Overlay } from "@/components/OverlayEditor";
 import { toast } from "sonner";
 
 const MAX_BYTES = 50 * 1024 * 1024;
@@ -21,6 +22,8 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
   const [caption, setCaption] = useState("");
   const [duration, setDuration] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [overlays, setOverlays] = useState<Overlay[]>([]);
+  const [showOverlayEditor, setShowOverlayEditor] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
@@ -29,6 +32,8 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
     setFile(null);
     setCaption("");
     setDuration(null);
+    setOverlays([]);
+    setShowOverlayEditor(false);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
   };
@@ -75,6 +80,7 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
         video_url: pub.publicUrl,
         caption: caption.trim() || null,
         duration_seconds: duration,
+        overlays: overlays as any,
       });
       if (insErr) throw insErr;
 
@@ -119,15 +125,35 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
           </button>
         ) : (
           <div className="space-y-3">
-            <div className="relative overflow-hidden rounded-xl bg-black">
-              <video
-                src={previewUrl ?? undefined}
-                controls
-                playsInline
-                onLoadedMetadata={onLoadedMeta}
-                className="aspect-[9/16] w-full object-contain"
+            {showOverlayEditor && previewUrl ? (
+              <OverlayEditor
+                videoUrl={previewUrl}
+                initial={overlays}
+                onChange={setOverlays}
               />
-            </div>
+            ) : (
+              <div className="relative overflow-hidden rounded-xl bg-black">
+                <video
+                  src={previewUrl ?? undefined}
+                  controls
+                  playsInline
+                  onLoadedMetadata={onLoadedMeta}
+                  className="aspect-[9/16] w-full object-contain"
+                />
+              </div>
+            )}
+
+            <Button
+              type="button"
+              variant={showOverlayEditor ? "default" : "outline"}
+              onClick={() => setShowOverlayEditor((v) => !v)}
+              className="w-full"
+            >
+              {showOverlayEditor
+                ? `✓ Pronto (${overlays.length} overlay${overlays.length === 1 ? "" : "s"})`
+                : `✨ Adicionar stickers e textos${overlays.length ? ` (${overlays.length})` : ""}`}
+            </Button>
+
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value.slice(0, 200))}

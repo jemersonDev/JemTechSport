@@ -15,6 +15,7 @@ export type ResenhaPost = {
   is_hidden: boolean;
   cheia_count?: number;
   murcha_count?: number;
+  overlays?: unknown;
   author?: {
     display_name: string;
     avatar_url: string | null;
