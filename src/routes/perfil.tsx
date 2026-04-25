@@ -6,7 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Camera, LogOut, Loader2, Shield, User as UserIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  LogOut,
+  Loader2,
+  Shield,
+  User as UserIcon,
+  Wallet,
+  ShieldCheck,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/perfil")({
