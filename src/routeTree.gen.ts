@@ -14,6 +14,7 @@ import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OrganizadorRouteImport } from './routes/organizador'
+import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -45,6 +46,11 @@ const PerfilRoute = PerfilRouteImport.update({
 const OrganizadorRoute = OrganizadorRouteImport.update({
   id: '/organizador',
   path: '/organizador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificacoesRoute = NotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inbox'
     | '/login'
+    | '/notificacoes'
     | '/organizador'
     | '/perfil'
     | '/rachas'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inbox'
     | '/login'
+    | '/notificacoes'
     | '/organizador'
     | '/perfil'
     | '/rachas'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/inbox'
     | '/login'
+    | '/notificacoes'
     | '/organizador'
     | '/perfil'
     | '/rachas'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   InboxRoute: typeof InboxRoute
   LoginRoute: typeof LoginRoute
+  NotificacoesRoute: typeof NotificacoesRoute
   OrganizadorRoute: typeof OrganizadorRoute
   PerfilRoute: typeof PerfilRoute
   RachasRoute: typeof RachasRoute
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/organizador'
       fullPath: '/organizador'
       preLoaderRoute: typeof OrganizadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes': {
+      id: '/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof NotificacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   InboxRoute: InboxRoute,
   LoginRoute: LoginRoute,
+  NotificacoesRoute: NotificacoesRoute,
   OrganizadorRoute: OrganizadorRoute,
   PerfilRoute: PerfilRoute,
   RachasRoute: RachasRoute,
