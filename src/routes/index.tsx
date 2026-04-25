@@ -86,6 +86,7 @@ function Index() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { activeRachaId, setActiveRachaId } = useActiveRachaId();
+  const { unreadCount: notifUnread } = useNotificacoes();
   const {
     racha,
     inscricoes,
