@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   UserPlus,
   X,
+  DollarSign,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 
