@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { Plus, Trash2, Check, DollarSign, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import type { JogadorManual } from "@/hooks/useRacha";
-
-type SkillLevel = "iniciante" | "casual" | "bom" | "craque";
-type PositionExt = "goleiro" | "zagueiro" | "meia" | "atacante";
+import type { JogadorManual, SkillLevel, PositionExt } from "@/hooks/useRacha";
 
 const POSITIONS: { id: PositionExt; label: string; emoji: string }[] = [
   { id: "goleiro", label: "Goleiro", emoji: "🧤" },
@@ -16,15 +13,15 @@ const POSITIONS: { id: PositionExt; label: string; emoji: string }[] = [
 const SKILLS: { id: SkillLevel; label: string }[] = [
   { id: "iniciante", label: "Iniciante" },
   { id: "casual", label: "Casual" },
-  { id: "bom", label: "Bom" },
+  { id: "bom_de_bola", label: "Bom" },
   { id: "craque", label: "Craque" },
 ];
 
 interface Props {
   manuais: JogadorManual[];
-  onAdd: (input: { name: string; position?: PositionExt; skill_level?: SkillLevel }) => Promise<{ error?: string }>;
-  onRemove: (id: string) => Promise<{ error?: string }>;
-  onTogglePaid: (id: string, paid: boolean) => Promise<{ error?: string }>;
+  onAdd: (input: { name: string; position?: PositionExt; skill_level?: SkillLevel }) => Promise<{ error: string | null } | { error?: string }>;
+  onRemove: (id: string) => Promise<{ error: string | null } | { error?: string }>;
+  onTogglePaid: (id: string, paid: boolean) => Promise<{ error: string | null } | { error?: string }>;
 }
 
 export function ManualPlayersEditor({ manuais, onAdd, onRemove, onTogglePaid }: Props) {
