@@ -299,13 +299,18 @@ function AdminPage() {
 
       <main className="px-4 py-5 max-w-2xl mx-auto">
         <Tabs defaultValue="denuncias">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={`grid w-full ${isSuper ? "grid-cols-3" : "grid-cols-2"}`}>
             <TabsTrigger value="denuncias" className="gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5" /> Denúncias ({denuncias.length})
             </TabsTrigger>
             <TabsTrigger value="admins" className="gap-1.5">
               <Shield className="w-3.5 h-3.5" /> Admins ({admins.length})
             </TabsTrigger>
+            {isSuper && (
+              <TabsTrigger value="cobranca" className="gap-1.5">
+                <DollarSign className="w-3.5 h-3.5" /> Cobrança ({saldos.filter(s => s.total_devido_plataforma > 0).length})
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="denuncias" className="space-y-2 mt-4">
