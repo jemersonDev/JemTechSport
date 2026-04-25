@@ -13,8 +13,10 @@ import { Route as ResenhaRouteImport } from './routes/resenha'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as OrganizadorRouteImport } from './routes/organizador'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InboxRouteImport } from './routes/inbox'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
@@ -40,6 +42,11 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrganizadorRoute = OrganizadorRouteImport.update({
+  id: '/organizador',
+  path: '/organizador',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -48,6 +55,11 @@ const LoginRoute = LoginRouteImport.update({
 const InboxRoute = InboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -73,8 +85,10 @@ const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
   '/ranking': typeof RankingRoute
@@ -85,8 +99,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
   '/ranking': typeof RankingRoute
@@ -98,8 +114,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
   '/rachas': typeof RachasRoute
   '/ranking': typeof RankingRoute
@@ -112,8 +130,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/inbox'
     | '/login'
+    | '/organizador'
     | '/perfil'
     | '/rachas'
     | '/ranking'
@@ -124,8 +144,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/inbox'
     | '/login'
+    | '/organizador'
     | '/perfil'
     | '/rachas'
     | '/ranking'
@@ -136,8 +158,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/inbox'
     | '/login'
+    | '/organizador'
     | '/perfil'
     | '/rachas'
     | '/ranking'
@@ -149,8 +173,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   InboxRoute: typeof InboxRoute
   LoginRoute: typeof LoginRoute
+  OrganizadorRoute: typeof OrganizadorRoute
   PerfilRoute: typeof PerfilRoute
   RachasRoute: typeof RachasRoute
   RankingRoute: typeof RankingRoute
@@ -190,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/organizador': {
+      id: '/organizador'
+      path: '/organizador'
+      fullPath: '/organizador'
+      preLoaderRoute: typeof OrganizadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -202,6 +235,13 @@ declare module '@tanstack/react-router' {
       path: '/inbox'
       fullPath: '/inbox'
       preLoaderRoute: typeof InboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -237,8 +277,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   InboxRoute: InboxRoute,
   LoginRoute: LoginRoute,
+  OrganizadorRoute: OrganizadorRoute,
   PerfilRoute: PerfilRoute,
   RachasRoute: RachasRoute,
   RankingRoute: RankingRoute,
@@ -250,3 +292,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
