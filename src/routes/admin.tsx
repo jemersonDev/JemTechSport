@@ -157,6 +157,30 @@ function AdminPage() {
       setAdmins([]);
     }
 
+    // Saldos de organizadores (quanto devem à plataforma)
+    const { data: sds } = await supabase
+      .from("organizador_saldo")
+      .select("id,organizador_id,total_devido_plataforma,total_recebido_plataforma")
+      .order("total_devido_plataforma", { ascending: false });
+    if (sds && sds.length > 0) {
+      const orgIds = sds.map((s) => s.organizador_id);
+      const { data: orgProfs } = await supabase
+        .from("profiles")
+        .select("user_id,display_name")
+        .in("user_id", orgIds);
+      const orgMap = new Map((orgProfs ?? []).map((p) => [p.user_id, p.display_name]));
+      setSaldos(
+        sds.map((s) => ({
+          ...s,
+          total_devido_plataforma: Number(s.total_devido_plataforma ?? 0),
+          total_recebido_plataforma: Number(s.total_recebido_plataforma ?? 0),
+          display_name: orgMap.get(s.organizador_id) ?? "Organizador",
+        })),
+      );
+    } else {
+      setSaldos([]);
+    }
+
     setLoading(false);
   }, []);
 
