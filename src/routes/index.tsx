@@ -122,19 +122,28 @@ function Index() {
   const [scoreB, setScoreB] = useState(0);
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
 
-  // Sync local players list from racha inscricoes (so sorteio still works)
+  // Sync local players list from racha inscricoes + jogadores manuais (com skill e paid)
   useEffect(() => {
     if (!activeRachaId) return;
-    setPlayers(
-      inscricoes.map((i) => ({
-        id: i.user_id,
-        name: i.display_name,
-        photo: i.avatar_url ?? undefined,
-        isGoalkeeper: i.position === "goleiro",
-        goals: 0,
-      })),
-    );
-  }, [inscricoes, activeRachaId]);
+    const fromInsc: Player[] = inscricoes.map((i) => ({
+      id: i.user_id,
+      name: i.display_name,
+      photo: i.avatar_url ?? undefined,
+      isGoalkeeper: i.position === "goleiro" || i.preferred_position_ext === "goleiro",
+      goals: 0,
+      paid: i.paid,
+      skill: SKILL_WEIGHT[i.skill_level] ?? 2,
+    }));
+    const fromManual: Player[] = manuais.map((m) => ({
+      id: `manual-${m.id}`,
+      name: m.name,
+      isGoalkeeper: m.position === "goleiro",
+      goals: 0,
+      paid: m.paid,
+      skill: SKILL_WEIGHT[m.skill_level] ?? 2,
+    }));
+    setPlayers([...fromInsc, ...fromManual]);
+  }, [inscricoes, manuais, activeRachaId]);
 
   // Sync location/total/field from racha
   useEffect(() => {
