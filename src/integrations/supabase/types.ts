@@ -55,6 +55,50 @@ export type Database = {
           },
         ]
       }
+      jogadores_manuais: {
+        Row: {
+          added_by: string
+          created_at: string
+          id: string
+          name: string
+          paid: boolean
+          paid_at: string | null
+          position: Database["public"]["Enums"]["preferred_position_ext"]
+          racha_id: string
+          skill_level: Database["public"]["Enums"]["skill_level"]
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          id?: string
+          name: string
+          paid?: boolean
+          paid_at?: string | null
+          position?: Database["public"]["Enums"]["preferred_position_ext"]
+          racha_id: string
+          skill_level?: Database["public"]["Enums"]["skill_level"]
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          name?: string
+          paid?: boolean
+          paid_at?: string | null
+          position?: Database["public"]["Enums"]["preferred_position_ext"]
+          racha_id?: string
+          skill_level?: Database["public"]["Enums"]["skill_level"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jogadores_manuais_racha_id_fkey"
+            columns: ["racha_id"]
+            isOneToOne: false
+            referencedRelation: "rachas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mp_contas: {
         Row: {
           access_token: string | null
@@ -224,6 +268,8 @@ export type Database = {
           display_name: string
           id: string
           preferred_position: Database["public"]["Enums"]["player_position"]
+          preferred_position_ext: Database["public"]["Enums"]["preferred_position_ext"]
+          skill_level: Database["public"]["Enums"]["skill_level"]
           updated_at: string
           user_id: string
         }
@@ -233,6 +279,8 @@ export type Database = {
           display_name?: string
           id?: string
           preferred_position?: Database["public"]["Enums"]["player_position"]
+          preferred_position_ext?: Database["public"]["Enums"]["preferred_position_ext"]
+          skill_level?: Database["public"]["Enums"]["skill_level"]
           updated_at?: string
           user_id: string
         }
@@ -242,6 +290,8 @@ export type Database = {
           display_name?: string
           id?: string
           preferred_position?: Database["public"]["Enums"]["player_position"]
+          preferred_position_ext?: Database["public"]["Enums"]["preferred_position_ext"]
+          skill_level?: Database["public"]["Enums"]["skill_level"]
           updated_at?: string
           user_id?: string
         }
@@ -684,8 +734,10 @@ export type Database = {
         | "reembolsado"
         | "cancelado"
       player_position: "goleiro" | "linha"
+      preferred_position_ext: "goleiro" | "zagueiro" | "meia" | "atacante"
       racha_role: "admin" | "jogador"
       resenha_voto_tipo: "cheia" | "murcha"
+      skill_level: "iniciante" | "casual" | "bom_de_bola" | "craque"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -832,8 +884,10 @@ export const Constants = {
         "cancelado",
       ],
       player_position: ["goleiro", "linha"],
+      preferred_position_ext: ["goleiro", "zagueiro", "meia", "atacante"],
       racha_role: ["admin", "jogador"],
       resenha_voto_tipo: ["cheia", "murcha"],
+      skill_level: ["iniciante", "casual", "bom_de_bola", "craque"],
     },
   },
 } as const

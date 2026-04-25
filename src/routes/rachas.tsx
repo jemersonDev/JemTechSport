@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   useUserRachas,
@@ -8,6 +8,7 @@ import {
   joinByInviteCode,
   type Racha,
 } from "@/hooks/useRacha";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -22,6 +23,8 @@ import {
   Calendar,
   Users,
   Check,
+  Clock,
+  LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,17 +32,73 @@ export const Route = createFileRoute("/rachas")({
   component: RachasPage,
   head: () => ({
     meta: [
-      { title: "Meus rachas — JemTech Sports" },
+      { title: "Meus rachas — Joga Bola App" },
       { name: "description", content: "Crie um racha ou entre com o código de convite." },
     ],
   }),
 });
+
+const FIELD_MODES: { id: "futsal" | "society" | "campo"; label: string; sub: string }[] = [
+  { id: "futsal", label: "Quadra", sub: "Futsal · 5x5" },
+  { id: "society", label: "Society", sub: "7x7" },
+  { id: "campo", label: "Campo", sub: "11x11" },
+];
+
+const VAGAS_OPCOES = [10, 12, 14, 16, 20];
+
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+// Próximos 7 dias (incluindo hoje)
+function nextDays(n: number): Date[] {
+  const out: Date[] = [];
+  const base = new Date();
+  base.setHours(0, 0, 0, 0);
+  for (let i = 0; i < n; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    out.push(d);
+  }
+  return out;
+}
+
+const HORARIOS = [
+  "18:00", "18:30", "19:00", "19:30",
+  "20:00", "20:30", "21:00", "21:30",
+  "22:00", "22:30",
+];
 
 function RachasPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { rachas, loading, reload } = useUserRachas();
   const { activeRachaId, setActiveRachaId } = useActiveRachaId();
+
+  // Estatísticas: # de inscritos por racha
+  const [counts, setCounts] = useState<Record<string, { total: number; paid: number }>>({});
+
+  useEffect(() => {
+    if (rachas.length === 0) {
+      setCounts({});
+      return;
+    }
+    (async () => {
+      const ids = rachas.map((r) => r.id);
+      const { data } = await supabase
+        .from("inscricoes")
+        .select("racha_id, paid")
+        .in("racha_id", ids);
+      const map: Record<string, { total: number; paid: number }> = {};
+      (data ?? []).forEach((i) => {
+        const k = i.racha_id;
+        if (!map[k]) map[k] = { total: 0, paid: 0 };
+        map[k].total += 1;
+        if (i.paid) map[k].paid += 1;
+      });
+      setCounts(map);
+    })();
+  }, [rachas]);
 
   const [mode, setMode] = useState<"list" | "create" | "join">("list");
 
@@ -88,44 +147,77 @@ function RachasPage() {
                 </p>
               </Card>
             ) : (
-              <div className="space-y-2">
-                {rachas.map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => handlePick(r)}
-                    className={`w-full text-left rounded-xl border p-4 transition hover:border-primary/50 ${
-                      activeRachaId === r.id ? "border-primary bg-primary/5" : "border-border bg-card"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold truncate">{r.name}</h3>
-                          {activeRachaId === r.id && (
-                            <Check className="w-4 h-4 text-primary shrink-0" strokeWidth={3} />
+              <div className="space-y-3">
+                {rachas.map((r) => {
+                  const c = counts[r.id] ?? { total: 0, paid: 0 };
+                  const pct = r.max_players > 0 ? (c.total / r.max_players) * 100 : 0;
+                  const isActive = activeRachaId === r.id;
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => handlePick(r)}
+                      className={`w-full text-left rounded-2xl border-2 p-4 transition shadow-card ${
+                        isActive
+                          ? "border-neon bg-neon/5 shadow-neon"
+                          : "border-border bg-graphite hover:border-neon/40"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold truncate text-foreground">{r.name}</h3>
+                            {isActive && (
+                              <Check className="w-4 h-4 text-neon shrink-0" strokeWidth={3} />
+                            )}
+                          </div>
+                          {r.address && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <MapPin className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{r.address}</span>
+                            </p>
+                          )}
+                          {r.scheduled_at && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Calendar className="w-3 h-3 shrink-0" />
+                              {new Date(r.scheduled_at).toLocaleString("pt-BR", {
+                                weekday: "short",
+                                day: "2-digit",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
                           )}
                         </div>
-                        {r.location && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <MapPin className="w-3 h-3" /> {r.location}
-                          </p>
-                        )}
-                        {r.scheduled_at && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <Calendar className="w-3 h-3" />{" "}
-                            {new Date(r.scheduled_at).toLocaleString("pt-BR", {
-                              dateStyle: "short",
-                              timeStyle: "short",
-                            })}
-                          </p>
-                        )}
+                        <span className="text-[10px] font-mono px-2 py-1 rounded bg-black/40 text-neon shrink-0 border border-neon/30">
+                          {r.invite_code}
+                        </span>
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-1 rounded bg-muted text-muted-foreground shrink-0">
-                        {r.invite_code}
-                      </span>
-                    </div>
-                  </button>
-                ))}
+
+                      {/* Barra de progresso confirmados */}
+                      <div className="mt-3 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            <span className="font-bold text-foreground">{c.total}</span>
+                            <span>/{r.max_players} confirmados</span>
+                          </span>
+                          {c.paid > 0 && (
+                            <span className="text-green-400 font-bold">
+                              {c.paid} pagos ✅
+                            </span>
+                          )}
+                        </div>
+                        <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-neon to-green-500 transition-all"
+                            style={{ width: `${Math.min(100, pct)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
@@ -177,10 +269,21 @@ function CreateRachaForm({
 }) {
   const { user } = useAuth();
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
-  const [scheduledAt, setScheduledAt] = useState("");
   const [busy, setBusy] = useState(false);
+  const [fieldMode, setFieldMode] = useState<"futsal" | "society" | "campo">("society");
+  const [maxPlayers, setMaxPlayers] = useState<number>(14);
+
+  const days = useMemo(() => nextDays(7), []);
+  const [selectedDay, setSelectedDay] = useState<Date>(days[0]);
+  const [selectedTime, setSelectedTime] = useState<string>("20:00");
+
+  const scheduledAtIso = useMemo(() => {
+    const [hh, mm] = selectedTime.split(":").map(Number);
+    const d = new Date(selectedDay);
+    d.setHours(hh, mm, 0, 0);
+    return d.toISOString();
+  }, [selectedDay, selectedTime]);
 
   const handleCreate = async () => {
     if (!user) return;
@@ -197,9 +300,11 @@ function CreateRachaForm({
     const { data, error } = await createRacha({
       admin_id: user.id,
       name: trimmed,
-      location: location.trim() || undefined,
       address: address.trim() || undefined,
-      scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
+      location: address.trim() || undefined,
+      scheduled_at: scheduledAtIso,
+      field_mode: fieldMode,
+      max_players: maxPlayers,
     });
     setBusy(false);
     if (error || !data) {
@@ -209,14 +314,20 @@ function CreateRachaForm({
     onCreated(data);
   };
 
+  const weekdays = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  const months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
   return (
-    <Card className="p-5 space-y-4">
-      <h2 className="font-bold flex items-center gap-2">
-        <Plus className="w-4 h-4" /> Novo racha
-      </h2>
+    <Card className="p-5 space-y-5 bg-graphite border-border">
+      <div className="flex items-center gap-2">
+        <Plus className="w-4 h-4 text-neon" />
+        <h2 className="font-bold">Novo racha</h2>
+      </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium">Nome do racha *</label>
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          Nome do racha *
+        </label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -225,37 +336,131 @@ function CreateRachaForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium">Local da quadra</label>
-        <Input
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Ex: Atlanta Arena"
-          maxLength={80}
-        />
+      {/* Modalidade */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <LayoutGrid className="w-3 h-3" /> Modalidade
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {FIELD_MODES.map((m) => {
+            const active = fieldMode === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setFieldMode(m.id)}
+                className={`py-3 rounded-xl border-2 text-center transition ${
+                  active
+                    ? "border-neon bg-neon/15 shadow-neon"
+                    : "border-border bg-background hover:border-neon/40"
+                }`}
+              >
+                <p className={`text-xs font-black uppercase tracking-wider leading-none ${active ? "text-neon" : "text-foreground"}`}>
+                  {m.label}
+                </p>
+                <p className="text-[9px] mt-1 leading-none text-muted-foreground">{m.sub}</p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
+      {/* Data — pills horizontais */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Calendar className="w-3 h-3" /> Data
+        </label>
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth">
+          {days.map((d) => {
+            const active =
+              d.toDateString() === selectedDay.toDateString();
+            return (
+              <button
+                key={d.toISOString()}
+                type="button"
+                onClick={() => setSelectedDay(d)}
+                className={`shrink-0 px-4 py-2.5 rounded-full border-2 text-center transition ${
+                  active
+                    ? "border-neon bg-neon text-black shadow-neon"
+                    : "border-border bg-background text-foreground hover:border-neon/40"
+                }`}
+              >
+                <p className="text-[10px] uppercase font-bold leading-none">
+                  {weekdays[d.getDay()]}.
+                </p>
+                <p className="text-xs font-black mt-0.5 leading-none">
+                  {pad(d.getDate())} {months[d.getMonth()]}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Horário — grade */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Clock className="w-3 h-3" /> Horário
+        </label>
+        <div className="grid grid-cols-5 gap-1.5">
+          {HORARIOS.map((h) => {
+            const active = selectedTime === h;
+            return (
+              <button
+                key={h}
+                type="button"
+                onClick={() => setSelectedTime(h)}
+                className={`py-2 rounded-lg border-2 text-xs font-bold transition ${
+                  active
+                    ? "border-neon bg-neon text-black shadow-neon"
+                    : "border-border bg-background text-foreground hover:border-neon/40"
+                }`}
+              >
+                {h}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Vagas */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Users className="w-3 h-3" /> Vagas
+        </label>
+        <div className="grid grid-cols-5 gap-1.5">
+          {VAGAS_OPCOES.map((v) => {
+            const active = maxPlayers === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setMaxPlayers(v)}
+                className={`py-2.5 rounded-lg border-2 text-sm font-black transition ${
+                  active
+                    ? "border-neon bg-neon text-black shadow-neon"
+                    : "border-border bg-background text-foreground hover:border-neon/40"
+                }`}
+              >
+                {v}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Endereço */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium">Endereço (opcional)</label>
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <MapPin className="w-3 h-3" /> Endereço
+        </label>
         <Input
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="Ex: Av. Paulista 1000, São Paulo"
+          placeholder="Ex: R. Barão da Ponte Alta, 1871"
           maxLength={200}
         />
-        <p className="text-[10px] text-muted-foreground">
-          Mapa gerado automaticamente via OpenStreetMap (gratuito).
-        </p>
-        <AddressMap address={address} height={180} className="pt-1" />
-      </div>
-
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium">Data e horário</label>
-        <Input
-          type="datetime-local"
-          value={scheduledAt}
-          onChange={(e) => setScheduledAt(e.target.value)}
-        />
+        <AddressMap address={address} height={160} className="pt-1" />
       </div>
 
       <div className="grid grid-cols-2 gap-2 pt-1">
@@ -263,7 +468,7 @@ function CreateRachaForm({
           Cancelar
         </Button>
         <Button onClick={handleCreate} disabled={busy}>
-          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Criar"}
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Criar racha"}
         </Button>
       </div>
     </Card>

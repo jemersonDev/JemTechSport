@@ -6,6 +6,8 @@ export type Player = {
   goals: number;
   photo?: string;
   isGoalkeeper?: boolean;
+  paid?: boolean;
+  skill?: number; // 1-4
 };
 
 export type FieldMode = "futsal" | "society" | "campo";
@@ -202,12 +204,13 @@ function PlayerPin({
 }) {
   const ringColor = team === "A" ? "ring-[var(--team-a)]" : "ring-[var(--team-b)]";
   const dotColor = team === "A" ? "bg-[var(--team-a)]" : "bg-[var(--team-b)]";
+  const paidRing = player.paid ? "ring-green-400 ring-[3px]" : `ring-2 ${player.isGoalkeeper ? "ring-keeper" : ringColor}`;
 
   return (
     <div className="flex flex-col items-center gap-0.5 w-[58px]">
       <div className="relative">
         <div
-          className={`w-9 h-9 rounded-full ${player.isGoalkeeper ? "bg-keeper" : dotColor} flex items-center justify-center overflow-hidden ring-2 ${player.isGoalkeeper ? "ring-keeper" : ringColor} shadow-card`}
+          className={`w-9 h-9 rounded-full ${player.isGoalkeeper ? "bg-keeper" : dotColor} flex items-center justify-center overflow-hidden ${paidRing} shadow-card`}
         >
           {player.photo ? (
             <img src={player.photo} alt={player.name} className="w-full h-full object-cover" />
@@ -218,6 +221,11 @@ function PlayerPin({
         {player.isGoalkeeper && (
           <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-keeper flex items-center justify-center ring-1 ring-black shadow">
             <Shield className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+          </span>
+        )}
+        {player.paid && !player.isGoalkeeper && (
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 flex items-center justify-center ring-1 ring-black shadow">
+            <span className="text-[8px] font-black text-black">$</span>
           </span>
         )}
       </div>

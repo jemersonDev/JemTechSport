@@ -16,18 +16,30 @@ import {
   Wallet,
   ShieldCheck,
   ChevronRight,
+  Trophy,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  SKILL_LABEL,
+  POSITION_LABEL,
+  POSITION_EMOJI,
+  type SkillLevel,
+  type PositionExt,
+} from "@/hooks/useRacha";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
   head: () => ({
     meta: [
-      { title: "Meu perfil — JemTech Sports" },
-      { name: "description", content: "Edite seu nome, foto e posição preferida." },
+      { title: "Meu perfil — Joga Bola App" },
+      { name: "description", content: "Edite sua foto, posição preferida e nível de habilidade." },
     ],
   }),
 });
+
+const POSITIONS: PositionExt[] = ["goleiro", "zagueiro", "meia", "atacante"];
+const SKILLS: SkillLevel[] = ["iniciante", "casual", "bom_de_bola", "craque"];
 
 function PerfilPage() {
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
@@ -35,7 +47,8 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
-  const [position, setPosition] = useState<"goleiro" | "linha">("linha");
+  const [position, setPosition] = useState<PositionExt>("meia");
+  const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -57,15 +70,27 @@ function PerfilPage() {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
 
+  // Carrega perfil completo (incluindo novos campos)
   useEffect(() => {
-    if (profile) {
-      setDisplayName(profile.display_name);
-      setPosition(profile.preferred_position);
-    }
-  }, [profile]);
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, preferred_position_ext, skill_level")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) {
+        setDisplayName(data.display_name ?? "");
+        setPosition((data.preferred_position_ext as PositionExt) ?? "meia");
+        setSkill((data.skill_level as SkillLevel) ?? "casual");
+      } else if (profile) {
+        setDisplayName(profile.display_name);
+      }
+    })();
+  }, [user, profile]);
 
   const handleSave = async () => {
-    if (!user || !profile) return;
+    if (!user) return;
     const trimmed = displayName.trim();
     if (!trimmed) {
       toast.error("Coloca um nome aí, craque");
@@ -76,9 +101,16 @@ function PerfilPage() {
       return;
     }
     setSaving(true);
+    // mantém preferred_position legado coerente: goleiro -> goleiro, resto -> linha
+    const legacyPos = position === "goleiro" ? "goleiro" : "linha";
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: trimmed, preferred_position: position })
+      .update({
+        display_name: trimmed,
+        preferred_position: legacyPos,
+        preferred_position_ext: position,
+        skill_level: skill,
+      })
       .eq("user_id", user.id);
     setSaving(false);
     if (error) {
@@ -212,35 +244,71 @@ function PerfilPage() {
             />
           </div>
 
-          {/* Posição */}
+          {/* Posição preferida (4 opções) */}
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <Shield className="w-4 h-4" /> Posição preferida
             </label>
             <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setPosition("linha")}
-                className={`h-12 rounded-md border-2 font-medium transition ${
-                  position === "linha"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-muted-foreground"
-                }`}
-              >
-                ⚽ Linha
-              </button>
-              <button
-                type="button"
-                onClick={() => setPosition("goleiro")}
-                className={`h-12 rounded-md border-2 font-medium transition ${
-                  position === "goleiro"
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-muted-foreground"
-                }`}
-              >
-                🧤 Goleiro
-              </button>
+              {POSITIONS.map((p) => {
+                const active = position === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPosition(p)}
+                    className={`h-12 rounded-xl border-2 font-bold text-sm transition flex items-center justify-center gap-1.5 ${
+                      active
+                        ? "border-neon bg-neon/15 text-neon shadow-neon"
+                        : "border-border bg-background text-muted-foreground hover:border-neon/40"
+                    }`}
+                  >
+                    <span>{POSITION_EMOJI[p]}</span>
+                    {POSITION_LABEL[p]}
+                  </button>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Nível de habilidade */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Trophy className="w-4 h-4" /> Nível de habilidade
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {SKILLS.map((s, idx) => {
+                const active = skill === s;
+                const stars = idx + 1;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSkill(s)}
+                    className={`h-14 rounded-xl border-2 font-bold text-sm transition flex flex-col items-center justify-center gap-0.5 ${
+                      active
+                        ? "border-neon bg-neon/15 text-neon shadow-neon"
+                        : "border-border bg-background text-muted-foreground hover:border-neon/40"
+                    }`}
+                  >
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: stars }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-3 h-3"
+                          fill={active ? "currentColor" : "none"}
+                          strokeWidth={2.5}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[11px] uppercase tracking-wider">{SKILL_LABEL[s]}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Usado pelo sorteio para equilibrar os times automaticamente.
+            </p>
           </div>
 
           <Button onClick={handleSave} disabled={saving} className="w-full h-11">
