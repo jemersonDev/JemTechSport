@@ -261,6 +261,9 @@ function VideoSlide({
         className="h-full w-full object-cover"
       />
 
+      {/* overlays do criador */}
+      <OverlayLayer overlays={(Array.isArray(post.overlays) ? post.overlays : []) as Overlay[]} />
+
       {/* mute indicator */}
       <div className="pointer-events-none absolute right-4 top-20 z-10">
         <div className="rounded-full bg-black/40 p-2 backdrop-blur">
