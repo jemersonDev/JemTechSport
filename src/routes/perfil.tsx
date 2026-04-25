@@ -32,7 +32,7 @@ export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
   head: () => ({
     meta: [
-      { title: "Meu perfil — Joga Bola App" },
+      { title: "Meu perfil — JemTech Sports" },
       { name: "description", content: "Edite sua foto, posição preferida e nível de habilidade." },
     ],
   }),

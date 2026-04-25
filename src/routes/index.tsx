@@ -65,13 +65,13 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Joga Bola App — Organize seu Racha de Futebol" },
+      { title: "JemTech Sports — Organize seu Racha de Futebol" },
       {
         name: "description",
         content:
           "Sorteie times, calcule o valor por jogador, marque gols e mande tudo pro Zap. O app tático para o seu racha.",
       },
-      { property: "og:title", content: "Joga Bola App — Racha sem zica" },
+      { property: "og:title", content: "JemTech Sports — Racha sem zica" },
       {
         property: "og:description",
         content: "Sorteio de times, divisão financeira e placar ao vivo num só lugar.",
@@ -471,7 +471,7 @@ function Index() {
         <div className="mx-auto max-w-2xl px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-neon flex items-center justify-center shadow-neon shrink-0">
-              <span className="text-black font-black text-sm tracking-tight">JB</span>
+              <span className="text-black font-black text-sm tracking-tight">JT</span>
             </div>
             <Link
               to="/rachas"
@@ -479,7 +479,7 @@ function Index() {
               title="Trocar de racha"
             >
               <h1 className="text-base font-black tracking-tight truncate">
-                <span className="text-neon">Joga Bola</span> App
+                <span className="text-neon">JemTech</span> Sports
               </h1>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
                 {racha ? "Toque pra trocar racha" : "Racha sem zica"}
