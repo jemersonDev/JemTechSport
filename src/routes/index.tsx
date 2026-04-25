@@ -91,6 +91,7 @@ function Index() {
   const {
     racha,
     inscricoes,
+    manuais,
     myInscricao,
     isAdmin,
     joinList,
@@ -98,6 +99,9 @@ function Index() {
     togglePaid,
     removeInscricao,
     updateRacha,
+    addManual,
+    removeManual,
+    toggleManualPaid,
   } = useRacha(activeRachaId);
 
   useEffect(() => {
