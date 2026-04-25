@@ -65,13 +65,13 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Joga Bola App — Organize seu Racha de Futebol" },
+      { title: "JemTech Sports — Organize seu Racha de Futebol" },
       {
         name: "description",
         content:
           "Sorteie times, calcule o valor por jogador, marque gols e mande tudo pro Zap. O app tático para o seu racha.",
       },
-      { property: "og:title", content: "Joga Bola App — Racha sem zica" },
+      { property: "og:title", content: "JemTech Sports — Racha sem zica" },
       {
         property: "og:description",
         content: "Sorteio de times, divisão financeira e placar ao vivo num só lugar.",
