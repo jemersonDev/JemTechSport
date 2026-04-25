@@ -468,40 +468,25 @@ function Index() {
       {/* ============== TOP NAV (sticky) ============== */}
       <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-lg border-b border-border">
         <div className="mx-auto max-w-2xl px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-neon flex items-center justify-center shadow-neon">
-              <span className="text-black font-black text-sm tracking-tight">JT</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-neon flex items-center justify-center shadow-neon shrink-0">
+              <span className="text-black font-black text-sm tracking-tight">JB</span>
             </div>
-            <div className="leading-tight min-w-0">
-              <Link
-                to="/rachas"
-                className="block hover:opacity-80 transition"
-                title="Trocar de racha"
-              >
-                <h1 className="text-base font-black tracking-tight truncate max-w-[200px]">
-                  {racha ? racha.name : <><span className="text-neon">JemTech</span> Sports</>}
-                </h1>
-              </Link>
-              {racha && (racha.address || racha.location) ? (
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] text-neon uppercase tracking-widest flex items-center gap-1 hover:underline truncate max-w-[200px]"
-                  title={racha.address || racha.location || ""}
-                >
-                  <MapPin className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />
-                  <span className="truncate">{racha.address || racha.location}</span>
-                </a>
-              ) : (
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                  {racha ? "Toque pra trocar racha" : "Racha sem zica"}
-                </p>
-              )}
-            </div>
+            <Link
+              to="/rachas"
+              className="leading-tight min-w-0 hover:opacity-80 transition"
+              title="Trocar de racha"
+            >
+              <h1 className="text-base font-black tracking-tight truncate">
+                <span className="text-neon">Joga Bola</span> App
+              </h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
+                {racha ? "Toque pra trocar racha" : "Racha sem zica"}
+              </p>
+            </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {teamsReady ? (
               <div className="flex items-center gap-2 text-base font-black tabular-nums">
                 <span className="text-[var(--team-a)]">{scoreA}</span>
@@ -539,6 +524,44 @@ function Index() {
             </Link>
           </div>
         </div>
+
+        {/* Bloco centralizado de info do evento — atualiza em tempo real */}
+        {racha && (
+          <div className="mx-auto max-w-2xl px-4 pb-3">
+            <div className="rounded-xl bg-graphite/70 border border-neon/30 px-4 py-3 text-center space-y-1 shadow-card">
+              <h2 className="text-base font-black text-neon tracking-tight truncate leading-tight">
+                {racha.name}
+              </h2>
+              <p className="text-xs text-foreground/90 font-semibold tabular-nums">
+                {racha.scheduled_at
+                  ? new Date(racha.scheduled_at).toLocaleString("pt-BR", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "📅 Defina a data e hora"}
+              </p>
+              {(racha.address || racha.location) ? (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1 text-[11px] text-muted-foreground hover:text-neon transition max-w-full"
+                  title={racha.address || racha.location || ""}
+                >
+                  <MapPin className="w-3 h-3 text-neon shrink-0" strokeWidth={2.5} />
+                  <span className="truncate">{racha.address || racha.location}</span>
+                </a>
+              ) : (
+                <p className="text-[11px] text-muted-foreground inline-flex items-center justify-center gap-1">
+                  <MapPin className="w-3 h-3 shrink-0" /> Adicione o endereço
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <nav className="mx-auto max-w-2xl px-4 pb-2">
