@@ -94,6 +94,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notificacoes: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          tipo: Database["public"]["Enums"]["notif_tipo"]
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          tipo: Database["public"]["Enums"]["notif_tipo"]
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          tipo?: Database["public"]["Enums"]["notif_tipo"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       organizador_saldo: {
         Row: {
           id: string
@@ -601,6 +634,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _notify: {
+        Args: {
+          _actor: string
+          _link: string
+          _msg: string
+          _tipo: Database["public"]["Enums"]["notif_tipo"]
+          _user: string
+        }
+        Returns: undefined
+      }
       gen_invite_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -626,6 +669,13 @@ export type Database = {
     Enums: {
       app_role: "super_admin" | "moderador"
       field_mode: "futsal" | "society" | "campo"
+      notif_tipo:
+        | "like"
+        | "comment"
+        | "follow"
+        | "message"
+        | "payment"
+        | "racha_join"
       pagamento_metodo: "pix_mp" | "dinheiro" | "outro"
       pagamento_status:
         | "pendente"
@@ -765,6 +815,14 @@ export const Constants = {
     Enums: {
       app_role: ["super_admin", "moderador"],
       field_mode: ["futsal", "society", "campo"],
+      notif_tipo: [
+        "like",
+        "comment",
+        "follow",
+        "message",
+        "payment",
+        "racha_join",
+      ],
       pagamento_metodo: ["pix_mp", "dinheiro", "outro"],
       pagamento_status: [
         "pendente",
