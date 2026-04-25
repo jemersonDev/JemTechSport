@@ -38,6 +38,20 @@ function PerfilPage() {
   const [position, setPosition] = useState<"goleiro" | "linha">("linha");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["super_admin", "moderador"])
+        .limit(1);
+      setIsAdmin((data ?? []).length > 0);
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
