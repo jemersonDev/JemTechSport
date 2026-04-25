@@ -4,6 +4,9 @@ import { useAuth } from "./useAuth";
 
 const ACTIVE_RACHA_KEY = "jemtech_active_racha";
 
+export type SkillLevel = "iniciante" | "casual" | "bom_de_bola" | "craque";
+export type PositionExt = "goleiro" | "zagueiro" | "meia" | "atacante";
+
 export type Racha = {
   id: string;
   admin_id: string;
@@ -31,6 +34,20 @@ export type Inscricao = {
   // joined profile
   display_name: string;
   avatar_url: string | null;
+  skill_level: SkillLevel;
+  preferred_position_ext: PositionExt;
+};
+
+export type JogadorManual = {
+  id: string;
+  racha_id: string;
+  added_by: string;
+  name: string;
+  position: PositionExt;
+  skill_level: SkillLevel;
+  paid: boolean;
+  paid_at: string | null;
+  created_at: string;
 };
 
 export function useUserRachas() {
@@ -76,12 +93,14 @@ export function useRacha(rachaId: string | null) {
   const { user } = useAuth();
   const [racha, setRacha] = useState<Racha | null>(null);
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
+  const [manuais, setManuais] = useState<JogadorManual[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadRacha = useCallback(async () => {
     if (!rachaId) {
       setRacha(null);
       setInscricoes([]);
+      setManuais([]);
       setLoading(false);
       return;
     }
@@ -94,7 +113,6 @@ export function useRacha(rachaId: string | null) {
       setInscricoes([]);
       return;
     }
-    // Fetch inscricoes
     const { data: ins } = await supabase
       .from("inscricoes")
       .select("*")
@@ -107,39 +125,56 @@ export function useRacha(rachaId: string | null) {
       return;
     }
 
-    // Fetch matching profiles
     const userIds = inscList.map((i) => i.user_id);
     const { data: profs } = await supabase
       .from("profiles")
-      .select("user_id, display_name, avatar_url")
+      .select("user_id, display_name, avatar_url, skill_level, preferred_position_ext")
       .in("user_id", userIds);
 
     const profMap = new Map((profs ?? []).map((p) => [p.user_id, p]));
-    const merged: Inscricao[] = inscList.map((i) => ({
-      id: i.id,
-      racha_id: i.racha_id,
-      user_id: i.user_id,
-      position: i.position,
-      paid: i.paid,
-      paid_at: i.paid_at,
-      display_name: profMap.get(i.user_id)?.display_name ?? "Jogador",
-      avatar_url: profMap.get(i.user_id)?.avatar_url ?? null,
-    }));
+    const merged: Inscricao[] = inscList.map((i) => {
+      const p = profMap.get(i.user_id);
+      return {
+        id: i.id,
+        racha_id: i.racha_id,
+        user_id: i.user_id,
+        position: i.position,
+        paid: i.paid,
+        paid_at: i.paid_at,
+        display_name: p?.display_name ?? "Jogador",
+        avatar_url: p?.avatar_url ?? null,
+        skill_level: (p?.skill_level as SkillLevel) ?? "casual",
+        preferred_position_ext: (p?.preferred_position_ext as PositionExt) ?? "meia",
+      };
+    });
     setInscricoes(merged);
+  }, [rachaId]);
+
+  const loadManuais = useCallback(async () => {
+    if (!rachaId) {
+      setManuais([]);
+      return;
+    }
+    const { data } = await supabase
+      .from("jogadores_manuais")
+      .select("*")
+      .eq("racha_id", rachaId)
+      .order("created_at", { ascending: true });
+    setManuais((data as JogadorManual[]) ?? []);
   }, [rachaId]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([loadRacha(), loadInscricoes()]).finally(() => {
+    Promise.all([loadRacha(), loadInscricoes(), loadManuais()]).finally(() => {
       if (!cancelled) setLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, [loadRacha, loadInscricoes]);
+  }, [loadRacha, loadInscricoes, loadManuais]);
 
-  // Realtime: refetch when inscricoes change for this racha
+  // Realtime
   useEffect(() => {
     if (!rachaId) return;
     const channel = supabase
@@ -154,11 +189,16 @@ export function useRacha(rachaId: string | null) {
         { event: "UPDATE", schema: "public", table: "rachas", filter: `id=eq.${rachaId}` },
         () => loadRacha(),
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "jogadores_manuais", filter: `racha_id=eq.${rachaId}` },
+        () => loadManuais(),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [rachaId, loadInscricoes, loadRacha]);
+  }, [rachaId, loadInscricoes, loadRacha, loadManuais]);
 
   const myInscricao = user ? inscricoes.find((i) => i.user_id === user.id) ?? null : null;
   const isAdmin = !!(user && racha && racha.admin_id === user.id);
@@ -212,7 +252,6 @@ export function useRacha(rachaId: string | null) {
     return { error: null };
   };
 
-  // Admin actions
   const removeInscricao = async (userId: string) => {
     if (!isAdmin || !rachaId) return { error: "Sem permissão" };
     const { error } = await supabase
@@ -233,9 +272,49 @@ export function useRacha(rachaId: string | null) {
     return { error: null };
   };
 
+  // ============== Jogadores manuais ==============
+  const addManual = async (input: { name: string; position?: PositionExt; skill_level?: SkillLevel }) => {
+    if (!user || !rachaId) return { error: "Sem permissão" };
+    const { error } = await supabase.from("jogadores_manuais").insert({
+      racha_id: rachaId,
+      added_by: user.id,
+      name: input.name,
+      position: input.position ?? "meia",
+      skill_level: input.skill_level ?? "casual",
+    });
+    if (error) return { error: error.message };
+    await loadManuais();
+    return { error: null };
+  };
+
+  const updateManual = async (id: string, patch: Partial<JogadorManual>) => {
+    const { error } = await supabase.from("jogadores_manuais").update(patch).eq("id", id);
+    if (error) return { error: error.message };
+    await loadManuais();
+    return { error: null };
+  };
+
+  const removeManual = async (id: string) => {
+    const { error } = await supabase.from("jogadores_manuais").delete().eq("id", id);
+    if (error) return { error: error.message };
+    await loadManuais();
+    return { error: null };
+  };
+
+  const toggleManualPaid = async (id: string, paid: boolean) => {
+    const { error } = await supabase
+      .from("jogadores_manuais")
+      .update({ paid, paid_at: paid ? new Date().toISOString() : null })
+      .eq("id", id);
+    if (error) return { error: error.message };
+    await loadManuais();
+    return { error: null };
+  };
+
   return {
     racha,
     inscricoes,
+    manuais,
     myInscricao,
     isAdmin,
     loading,
@@ -245,7 +324,11 @@ export function useRacha(rachaId: string | null) {
     setMyPosition,
     removeInscricao,
     updateRacha,
-    refresh: () => Promise.all([loadRacha(), loadInscricoes()]),
+    addManual,
+    updateManual,
+    removeManual,
+    toggleManualPaid,
+    refresh: () => Promise.all([loadRacha(), loadInscricoes(), loadManuais()]),
   };
 }
 
@@ -307,7 +390,6 @@ export async function joinByInviteCode(code: string, userId: string) {
   if (rachaErr) return { data: null, error: rachaErr.message };
   if (!racha) return { data: null, error: "Código inválido" };
 
-  // Check if already member
   const { data: existing } = await supabase
     .from("racha_membros")
     .select("id")
@@ -326,3 +408,32 @@ export async function joinByInviteCode(code: string, userId: string) {
 
   return { data: racha as Racha, error: null };
 }
+
+// ============== Skill helpers ==============
+export const SKILL_WEIGHT: Record<SkillLevel, number> = {
+  iniciante: 1,
+  casual: 2,
+  bom_de_bola: 3,
+  craque: 4,
+};
+
+export const SKILL_LABEL: Record<SkillLevel, string> = {
+  iniciante: "Iniciante",
+  casual: "Casual",
+  bom_de_bola: "Bom de Bola",
+  craque: "Craque",
+};
+
+export const POSITION_LABEL: Record<PositionExt, string> = {
+  goleiro: "Goleiro",
+  zagueiro: "Zagueiro",
+  meia: "Meia",
+  atacante: "Atacante",
+};
+
+export const POSITION_EMOJI: Record<PositionExt, string> = {
+  goleiro: "🧤",
+  zagueiro: "🛡️",
+  meia: "🎯",
+  atacante: "⚡",
+};
