@@ -6,6 +6,8 @@ export type Player = {
   goals: number;
   photo?: string;
   isGoalkeeper?: boolean;
+  paid?: boolean;
+  skill?: number; // 1-4
 };
 
 export type FieldMode = "futsal" | "society" | "campo";
