@@ -3,6 +3,7 @@ import { Upload, X, Loader2, Video as VideoIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { OverlayEditor, type Overlay } from "@/components/OverlayEditor";
 import { toast } from "sonner";
 
 const MAX_BYTES = 50 * 1024 * 1024;
