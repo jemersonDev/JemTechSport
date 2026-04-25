@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { AddressMap } from "@/components/AddressMap";
 import {
   ArrowLeft,
   Plus,
@@ -239,9 +240,13 @@ function CreateRachaForm({
         <Input
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="Endereço completo pra Maps"
+          placeholder="Ex: Av. Paulista 1000, São Paulo"
           maxLength={200}
         />
+        <p className="text-[10px] text-muted-foreground">
+          Mapa gerado automaticamente via OpenStreetMap (gratuito).
+        </p>
+        <AddressMap address={address} height={180} className="pt-1" />
       </div>
 
       <div className="space-y-1.5">
