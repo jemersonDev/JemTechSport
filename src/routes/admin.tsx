@@ -235,7 +235,7 @@ function AdminPage() {
     }
   };
 
-
+  const addAdmin = async () => {
     if (!isSuper) return;
     const email = newAdminEmail.trim().toLowerCase();
     if (!email) return;
