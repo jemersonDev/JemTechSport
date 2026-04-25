@@ -80,6 +80,7 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
         video_url: pub.publicUrl,
         caption: caption.trim() || null,
         duration_seconds: duration,
+        overlays: overlays as any,
       });
       if (insErr) throw insErr;
 
