@@ -275,42 +275,14 @@ function Index() {
 
   function shuffleTeams() {
     if (players.length < 2) return;
-
-    const teamSize = TEAM_SIZE[fieldMode];
-    const maxFieldPerTeam = teamSize - 1; // 1 vaga reservada pro goleiro
-
-    const keepers = players.filter((p) => p.isGoalkeeper);
-    const fieldPlayers = players.filter((p) => !p.isGoalkeeper);
-
-    const shuffled = [...fieldPlayers].sort(() => Math.random() - 0.5);
-    const fieldA: Player[] = [];
-    const fieldB: Player[] = [];
-    const fieldReserves: Player[] = [];
-
-    // Distribui linha alternando A/B até preencher; o resto vira reserva
-    shuffled.forEach((p) => {
-      if (fieldA.length <= fieldB.length && fieldA.length < maxFieldPerTeam) {
-        fieldA.push(p);
-      } else if (fieldB.length < maxFieldPerTeam) {
-        fieldB.push(p);
-      } else {
-        fieldReserves.push(p);
-      }
-    });
-
-    const shuffledKeepers = [...keepers].sort(() => Math.random() - 0.5);
-    const keeperA = shuffledKeepers[0] ? [shuffledKeepers[0]] : [];
-    const keeperB = shuffledKeepers[1] ? [shuffledKeepers[1]] : [];
-    const extraKeepers = shuffledKeepers.slice(2);
-    // Goleiros extras viram reservas (mantém marcação de goleiro)
-    const reservesAll = [...extraKeepers, ...fieldReserves];
-
-    setTeamA([...keeperA, ...fieldA].map((p) => ({ ...p, goals: 0 })));
-    setTeamB([...keeperB, ...fieldB].map((p) => ({ ...p, goals: 0 })));
-    setReserves(reservesAll.map((p) => ({ ...p, goals: 0 })));
+    const { teamA: tA, teamB: tB, reserves: rs } = smartShuffle(players, TEAM_SIZE[fieldMode]);
+    setTeamA(tA);
+    setTeamB(tB);
+    setReserves(rs);
     setScoreA(0);
     setScoreB(0);
     setActiveTab("tactical");
+    toast.success("Times equilibrados por nível! ⚖️");
   }
 
   function clearAll() {
