@@ -151,7 +151,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
         mp_qr_code: td?.qr_code ?? null,
         mp_qr_code_base64: td?.qr_code_base64 ?? null,
         mp_ticket_url: td?.ticket_url ?? null,
-        raw: mp as unknown as Record<string, unknown>,
+        raw: mp as never,
       })
       .select("id")
       .single();
