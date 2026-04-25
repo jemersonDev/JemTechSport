@@ -1,0 +1,19 @@
+{
+  "name": "JemTech Sports",
+  "short_name": "JemTech",
+  "description": "Organize seu racha: sorteio de times, divisão financeira e placar ao vivo.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f0d",
+  "theme_color": "#0a0f0d",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

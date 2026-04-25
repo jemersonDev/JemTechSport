@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   UserPlus,
   X,
+  DollarSign,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,6 +52,14 @@ type AdminUser = {
   display_name?: string;
 };
 
+type SaldoOrganizador = {
+  id: string;
+  organizador_id: string;
+  total_devido_plataforma: number;
+  total_recebido_plataforma: number;
+  display_name?: string;
+};
+
 function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -57,6 +67,7 @@ function AdminPage() {
   const [isSuper, setIsSuper] = useState(false);
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [saldos, setSaldos] = useState<SaldoOrganizador[]>([]);
   const [loading, setLoading] = useState(true);
   const [newAdminEmail, setNewAdminEmail] = useState("");
 
@@ -146,6 +157,30 @@ function AdminPage() {
       setAdmins([]);
     }
 
+    // Saldos de organizadores (quanto devem à plataforma)
+    const { data: sds } = await supabase
+      .from("organizador_saldo")
+      .select("id,organizador_id,total_devido_plataforma,total_recebido_plataforma")
+      .order("total_devido_plataforma", { ascending: false });
+    if (sds && sds.length > 0) {
+      const orgIds = sds.map((s) => s.organizador_id);
+      const { data: orgProfs } = await supabase
+        .from("profiles")
+        .select("user_id,display_name")
+        .in("user_id", orgIds);
+      const orgMap = new Map((orgProfs ?? []).map((p) => [p.user_id, p.display_name]));
+      setSaldos(
+        sds.map((s) => ({
+          ...s,
+          total_devido_plataforma: Number(s.total_devido_plataforma ?? 0),
+          total_recebido_plataforma: Number(s.total_recebido_plataforma ?? 0),
+          display_name: orgMap.get(s.organizador_id) ?? "Organizador",
+        })),
+      );
+    } else {
+      setSaldos([]);
+    }
+
     setLoading(false);
   }, []);
 
@@ -181,6 +216,23 @@ function AdminPage() {
     toast.info("Denúncia mantida no histórico (RLS impede apagar).");
     void denunciaId;
     loadAll();
+  };
+
+  const marcarRecebido = async (saldo: SaldoOrganizador) => {
+    if (!isSuper) return;
+    if (!confirm(`Confirmar recebimento de R$ ${saldo.total_devido_plataforma.toFixed(2)} de ${saldo.display_name}?`)) return;
+    const { error } = await supabase
+      .from("organizador_saldo")
+      .update({
+        total_recebido_plataforma: saldo.total_recebido_plataforma + saldo.total_devido_plataforma,
+        total_devido_plataforma: 0,
+      })
+      .eq("id", saldo.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Recebimento registrado ✅");
+      loadAll();
+    }
   };
 
   const addAdmin = async () => {
@@ -247,13 +299,18 @@ function AdminPage() {
 
       <main className="px-4 py-5 max-w-2xl mx-auto">
         <Tabs defaultValue="denuncias">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={`grid w-full ${isSuper ? "grid-cols-3" : "grid-cols-2"}`}>
             <TabsTrigger value="denuncias" className="gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5" /> Denúncias ({denuncias.length})
             </TabsTrigger>
             <TabsTrigger value="admins" className="gap-1.5">
               <Shield className="w-3.5 h-3.5" /> Admins ({admins.length})
             </TabsTrigger>
+            {isSuper && (
+              <TabsTrigger value="cobranca" className="gap-1.5">
+                <DollarSign className="w-3.5 h-3.5" /> Cobrança ({saldos.filter(s => s.total_devido_plataforma > 0).length})
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="denuncias" className="space-y-2 mt-4">
@@ -387,6 +444,71 @@ function AdminPage() {
               ))}
             </div>
           </TabsContent>
+
+          {isSuper && (
+            <TabsContent value="cobranca" className="space-y-2 mt-4">
+              {(() => {
+                const totalDevido = saldos.reduce((s, x) => s + x.total_devido_plataforma, 0);
+                const totalRecebido = saldos.reduce((s, x) => s + x.total_recebido_plataforma, 0);
+                return (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <Card className="p-3 text-center bg-amber-500/10 border-amber-500/30">
+                      <p className="text-[10px] uppercase tracking-widest text-amber-400 mb-1">A receber</p>
+                      <p className="text-xl font-black text-amber-400 tabular-nums">
+                        R$ {totalDevido.toFixed(2)}
+                      </p>
+                    </Card>
+                    <Card className="p-3 text-center bg-green-500/10 border-green-500/30">
+                      <p className="text-[10px] uppercase tracking-widest text-green-400 mb-1">Já recebido</p>
+                      <p className="text-xl font-black text-green-400 tabular-nums">
+                        R$ {totalRecebido.toFixed(2)}
+                      </p>
+                    </Card>
+                  </div>
+                );
+              })()}
+
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin mx-auto mt-8 text-muted-foreground" />
+              ) : saldos.length === 0 ? (
+                <Card className="p-8 text-center text-sm text-muted-foreground">
+                  Nenhum organizador com saldo ainda.
+                </Card>
+              ) : (
+                saldos.map((s) => (
+                  <Card key={s.id} className="p-3 flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{s.display_name}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {s.total_devido_plataforma > 0 ? (
+                          <Badge variant="destructive" className="text-[9px]">
+                            Deve R$ {s.total_devido_plataforma.toFixed(2)}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[9px] border-green-500/40 text-green-400">
+                            Em dia
+                          </Badge>
+                        )}
+                        <span className="text-[10px] text-muted-foreground">
+                          Pago: R$ {s.total_recebido_plataforma.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    {s.total_devido_plataforma > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => marcarRecebido(s)}
+                        className="text-xs gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Recebi
+                      </Button>
+                    )}
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </main>
     </div>
