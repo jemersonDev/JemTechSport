@@ -836,41 +836,51 @@ function Index() {
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={async () => {
-                          const { error } = await togglePaid(!myInscricao.paid);
-                          if (error) toast.error(error);
-                          else toast.success(myInscricao.paid ? "Pagamento desmarcado" : "Pago! ✅");
-                        }}
-                        className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition active:scale-95 ${
-                          myInscricao.paid
-                            ? "bg-green-500/20 border border-green-500 text-green-400"
-                            : "bg-secondary border border-border text-foreground hover:border-green-500/60"
-                        }`}
-                      >
-                        {myInscricao.paid ? (
-                          <>
-                            <Check className="w-4 h-4" strokeWidth={3} /> Pago
-                          </>
-                        ) : (
-                          <>
-                            <DollarSign className="w-4 h-4" /> Já paguei
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm("Sair do racha?")) return;
-                          const { error } = await leaveList();
-                          if (error) toast.error(error);
-                          else toast.success("Você saiu da lista");
-                        }}
-                        className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-muted-foreground hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition uppercase tracking-wider text-sm font-bold"
-                      >
-                        <X className="w-4 h-4" strokeWidth={2.5} />
-                        Sair
-                      </button>
+                    <div className="space-y-2">
+                      {!myInscricao.paid && (
+                        <button
+                          onClick={() => setPixOpen(true)}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-bold uppercase tracking-wider text-sm hover:brightness-110 active:scale-95 transition"
+                        >
+                          <QrCode className="w-4 h-4" /> Pagar com PIX
+                        </button>
+                      )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={async () => {
+                            const { error } = await togglePaid(!myInscricao.paid);
+                            if (error) toast.error(error);
+                            else toast.success(myInscricao.paid ? "Pagamento desmarcado" : "Pago! ✅");
+                          }}
+                          className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition active:scale-95 ${
+                            myInscricao.paid
+                              ? "bg-green-500/20 border border-green-500 text-green-400"
+                              : "bg-secondary border border-border text-foreground hover:border-green-500/60"
+                          }`}
+                        >
+                          {myInscricao.paid ? (
+                            <>
+                              <Check className="w-4 h-4" strokeWidth={3} /> Pago
+                            </>
+                          ) : (
+                            <>
+                              <DollarSign className="w-4 h-4" /> Dinheiro
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!confirm("Sair do racha?")) return;
+                            const { error } = await leaveList();
+                            if (error) toast.error(error);
+                            else toast.success("Você saiu da lista");
+                          }}
+                          className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-muted-foreground hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition uppercase tracking-wider text-sm font-bold"
+                        >
+                          <X className="w-4 h-4" strokeWidth={2.5} />
+                          Sair
+                        </button>
+                      </div>
                     </div>
                   )}
 
