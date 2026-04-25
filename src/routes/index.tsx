@@ -21,11 +21,13 @@ import {
   CreditCard,
   Loader2,
   KeyRound,
+  Bell,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRacha, useActiveRachaId } from "@/hooks/useRacha";
+import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { toast } from "sonner";
 
@@ -84,6 +86,7 @@ function Index() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { activeRachaId, setActiveRachaId } = useActiveRachaId();
+  const { unreadCount: notifUnread } = useNotificacoes();
   const {
     racha,
     inscricoes,
@@ -524,6 +527,18 @@ function Index() {
                 {players.length} {players.length === 1 ? "jogador" : "jogadores"}
               </span>
             )}
+            <Link
+              to="/notificacoes"
+              aria-label="Notificações"
+              className="relative w-9 h-9 rounded-full bg-secondary/40 flex items-center justify-center text-foreground hover:bg-secondary transition"
+            >
+              <Bell className="w-4 h-4" />
+              {notifUnread > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-neon text-black text-[9px] font-black flex items-center justify-center shadow-neon">
+                  {notifUnread > 9 ? "9+" : notifUnread}
+                </span>
+              )}
+            </Link>
             <Link
               to="/perfil"
               aria-label="Meu perfil"
