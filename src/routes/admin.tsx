@@ -218,7 +218,24 @@ function AdminPage() {
     loadAll();
   };
 
-  const addAdmin = async () => {
+  const marcarRecebido = async (saldo: SaldoOrganizador) => {
+    if (!isSuper) return;
+    if (!confirm(`Confirmar recebimento de R$ ${saldo.total_devido_plataforma.toFixed(2)} de ${saldo.display_name}?`)) return;
+    const { error } = await supabase
+      .from("organizador_saldo")
+      .update({
+        total_recebido_plataforma: saldo.total_recebido_plataforma + saldo.total_devido_plataforma,
+        total_devido_plataforma: 0,
+      })
+      .eq("id", saldo.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Recebimento registrado ✅");
+      loadAll();
+    }
+  };
+
+
     if (!isSuper) return;
     const email = newAdminEmail.trim().toLowerCase();
     if (!email) return;
