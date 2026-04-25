@@ -52,6 +52,14 @@ type AdminUser = {
   display_name?: string;
 };
 
+type SaldoOrganizador = {
+  id: string;
+  organizador_id: string;
+  total_devido_plataforma: number;
+  total_recebido_plataforma: number;
+  display_name?: string;
+};
+
 function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
