@@ -26,9 +26,10 @@ import {
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useRacha, useActiveRachaId } from "@/hooks/useRacha";
+import { useRacha, useActiveRachaId, SKILL_WEIGHT, type JogadorManual } from "@/hooks/useRacha";
 import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { PixPaymentDialog } from "@/components/PixPaymentDialog";
+import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
 
 type TabId = "tactical" | "roster" | "match";
