@@ -444,6 +444,71 @@ function AdminPage() {
               ))}
             </div>
           </TabsContent>
+
+          {isSuper && (
+            <TabsContent value="cobranca" className="space-y-2 mt-4">
+              {(() => {
+                const totalDevido = saldos.reduce((s, x) => s + x.total_devido_plataforma, 0);
+                const totalRecebido = saldos.reduce((s, x) => s + x.total_recebido_plataforma, 0);
+                return (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <Card className="p-3 text-center bg-amber-500/10 border-amber-500/30">
+                      <p className="text-[10px] uppercase tracking-widest text-amber-400 mb-1">A receber</p>
+                      <p className="text-xl font-black text-amber-400 tabular-nums">
+                        R$ {totalDevido.toFixed(2)}
+                      </p>
+                    </Card>
+                    <Card className="p-3 text-center bg-green-500/10 border-green-500/30">
+                      <p className="text-[10px] uppercase tracking-widest text-green-400 mb-1">Já recebido</p>
+                      <p className="text-xl font-black text-green-400 tabular-nums">
+                        R$ {totalRecebido.toFixed(2)}
+                      </p>
+                    </Card>
+                  </div>
+                );
+              })()}
+
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin mx-auto mt-8 text-muted-foreground" />
+              ) : saldos.length === 0 ? (
+                <Card className="p-8 text-center text-sm text-muted-foreground">
+                  Nenhum organizador com saldo ainda.
+                </Card>
+              ) : (
+                saldos.map((s) => (
+                  <Card key={s.id} className="p-3 flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{s.display_name}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {s.total_devido_plataforma > 0 ? (
+                          <Badge variant="destructive" className="text-[9px]">
+                            Deve R$ {s.total_devido_plataforma.toFixed(2)}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[9px] border-green-500/40 text-green-400">
+                            Em dia
+                          </Badge>
+                        )}
+                        <span className="text-[10px] text-muted-foreground">
+                          Pago: R$ {s.total_recebido_plataforma.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    {s.total_devido_plataforma > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => marcarRecebido(s)}
+                        className="text-xs gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Recebi
+                      </Button>
+                    )}
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </main>
     </div>
