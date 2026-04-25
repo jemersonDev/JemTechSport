@@ -6,7 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Camera, LogOut, Loader2, Shield, User as UserIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  LogOut,
+  Loader2,
+  Shield,
+  User as UserIcon,
+  Wallet,
+  ShieldCheck,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/perfil")({
@@ -28,6 +38,20 @@ function PerfilPage() {
   const [position, setPosition] = useState<"goleiro" | "linha">("linha");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["super_admin", "moderador"])
+        .limit(1);
+      setIsAdmin((data ?? []).length > 0);
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -222,6 +246,41 @@ function PerfilPage() {
           <Button onClick={handleSave} disabled={saving} className="w-full h-11">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar perfil"}
           </Button>
+        </Card>
+
+        <Card className="p-2 divide-y divide-border">
+          <Link
+            to="/organizador"
+            className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-md transition"
+          >
+            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <Wallet className="w-4 h-4" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-medium">Painel do organizador</div>
+              <div className="text-[11px] text-muted-foreground">
+                Pagamentos recebidos e saldo
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-md transition"
+            >
+              <div className="w-9 h-9 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium">Painel de moderação</div>
+                <div className="text-[11px] text-muted-foreground">
+                  Denúncias e administradores
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </Link>
+          )}
         </Card>
 
         <Card className="p-4">
