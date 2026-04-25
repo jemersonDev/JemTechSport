@@ -32,7 +32,7 @@ export const Route = createFileRoute("/rachas")({
   component: RachasPage,
   head: () => ({
     meta: [
-      { title: "Meus rachas — Joga Bola App" },
+      { title: "Meus rachas — JemTech Sports" },
       { name: "description", content: "Crie um racha ou entre com o código de convite." },
     ],
   }),
