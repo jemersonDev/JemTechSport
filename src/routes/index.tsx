@@ -996,6 +996,16 @@ function Index() {
                   </div>
                 </section>
 
+                {/* Editar elenco — apenas admin */}
+                {isAdmin && (
+                  <ManualPlayersEditor
+                    manuais={manuais}
+                    onAdd={addManual}
+                    onRemove={removeManual}
+                    onTogglePaid={toggleManualPaid}
+                  />
+                )}
+
                 <div className="rounded-xl bg-graphite/60 border border-border px-4 py-3 text-[11px] text-muted-foreground space-y-1.5">
                   <p className="flex items-start gap-1.5">
                     <Shield className="w-3 h-3 mt-0.5 text-keeper shrink-0" />
