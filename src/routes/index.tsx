@@ -26,6 +26,7 @@ import { SoccerField, type Player, type FieldMode } from "@/components/SoccerFie
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRacha, useActiveRachaId } from "@/hooks/useRacha";
+import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { toast } from "sonner";
 
 type TabId = "tactical" | "roster" | "match";
