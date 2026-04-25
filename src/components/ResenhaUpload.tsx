@@ -22,6 +22,8 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
   const [caption, setCaption] = useState("");
   const [duration, setDuration] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [overlays, setOverlays] = useState<Overlay[]>([]);
+  const [showOverlayEditor, setShowOverlayEditor] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
@@ -30,6 +32,8 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
     setFile(null);
     setCaption("");
     setDuration(null);
+    setOverlays([]);
+    setShowOverlayEditor(false);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
   };
