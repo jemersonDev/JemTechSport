@@ -67,6 +67,7 @@ function AdminPage() {
   const [isSuper, setIsSuper] = useState(false);
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [saldos, setSaldos] = useState<SaldoOrganizador[]>([]);
   const [loading, setLoading] = useState(true);
   const [newAdminEmail, setNewAdminEmail] = useState("");
 
