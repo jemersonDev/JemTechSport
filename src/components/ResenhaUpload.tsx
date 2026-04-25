@@ -125,15 +125,35 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
           </button>
         ) : (
           <div className="space-y-3">
-            <div className="relative overflow-hidden rounded-xl bg-black">
-              <video
-                src={previewUrl ?? undefined}
-                controls
-                playsInline
-                onLoadedMetadata={onLoadedMeta}
-                className="aspect-[9/16] w-full object-contain"
+            {showOverlayEditor && previewUrl ? (
+              <OverlayEditor
+                videoUrl={previewUrl}
+                initial={overlays}
+                onChange={setOverlays}
               />
-            </div>
+            ) : (
+              <div className="relative overflow-hidden rounded-xl bg-black">
+                <video
+                  src={previewUrl ?? undefined}
+                  controls
+                  playsInline
+                  onLoadedMetadata={onLoadedMeta}
+                  className="aspect-[9/16] w-full object-contain"
+                />
+              </div>
+            )}
+
+            <Button
+              type="button"
+              variant={showOverlayEditor ? "default" : "outline"}
+              onClick={() => setShowOverlayEditor((v) => !v)}
+              className="w-full"
+            >
+              {showOverlayEditor
+                ? `✓ Pronto (${overlays.length} overlay${overlays.length === 1 ? "" : "s"})`
+                : `✨ Adicionar stickers e textos${overlays.length ? ` (${overlays.length})` : ""}`}
+            </Button>
+
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value.slice(0, 200))}
