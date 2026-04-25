@@ -21,6 +21,7 @@ import { ResenhaUpload } from "@/components/ResenhaUpload";
 import { ResenhaComments } from "@/components/ResenhaComments";
 import { ReportDialog } from "@/components/ReportDialog";
 import { PostVoteButtons } from "@/components/PostVoteButtons";
+import { OverlayLayer, type Overlay } from "@/components/OverlayEditor";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/resenha")({
