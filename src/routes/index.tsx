@@ -1452,6 +1452,11 @@ function Index() {
         )}
       </main>
 
+      <PixPaymentDialog
+        inscricaoId={myInscricao?.id ?? null}
+        open={pixOpen}
+        onOpenChange={setPixOpen}
+      />
     </div>
   );
 }
