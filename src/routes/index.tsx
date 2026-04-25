@@ -102,6 +102,7 @@ function Index() {
     }
   }, [user, authLoading, navigate]);
 
+  const [pixOpen, setPixOpen] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [newName, setNewName] = useState("");
   const [totalValue, setTotalValue] = useState<string>("140");
