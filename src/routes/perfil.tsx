@@ -27,6 +27,7 @@ import {
   type SkillLevel,
   type PositionExt,
 } from "@/hooks/useRacha";
+import { PlayerStats } from "@/components/PlayerStats";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -315,6 +316,16 @@ function PerfilPage() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar perfil"}
           </Button>
         </Card>
+
+        {/* Estatísticas pessoais */}
+        {user && (
+          <div>
+            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2 px-1">
+              Minhas estatísticas
+            </h2>
+            <PlayerStats userId={user.id} />
+          </div>
+        )}
 
         <Card className="p-2 divide-y divide-border">
           <Link
