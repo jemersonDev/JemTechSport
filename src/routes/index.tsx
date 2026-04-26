@@ -286,13 +286,11 @@ function Index() {
     toast.success("Times equilibrados por nível! ⚖️");
   }
 
-  // Auto-escalação: quando jogadores ou modalidade mudam, monta times automaticamente
-  // (goleiros fixos + linha pelo tamanho da modalidade). Só roda se a partida não começou
-  // (placar zerado) pra não atrapalhar jogo em andamento.
+  // Auto-escalação: sempre que jogadores ou modalidade mudam, monta times automaticamente
+  // (goleiros fixos + linha pelo tamanho da modalidade).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (players.length < 2) return;
-    if (scoreA > 0 || scoreB > 0) return;
     // Só re-sorteia se a composição (ids) ou modalidade realmente mudou
     const ids = players.map((p) => p.id).sort().join("|");
     const currentIds = [...teamA, ...teamB, ...reserves].map((p) => p.id).sort().join("|");
@@ -505,17 +503,9 @@ function Index() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            {teamsReady ? (
-              <div className="flex items-center gap-2 text-base font-black tabular-nums">
-                <span className="text-[var(--team-a)]">{scoreA}</span>
-                <span className="text-muted-foreground text-xs">×</span>
-                <span className="text-[var(--team-b)]">{scoreB}</span>
-              </div>
-            ) : (
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground hidden sm:inline">
-                {players.length} {players.length === 1 ? "jogador" : "jogadores"}
-              </span>
-            )}
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground hidden sm:inline">
+              {players.length} {players.length === 1 ? "jogador" : "jogadores"}
+            </span>
             <Link
               to="/notificacoes"
               aria-label="Notificações"
