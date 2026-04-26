@@ -80,11 +80,12 @@ function PerfilPage() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, preferred_position_ext, skill_level")
+        .select("display_name, preferred_position_ext, skill_level, bio")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
         setDisplayName(data.display_name ?? "");
+        setBio((data as { bio: string | null }).bio ?? "");
         setPosition((data.preferred_position_ext as PositionExt) ?? "meia");
         setSkill((data.skill_level as SkillLevel) ?? "casual");
       } else if (profile) {
