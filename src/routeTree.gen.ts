@@ -19,6 +19,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
 import { Route as ApiPublicMpWebhookRouteImport } from './routes/api.public.mp-webhook'
@@ -73,6 +74,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
   id: '/chat/$conversaId',
   path: '/chat/$conversaId',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
+  '/r/$code': typeof RCodeRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
+  '/r/$code': typeof RCodeRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
 }
 export interface FileRoutesById {
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
+  '/r/$code': typeof RCodeRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/resenha'
     | '/atleta/$userId'
     | '/chat/$conversaId'
+    | '/r/$code'
     | '/api/public/mp-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/resenha'
     | '/atleta/$userId'
     | '/chat/$conversaId'
+    | '/r/$code'
     | '/api/public/mp-webhook'
   id:
     | '__root__'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/resenha'
     | '/atleta/$userId'
     | '/chat/$conversaId'
+    | '/r/$code'
     | '/api/public/mp-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   ResenhaRoute: typeof ResenhaRoute
   AtletaUserIdRoute: typeof AtletaUserIdRoute
   ChatConversaIdRoute: typeof ChatConversaIdRoute
+  RCodeRoute: typeof RCodeRoute
   ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
 }
 
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat/$conversaId': {
       id: '/chat/$conversaId'
       path: '/chat/$conversaId'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResenhaRoute: ResenhaRoute,
   AtletaUserIdRoute: AtletaUserIdRoute,
   ChatConversaIdRoute: ChatConversaIdRoute,
+  RCodeRoute: RCodeRoute,
   ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
 }
 export const routeTree = rootRouteImport

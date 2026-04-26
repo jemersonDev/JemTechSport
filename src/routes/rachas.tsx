@@ -25,6 +25,7 @@ import {
   Check,
   Clock,
   LayoutGrid,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -214,6 +215,39 @@ function RachasPage() {
                             style={{ width: `${Math.min(100, pct)}%` }}
                           />
                         </div>
+                      </div>
+
+                      {/* Botão de compartilhar via WhatsApp */}
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/r/${r.invite_code}`;
+                          const txt = `🏟️ Bora jogar racha?\n\n${r.name}\n${
+                            r.scheduled_at
+                              ? new Date(r.scheduled_at).toLocaleString("pt-BR", {
+                                  weekday: "short",
+                                  day: "2-digit",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "Data a definir"
+                          }\n${r.address ?? ""}\n\nConfirma aí: ${url}`;
+                          if (navigator.share) {
+                            navigator.share({ title: r.name, text: txt }).catch(() => {});
+                          } else {
+                            window.open(
+                              `https://wa.me/?text=${encodeURIComponent(txt)}`,
+                              "_blank",
+                            );
+                          }
+                        }}
+                        className="mt-3 flex items-center justify-center gap-2 py-2 rounded-lg border border-neon/30 bg-neon/5 text-neon text-xs font-bold hover:bg-neon/10 transition cursor-pointer"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        Convidar galera no WhatsApp
                       </div>
                     </button>
                   );

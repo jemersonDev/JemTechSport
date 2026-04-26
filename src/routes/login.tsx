@@ -22,7 +22,15 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/" });
+    if (!loading && user) {
+      const pending = sessionStorage.getItem("pending_invite");
+      if (pending) {
+        sessionStorage.removeItem("pending_invite");
+        navigate({ to: "/r/$code", params: { code: pending } });
+      } else {
+        navigate({ to: "/" });
+      }
+    }
   }, [user, loading, navigate]);
 
   const handleGoogle = async () => {
