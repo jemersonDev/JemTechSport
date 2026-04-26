@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       gols_jogador: {
         Row: {
+          assistencias: number
           created_at: string
           gols: number
           id: string
@@ -24,6 +25,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assistencias?: number
           created_at?: string
           gols?: number
           id?: string
@@ -32,6 +34,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assistencias?: number
           created_at?: string
           gols?: number
           id?: string
@@ -291,6 +294,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string
           id: string
@@ -302,6 +306,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string
           id?: string
@@ -313,6 +318,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string
           id?: string
@@ -622,6 +628,7 @@ export type Database = {
           updated_at: string
           user_id: string
           video_url: string
+          views_count: number
         }
         Insert: {
           caption?: string | null
@@ -640,6 +647,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           video_url: string
+          views_count?: number
         }
         Update: {
           caption?: string | null
@@ -658,6 +666,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           video_url?: string
+          views_count?: number
         }
         Relationships: []
       }
@@ -744,6 +753,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_post_view: { Args: { _post_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_racha_admin: {
         Args: { _racha_id: string; _user_id: string }

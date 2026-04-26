@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Play, UserPlus, UserCheck, Heart, MessageCircle, Send } from "lucide-react";
+import { ArrowLeft, Loader2, Play, UserPlus, UserCheck, Send, Grid3x3 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useResenha";
 import { openOrCreateConversa } from "@/hooks/useResenhaDM";
-
+import { ReelsViewer, type ReelPost, formatCount } from "@/components/ReelsViewer";
 
 export const Route = createFileRoute("/atleta/$userId")({
   component: AthleteProfile,
@@ -18,15 +18,7 @@ type Profile = {
   display_name: string;
   avatar_url: string | null;
   preferred_position: string;
-};
-
-type Post = {
-  id: string;
-  video_url: string;
-  thumb_url: string | null;
-  likes_count: number;
-  comments_count: number;
-  caption: string | null;
+  bio: string | null;
 };
 
 function AthleteProfile() {
@@ -34,26 +26,46 @@ function AthleteProfile() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<ReelPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ partidas: 0, gols: 0, assistencias: 0 });
+  const [reelsOpenAt, setReelsOpenAt] = useState<number | null>(null);
   const { isFollowing, followers, following, toggle } = useFollow(userId);
 
   useEffect(() => {
     let active = true;
     (async () => {
       setLoading(true);
-      const [profRes, postsRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
+      const [profRes, postsRes, partidasRes, golsRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("user_id, display_name, avatar_url, preferred_position, bio")
+          .eq("user_id", userId)
+          .maybeSingle(),
         supabase
           .from("resenha_posts")
-          .select("id, video_url, thumb_url, likes_count, comments_count, caption")
+          .select("id, video_url, thumb_url, likes_count, comments_count, caption, views_count")
           .eq("user_id", userId)
           .eq("is_hidden", false)
           .order("created_at", { ascending: false }),
+        supabase
+          .from("racha_membros")
+          .select("racha_id", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("gols_jogador")
+          .select("gols, assistencias")
+          .eq("user_id", userId),
       ]);
       if (!active) return;
       setProfile((profRes.data as Profile) ?? null);
-      setPosts((postsRes.data as Post[]) ?? []);
+      setPosts((postsRes.data as ReelPost[]) ?? []);
+      const golsArr = (golsRes.data ?? []) as { gols: number; assistencias: number }[];
+      setStats({
+        partidas: partidasRes.count ?? 0,
+        gols: golsArr.reduce((s, g) => s + (g.gols ?? 0), 0),
+        assistencias: golsArr.reduce((s, g) => s + (g.assistencias ?? 0), 0),
+      });
       setLoading(false);
     })();
     return () => {
@@ -82,9 +94,11 @@ function AthleteProfile() {
     );
   }
 
+  const handle = profile.display_name.replace(/\s+/g, "").toLowerCase();
+
   return (
-    <div className="min-h-[100dvh] bg-background pb-24">
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+    <div className="min-h-[100dvh] bg-background pb-24 text-foreground">
+      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur">
         <button
           onClick={() => navigate({ to: "/resenha" })}
           className="rounded-full p-1 hover:bg-muted"
@@ -92,11 +106,12 @@ function AthleteProfile() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="font-semibold">@{profile.display_name.replace(/\s+/g, "").toLowerCase()}</h1>
+        <h1 className="font-semibold">@{handle}</h1>
       </header>
 
-      <section className="px-4 py-6">
-        <div className="flex items-center gap-4">
+      {/* Instagram-style header */}
+      <section className="px-4 pb-4 pt-6">
+        <div className="flex items-center gap-6">
           <Avatar className="h-20 w-20 ring-2 ring-primary/30">
             <AvatarImage src={profile.avatar_url ?? undefined} />
             <AvatarFallback className="bg-primary text-2xl text-primary-foreground">
@@ -104,17 +119,29 @@ function AthleteProfile() {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-1 justify-around text-center">
-            <Stat label="Vídeos" value={posts.length} />
-            <Stat label="Seguidores" value={followers} />
-            <Stat label="Seguindo" value={following} />
+            <Stat label="Partidas" value={stats.partidas} />
+            <Stat label="Gols" value={stats.gols} />
+            <Stat label="Assist." value={stats.assistencias} />
           </div>
         </div>
 
-        <div className="mt-4">
-          <h2 className="text-lg font-bold">{profile.display_name}</h2>
-          <p className="text-sm text-muted-foreground capitalize">{profile.preferred_position}</p>
+        {/* Name + bio */}
+        <div className="mt-4 space-y-1">
+          <h2 className="text-base font-bold leading-tight">{profile.display_name}</h2>
+          {profile.bio ? (
+            <p className="whitespace-pre-line text-sm leading-snug text-foreground/90">
+              {profile.bio}
+            </p>
+          ) : (
+            <p className="text-sm capitalize text-muted-foreground">{profile.preferred_position}</p>
+          )}
+          <p className="pt-1 text-[11px] text-muted-foreground">
+            <span className="font-semibold text-foreground">{followers}</span> seguidores ·{" "}
+            <span className="font-semibold text-foreground">{following}</span> seguindo
+          </p>
         </div>
 
+        {/* Actions */}
         {!isMe && user && (
           <div className="mt-4 flex gap-2">
             <Button
@@ -154,21 +181,35 @@ function AthleteProfile() {
         )}
       </section>
 
-      <section className="border-t border-border px-1 pt-1">
+      {/* Tabs (only one for now: Grid) */}
+      <div className="flex border-y border-border/60">
+        <div className="flex flex-1 items-center justify-center gap-1.5 border-t-2 border-foreground py-2.5 text-xs font-semibold">
+          <Grid3x3 className="h-4 w-4" /> LANCES
+        </div>
+      </div>
+
+      {/* Square 3x3 grid */}
+      <section className="pt-px">
         {posts.length === 0 ? (
           <p className="py-12 text-center text-sm text-muted-foreground">
-            Nenhuma resenha postada ainda.
+            Nenhum lance postado ainda.
           </p>
         ) : (
-          <div className="grid grid-cols-3 gap-1">
-            {posts.map((p) => (
-              <Link
+          <div className="grid grid-cols-3 gap-px bg-border/40">
+            {posts.map((p, idx) => (
+              <button
                 key={p.id}
-                to="/resenha"
-                className="relative aspect-[9/16] overflow-hidden bg-black"
+                type="button"
+                onClick={() => setReelsOpenAt(idx)}
+                className="group relative aspect-square overflow-hidden bg-black"
               >
                 {p.thumb_url ? (
-                  <img src={p.thumb_url} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={p.thumb_url}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover transition group-hover:opacity-90"
+                  />
                 ) : (
                   <video
                     src={p.video_url}
@@ -178,17 +219,24 @@ function AthleteProfile() {
                     className="h-full w-full object-cover"
                   />
                 )}
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/70 to-transparent px-1.5 py-1 text-[10px] font-semibold text-white">
-                  <span className="flex items-center gap-0.5">
-                    <Heart className="h-3 w-3" /> {p.likes_count}
-                  </span>
-                  <Play className="h-3 w-3" />
+                {/* Play + view count bottom-left */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-1 bg-gradient-to-t from-black/70 via-black/20 to-transparent px-1.5 pb-1 pt-4 text-[11px] font-semibold text-white drop-shadow-md">
+                  <Play className="h-3 w-3 fill-white" />
+                  <span>{formatCount(p.views_count)}</span>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         )}
       </section>
+
+      {reelsOpenAt !== null && (
+        <ReelsViewer
+          posts={posts}
+          startIndex={reelsOpenAt}
+          onClose={() => setReelsOpenAt(null)}
+        />
+      )}
     </div>
   );
 }
@@ -196,8 +244,8 @@ function AthleteProfile() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <div className="text-lg font-bold">{value}</div>
-      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="text-lg font-bold leading-none">{value}</div>
+      <div className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
   );
 }

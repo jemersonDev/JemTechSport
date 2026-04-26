@@ -18,7 +18,9 @@ import {
   ChevronRight,
   Trophy,
   Star,
+  FileText,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   SKILL_LABEL,
@@ -48,6 +50,7 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
   const [position, setPosition] = useState<PositionExt>("meia");
   const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
@@ -77,11 +80,12 @@ function PerfilPage() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, preferred_position_ext, skill_level")
+        .select("display_name, preferred_position_ext, skill_level, bio")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
         setDisplayName(data.display_name ?? "");
+        setBio((data as { bio: string | null }).bio ?? "");
         setPosition((data.preferred_position_ext as PositionExt) ?? "meia");
         setSkill((data.skill_level as SkillLevel) ?? "casual");
       } else if (profile) {
@@ -111,7 +115,8 @@ function PerfilPage() {
         preferred_position: legacyPos,
         preferred_position_ext: position,
         skill_level: skill,
-      })
+        bio: bio.trim() || null,
+      } as never)
       .eq("user_id", user.id);
     setSaving(false);
     if (error) {
@@ -245,7 +250,22 @@ function PerfilPage() {
             />
           </div>
 
-          {/* Posição preferida (4 opções) */}
+          {/* Bio */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Bio
+            </label>
+            <Textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Ex: Meia-atacante | Destro | Foco no gol 🚀"
+              maxLength={150}
+              rows={3}
+            />
+            <p className="text-[10px] text-muted-foreground text-right">{bio.length}/150</p>
+          </div>
+
+
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <Shield className="w-4 h-4" /> Posição preferida
