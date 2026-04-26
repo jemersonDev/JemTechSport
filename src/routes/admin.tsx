@@ -61,6 +61,7 @@ type SaldoOrganizador = {
 };
 
 function AdminPage() {
+  // Painel de moderação JemTech Sports
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
