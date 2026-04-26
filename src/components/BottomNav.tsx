@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Home, Trophy, Video, User as UserIcon, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNotificacoes } from "@/hooks/useNotificacoes";
 
 const tabs = [
   { to: "/" as const, icon: Home, label: "Racha" },
@@ -12,12 +13,16 @@ const tabs = [
 
 export function BottomNav() {
   const location = useLocation();
+  const { unreadCount } = useNotificacoes();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex max-w-2xl items-end justify-around px-2 pb-safe pt-2">
         {tabs.map((tab) => {
           const active = location.pathname === tab.to;
+          // badge de notificação só na aba inbox (proxy: avisos no app)
+          const showBadge = tab.to === "/inbox" && unreadCount > 0;
+
           if (tab.center) {
             return (
               <Link
@@ -47,13 +52,20 @@ export function BottomNav() {
               key={tab.to}
               to={tab.to}
               className={cn(
-                "flex flex-1 flex-col items-center gap-0.5 rounded-md px-3 py-2 text-[11px] transition-colors",
+                "relative flex flex-1 flex-col items-center gap-0.5 rounded-md px-3 py-2 text-[11px] transition-colors",
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <tab.icon className="h-5 w-5" />
+              <div className="relative">
+                <tab.icon className="h-5 w-5" />
+                {showBadge && (
+                  <span className="absolute -right-1.5 -top-1 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </div>
               <span>{tab.label}</span>
             </Link>
           );
