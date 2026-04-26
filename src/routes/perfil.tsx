@@ -250,7 +250,22 @@ function PerfilPage() {
             />
           </div>
 
-          {/* Posição preferida (4 opções) */}
+          {/* Bio */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Bio
+            </label>
+            <Textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Ex: Meia-atacante | Destro | Foco no gol 🚀"
+              maxLength={150}
+              rows={3}
+            />
+            <p className="text-[10px] text-muted-foreground text-right">{bio.length}/150</p>
+          </div>
+
+
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <Shield className="w-4 h-4" /> Posição preferida
