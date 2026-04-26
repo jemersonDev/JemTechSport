@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      gols_jogador: {
+        Row: {
+          created_at: string
+          gols: number
+          id: string
+          racha_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gols?: number
+          id?: string
+          racha_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gols?: number
+          id?: string
+          racha_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inscricoes: {
         Row: {
           created_at: string
@@ -336,9 +363,11 @@ export type Database = {
           app_fee: number
           created_at: string
           field_mode: Database["public"]["Enums"]["field_mode"]
+          finalizado_em: string | null
           id: string
           invite_code: string
           lat: number | null
+          lembrete_3h_enviado: boolean
           lng: number | null
           location: string | null
           max_players: number
@@ -357,9 +386,11 @@ export type Database = {
           app_fee?: number
           created_at?: string
           field_mode?: Database["public"]["Enums"]["field_mode"]
+          finalizado_em?: string | null
           id?: string
           invite_code?: string
           lat?: number | null
+          lembrete_3h_enviado?: boolean
           lng?: number | null
           location?: string | null
           max_players?: number
@@ -378,9 +409,11 @@ export type Database = {
           app_fee?: number
           created_at?: string
           field_mode?: Database["public"]["Enums"]["field_mode"]
+          finalizado_em?: string | null
           id?: string
           invite_code?: string
           lat?: number | null
+          lembrete_3h_enviado?: boolean
           lng?: number | null
           location?: string | null
           max_players?: number
@@ -693,6 +726,15 @@ export type Database = {
           _user: string
         }
         Returns: undefined
+      }
+      enviar_lembretes_3h: { Args: never; Returns: number }
+      find_user_by_email: {
+        Args: { _email: string }
+        Returns: {
+          display_name: string
+          email: string
+          user_id: string
+        }[]
       }
       gen_invite_code: { Args: never; Returns: string }
       has_role: {
