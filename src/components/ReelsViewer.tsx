@@ -67,7 +67,6 @@ export function ReelsViewer({
         const post = posts[idx];
         if (post && !viewedRef.current.has(post.id)) {
           viewedRef.current.add(post.id);
-          // @ts-expect-error - rpc not in generated types yet
           supabase.rpc("increment_post_view", { _post_id: post.id }).then(() => {});
         }
       } else {
