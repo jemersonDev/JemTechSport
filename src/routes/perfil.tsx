@@ -18,7 +18,9 @@ import {
   ChevronRight,
   Trophy,
   Star,
+  FileText,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   SKILL_LABEL,
