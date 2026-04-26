@@ -505,17 +505,9 @@ function Index() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            {teamsReady ? (
-              <div className="flex items-center gap-2 text-base font-black tabular-nums">
-                <span className="text-[var(--team-a)]">{scoreA}</span>
-                <span className="text-muted-foreground text-xs">×</span>
-                <span className="text-[var(--team-b)]">{scoreB}</span>
-              </div>
-            ) : (
-              <span className="text-[10px] uppercase tracking-widest text-muted-foreground hidden sm:inline">
-                {players.length} {players.length === 1 ? "jogador" : "jogadores"}
-              </span>
-            )}
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground hidden sm:inline">
+              {players.length} {players.length === 1 ? "jogador" : "jogadores"}
+            </span>
             <Link
               to="/notificacoes"
               aria-label="Notificações"
