@@ -115,7 +115,8 @@ function PerfilPage() {
         preferred_position: legacyPos,
         preferred_position_ext: position,
         skill_level: skill,
-      })
+        bio: bio.trim() || null,
+      } as never)
       .eq("user_id", user.id);
     setSaving(false);
     if (error) {
