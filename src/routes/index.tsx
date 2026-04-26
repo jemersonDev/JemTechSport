@@ -286,13 +286,11 @@ function Index() {
     toast.success("Times equilibrados por nível! ⚖️");
   }
 
-  // Auto-escalação: quando jogadores ou modalidade mudam, monta times automaticamente
-  // (goleiros fixos + linha pelo tamanho da modalidade). Só roda se a partida não começou
-  // (placar zerado) pra não atrapalhar jogo em andamento.
+  // Auto-escalação: sempre que jogadores ou modalidade mudam, monta times automaticamente
+  // (goleiros fixos + linha pelo tamanho da modalidade).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (players.length < 2) return;
-    if (scoreA > 0 || scoreB > 0) return;
     // Só re-sorteia se a composição (ids) ou modalidade realmente mudou
     const ids = players.map((p) => p.id).sort().join("|");
     const currentIds = [...teamA, ...teamB, ...reserves].map((p) => p.id).sort().join("|");
