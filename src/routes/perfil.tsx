@@ -50,6 +50,7 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
   const [position, setPosition] = useState<PositionExt>("meia");
   const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
