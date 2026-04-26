@@ -240,12 +240,38 @@ function AdminPage() {
     if (!isSuper) return;
     const email = newAdminEmail.trim().toLowerCase();
     if (!email) return;
-    // Procurar profile por email é complicado (não temos campo email no profile).
-    // Como solução simples: pedir o user_id directamente.
-    toast.error(
-      "Para adicionar admin, vai à tabela user_roles e insere user_id + role manualmente, ou implementa lookup por email.",
-    );
+
+    // 1. Buscar user_id pelo email via RPC segura
+    const { data: found, error: findErr } = await supabase.rpc("find_user_by_email", {
+      _email: email,
+    });
+    if (findErr) {
+      toast.error(findErr.message);
+      return;
+    }
+    const target = (found ?? [])[0];
+    if (!target) {
+      toast.error("Usuário com esse email não existe.");
+      return;
+    }
+
+    // 2. Adicionar role moderador
+    const { error: roleErr } = await supabase.from("user_roles").insert({
+      user_id: target.user_id,
+      role: "moderador",
+      granted_by: user?.id,
+    });
+    if (roleErr) {
+      if (roleErr.message.includes("duplicate")) {
+        toast.error(`${target.display_name ?? "Usuário"} já é admin`);
+      } else {
+        toast.error(roleErr.message);
+      }
+      return;
+    }
+    toast.success(`${target.display_name ?? "Usuário"} virou moderador ✅`);
     setNewAdminEmail("");
+    loadAll();
   };
 
   const removeAdmin = async (roleId: string) => {

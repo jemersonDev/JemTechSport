@@ -37,13 +37,16 @@ export function PlayerStats({ userId }: { userId: string }) {
     const golsMap = new Map((gols ?? []).map((g) => [g.racha_id, g.gols]));
     const totalGols = (gols ?? []).reduce((s, g) => s + g.gols, 0);
 
-    const ultimos = (membros ?? [])
+    type MembroRow = {
+      racha_id: string;
+      rachas: { id: string; name: string; scheduled_at: string | null } | null;
+    };
+
+    const ultimos = ((membros ?? []) as MembroRow[])
       .map((m) => ({
         id: m.racha_id,
-        // @ts-expect-error - relation
         name: m.rachas?.name ?? "Racha",
         gols: golsMap.get(m.racha_id) ?? 0,
-        // @ts-expect-error - relation
         data: m.rachas?.scheduled_at ?? null,
       }))
       .sort((a, b) => (b.data ?? "").localeCompare(a.data ?? ""))
