@@ -42,21 +42,20 @@ export function useNotificacoes() {
   // Realtime: novo aviso entra no topo
   useEffect(() => {
     if (!user) return;
-    const ch = supabase
-      .channel(`notif:${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notificacoes",
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          setItems((prev) => [payload.new as Notificacao, ...prev].slice(0, 50));
-        },
-      )
-      .subscribe();
+    const channelName = `notif:${user.id}:${Math.random().toString(36).slice(2)}`;
+    const ch = supabase.channel(channelName);
+    ch.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "notificacoes",
+        filter: `user_id=eq.${user.id}`,
+      },
+      (payload) => {
+        setItems((prev) => [payload.new as Notificacao, ...prev].slice(0, 50));
+      },
+    ).subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
