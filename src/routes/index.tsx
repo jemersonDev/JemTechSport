@@ -635,7 +635,7 @@ function Index() {
       <main className="mx-auto max-w-2xl px-4 py-5 pb-10">
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
-          <div className="space-y-5">
+          <div key="tab-tactical" className="space-y-5 animate-fade-in">
             {/* Placar ao vivo removido a pedido do usuário */}
 
             {/* Modality */}
@@ -800,7 +800,7 @@ function Index() {
 
         {/* ─────────────── TAB: ELENCO ─────────────── */}
         {activeTab === "roster" && (
-          <div className="space-y-5">
+          <div key="tab-roster" className="space-y-5 animate-fade-in">
             {!activeRachaId || !racha ? (
               <section className="rounded-2xl bg-graphite border border-border p-6 shadow-card text-center space-y-4">
                 <div className="w-14 h-14 rounded-full bg-neon/15 flex items-center justify-center mx-auto">
@@ -1105,7 +1105,7 @@ function Index() {
 
         {/* ─────────────── TAB: PARTIDA ─────────────── */}
         {activeTab === "match" && (
-          <div className="space-y-5">
+          <div key="tab-match" className="space-y-5 animate-fade-in">
             {/* ============== PAINEL FINANCEIRO DO ORGANIZADOR ============== */}
             {isAdmin && racha && inscricoes.length > 0 && (
               <section className="rounded-2xl bg-gradient-to-br from-neon/10 via-graphite to-graphite border border-neon/40 p-5 shadow-card space-y-4">
