@@ -1090,7 +1090,8 @@ function Index() {
                 {(() => {
                   const total = parseFloat(totalValue.replace(",", ".")) || 0;
                   const valorBase = inscricoes.length > 0 ? total / inscricoes.length : 0;
-                  const valorComTaxa = valorBase + APP_FEE;
+                  // Exibido sem a taxa interna do app
+                  const valorComTaxa = valorBase;
                   const pagos = inscricoes.filter((i) => i.paid);
                   const devendo = inscricoes.filter((i) => !i.paid);
                   const arrecadado = pagos.length * valorComTaxa;
