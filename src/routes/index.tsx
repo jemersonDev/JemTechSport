@@ -534,8 +534,8 @@ function Index() {
           </div>
         </div>
 
-        {/* Bloco centralizado de info do evento — atualiza em tempo real */}
-        {racha && (
+        {/* Bloco centralizado de info do evento — só aparece na aba Tático */}
+        {racha && activeTab === "tactical" && (
           <div className="mx-auto max-w-2xl px-4 pb-3">
             <div className="rounded-xl bg-graphite/70 border border-neon/30 px-4 py-3 text-center space-y-1 shadow-card">
               <h2 className="text-base font-black text-neon tracking-tight truncate leading-tight">
