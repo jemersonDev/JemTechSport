@@ -200,11 +200,12 @@ function Index() {
     }
   }, [pixKey, pixKeyType, pixOwner]);
 
-  const APP_FEE = 0.2; // R$ 0,20 por jogador para manter o app no ar
+  const APP_FEE = 0.2; // taxa interna — não exibir na UI
+  // Valor exibido aos jogadores: apenas o rateio puro da quadra (sem taxa do app)
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
-    return total / players.length + APP_FEE;
+    return total / players.length;
   }, [totalValue, players.length]);
 
   const goalkeeperCount = useMemo(
