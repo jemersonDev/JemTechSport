@@ -1174,7 +1174,7 @@ function Index() {
                         </div>
                         <div className="text-right">
                           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Meta total</p>
-                          <p className="text-xl font-black text-foreground">R$ {(total + APP_FEE * inscricoes.length).toFixed(2).replace(".", ",")}</p>
+                          <p className="text-xl font-black text-foreground">R$ {total.toFixed(2).replace(".", ",")}</p>
                         </div>
                       </div>
                     </>
