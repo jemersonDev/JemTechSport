@@ -534,40 +534,74 @@ function Index() {
           </div>
         </div>
 
-        {/* Bloco centralizado de info do evento — só aparece na aba Tático */}
+        {/* Card premium do evento — só aparece na aba Tático */}
         {racha && activeTab === "tactical" && (
-          <div className="mx-auto max-w-2xl px-4 pb-3">
-            <div className="rounded-xl bg-graphite/70 border border-neon/30 px-4 py-3 text-center space-y-1 shadow-card">
-              <h2 className="text-base font-black text-neon tracking-tight truncate leading-tight">
-                {racha.name}
-              </h2>
-              <p className="text-xs text-foreground/90 font-semibold tabular-nums">
-                {racha.scheduled_at
-                  ? new Date(racha.scheduled_at).toLocaleString("pt-BR", {
-                      weekday: "short",
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "📅 Defina a data e hora"}
-              </p>
-              {(racha.address || racha.location) ? (
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1 text-[11px] text-muted-foreground hover:text-neon transition max-w-full"
-                  title={racha.address || racha.location || ""}
-                >
-                  <MapPin className="w-3 h-3 text-neon shrink-0" strokeWidth={2.5} />
-                  <span className="truncate">{racha.address || racha.location}</span>
-                </a>
-              ) : (
-                <p className="text-[11px] text-muted-foreground inline-flex items-center justify-center gap-1">
-                  <MapPin className="w-3 h-3 shrink-0" /> Adicione o endereço
-                </p>
-              )}
+          <div className="mx-auto max-w-2xl px-4 pb-3 animate-fade-in">
+            <div className="relative rounded-2xl bg-graphite/40 backdrop-blur-md border border-neon/30 px-4 py-3.5 shadow-card overflow-hidden">
+              {/* brilho decorativo */}
+              <div
+                className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full opacity-20 blur-3xl"
+                style={{ background: "radial-gradient(circle, hsl(var(--neon)) 0%, transparent 70%)" }}
+              />
+
+              {/* Badge de status no canto superior direito */}
+              {(() => {
+                const total = players.length;
+                const max = racha.max_players ?? 0;
+                const lotado = max > 0 && total >= max;
+                const quase = max > 0 && total >= max - 2 && !lotado;
+                const cls = lotado
+                  ? "bg-orange-500/20 text-orange-400 border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.4)]"
+                  : quase
+                    ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/40 shadow-[0_0_12px_rgba(234,179,8,0.4)]"
+                    : "bg-neon/15 text-neon border-neon/40 shadow-[0_0_12px_hsl(var(--neon)/0.4)]";
+                const label = lotado ? "Lotado" : quase ? "Últimas vagas" : "Vagas abertas";
+                return (
+                  <span
+                    className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${cls}`}
+                  >
+                    {label}
+                  </span>
+                );
+              })()}
+
+              <div className="relative text-center space-y-1.5 pr-20">
+                <h2 className="text-base font-black text-neon tracking-tight truncate leading-tight">
+                  {racha.name}
+                </h2>
+
+                <div className="flex flex-col items-center gap-0.5">
+                  <p className="text-xs text-foreground/90 font-semibold tabular-nums">
+                    {racha.scheduled_at
+                      ? new Date(racha.scheduled_at).toLocaleString("pt-BR", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "📅 Defina a data e hora"}
+                  </p>
+                  {racha.scheduled_at && <Countdown target={racha.scheduled_at} />}
+                </div>
+
+                {(racha.address || racha.location) ? (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1 text-[11px] font-semibold text-sky-400 hover:text-neon underline-offset-2 hover:underline transition max-w-full"
+                    title={racha.address || racha.location || ""}
+                  >
+                    <MapPin className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                    <span className="truncate">{racha.address || racha.location}</span>
+                  </a>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground inline-flex items-center justify-center gap-1">
+                    <MapPin className="w-3 h-3 shrink-0" /> Adicione o endereço
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -601,7 +635,7 @@ function Index() {
       <main className="mx-auto max-w-2xl px-4 py-5 pb-10">
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
-          <div className="space-y-5">
+          <div key="tab-tactical" className="space-y-5 animate-fade-in">
             {/* Placar ao vivo removido a pedido do usuário */}
 
             {/* Modality */}
@@ -766,7 +800,7 @@ function Index() {
 
         {/* ─────────────── TAB: ELENCO ─────────────── */}
         {activeTab === "roster" && (
-          <div className="space-y-5">
+          <div key="tab-roster" className="space-y-5 animate-fade-in">
             {!activeRachaId || !racha ? (
               <section className="rounded-2xl bg-graphite border border-border p-6 shadow-card text-center space-y-4">
                 <div className="w-14 h-14 rounded-full bg-neon/15 flex items-center justify-center mx-auto">
@@ -1071,7 +1105,7 @@ function Index() {
 
         {/* ─────────────── TAB: PARTIDA ─────────────── */}
         {activeTab === "match" && (
-          <div className="space-y-5">
+          <div key="tab-match" className="space-y-5 animate-fade-in">
             {/* ============== PAINEL FINANCEIRO DO ORGANIZADOR ============== */}
             {isAdmin && racha && inscricoes.length > 0 && (
               <section className="rounded-2xl bg-gradient-to-br from-neon/10 via-graphite to-graphite border border-neon/40 p-5 shadow-card space-y-4">
@@ -1564,6 +1598,41 @@ type RachaInscricao = {
   display_name: string;
   avatar_url: string | null;
 };
+
+function Countdown({ target }: { target: string }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = new Date(target).getTime() - now;
+  if (isNaN(diff)) return null;
+  if (diff <= 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-orange-400 animate-pulse">
+        🔴 Em andamento
+      </span>
+    );
+  }
+  const totalMin = Math.floor(diff / 60000);
+  const days = Math.floor(totalMin / (60 * 24));
+  const hours = Math.floor((totalMin % (60 * 24)) / 60);
+  const mins = totalMin % 60;
+  let txt = "";
+  if (days > 0) txt = `${days}d ${hours}h`;
+  else if (hours > 0) txt = `${hours}h ${mins}min`;
+  else txt = `${mins}min`;
+  const urgent = diff < 60 * 60 * 1000;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider tabular-nums ${
+        urgent ? "text-orange-400 animate-pulse" : "text-neon/80"
+      }`}
+    >
+      ⏱ Começa em {txt}
+    </span>
+  );
+}
 
 function RachaListItem({
   index,
