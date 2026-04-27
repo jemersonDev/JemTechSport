@@ -200,11 +200,12 @@ function Index() {
     }
   }, [pixKey, pixKeyType, pixOwner]);
 
-  const APP_FEE = 0.2; // R$ 0,20 por jogador para manter o app no ar
+  const APP_FEE = 0.2; // taxa interna — não exibir na UI
+  // Valor exibido aos jogadores: apenas o rateio puro da quadra (sem taxa do app)
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
     if (players.length === 0 || total === 0) return 0;
-    return total / players.length + APP_FEE;
+    return total / players.length;
   }, [totalValue, players.length]);
 
   const goalkeeperCount = useMemo(
@@ -1089,7 +1090,8 @@ function Index() {
                 {(() => {
                   const total = parseFloat(totalValue.replace(",", ".")) || 0;
                   const valorBase = inscricoes.length > 0 ? total / inscricoes.length : 0;
-                  const valorComTaxa = valorBase + APP_FEE;
+                  // Exibido sem a taxa interna do app
+                  const valorComTaxa = valorBase;
                   const pagos = inscricoes.filter((i) => i.paid);
                   const devendo = inscricoes.filter((i) => !i.paid);
                   const arrecadado = pagos.length * valorComTaxa;
@@ -1172,7 +1174,7 @@ function Index() {
                         </div>
                         <div className="text-right">
                           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Meta total</p>
-                          <p className="text-xl font-black text-foreground">R$ {(total + APP_FEE * inscricoes.length).toFixed(2).replace(".", ",")}</p>
+                          <p className="text-xl font-black text-foreground">R$ {total.toFixed(2).replace(".", ",")}</p>
                         </div>
                       </div>
                     </>
@@ -1297,15 +1299,6 @@ function Index() {
                 <p className="text-3xl font-black text-neon text-glow">
                   R$ {valuePerPerson.toFixed(2).replace(".", ",")}
                 </p>
-                {players.length > 0 && (
-                  <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed flex items-start gap-1">
-                    <span className="text-neon">⚡</span>
-                    <span>
-                      Inclui <span className="text-neon font-bold">R$ 0,20</span> de força extra pra
-                      manter a bola rolando aqui no app — valeu por jogar com a gente! 🙌
-                    </span>
-                  </p>
-                )}
               </div>
 
               <div>
