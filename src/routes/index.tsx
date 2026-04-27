@@ -1599,6 +1599,41 @@ type RachaInscricao = {
   avatar_url: string | null;
 };
 
+function Countdown({ target }: { target: string }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = new Date(target).getTime() - now;
+  if (isNaN(diff)) return null;
+  if (diff <= 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-orange-400 animate-pulse">
+        🔴 Em andamento
+      </span>
+    );
+  }
+  const totalMin = Math.floor(diff / 60000);
+  const days = Math.floor(totalMin / (60 * 24));
+  const hours = Math.floor((totalMin % (60 * 24)) / 60);
+  const mins = totalMin % 60;
+  let txt = "";
+  if (days > 0) txt = `${days}d ${hours}h`;
+  else if (hours > 0) txt = `${hours}h ${mins}min`;
+  else txt = `${mins}min`;
+  const urgent = diff < 60 * 60 * 1000;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider tabular-nums ${
+        urgent ? "text-orange-400 animate-pulse" : "text-neon/80"
+      }`}
+    >
+      ⏱ Começa em {txt}
+    </span>
+  );
+}
+
 function RachaListItem({
   index,
   inscricao,
