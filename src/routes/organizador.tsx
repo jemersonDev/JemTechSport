@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, DollarSign, TrendingUp, Wallet, Loader2 } from "lucide-react";
+import { DevedoresPanel } from "@/components/DevedoresPanel";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
