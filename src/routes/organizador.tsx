@@ -159,6 +159,9 @@ function OrganizadorPage() {
           </p>
         </Card>
 
+        {/* Devedores */}
+        <DevedoresPanel />
+
         {/* Lista */}
         <section className="space-y-2">
           <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
