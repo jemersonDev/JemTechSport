@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      devedores: {
+        Row: {
+          created_at: string
+          id: string
+          motivo: string | null
+          organizador_id: string
+          racha_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          motivo?: string | null
+          organizador_id: string
+          racha_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          motivo?: string | null
+          organizador_id?: string
+          racha_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       gols_jogador: {
         Row: {
           assistencias: number
@@ -291,6 +327,54 @@ export type Database = {
         }
         Relationships: []
       }
+      partidas_finalizadas: {
+        Row: {
+          created_by: string
+          finalizada_em: string
+          id: string
+          mvp_assistencias: number
+          mvp_gols: number
+          mvp_nome: string | null
+          mvp_user_id: string | null
+          racha_id: string
+          score_a: number
+          score_b: number
+          team_a_ids: string[]
+          team_b_ids: string[]
+          vencedor: string | null
+        }
+        Insert: {
+          created_by: string
+          finalizada_em?: string
+          id?: string
+          mvp_assistencias?: number
+          mvp_gols?: number
+          mvp_nome?: string | null
+          mvp_user_id?: string | null
+          racha_id: string
+          score_a?: number
+          score_b?: number
+          team_a_ids?: string[]
+          team_b_ids?: string[]
+          vencedor?: string | null
+        }
+        Update: {
+          created_by?: string
+          finalizada_em?: string
+          id?: string
+          mvp_assistencias?: number
+          mvp_gols?: number
+          mvp_nome?: string | null
+          mvp_user_id?: string | null
+          racha_id?: string
+          score_a?: number
+          score_b?: number
+          team_a_ids?: string[]
+          team_b_ids?: string[]
+          vencedor?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -376,6 +460,7 @@ export type Database = {
           lembrete_3h_enviado: boolean
           lng: number | null
           location: string | null
+          match_started: boolean
           max_players: number
           name: string
           pix_holder: string | null
@@ -383,6 +468,8 @@ export type Database = {
           pix_key_type: string | null
           place_id: string | null
           scheduled_at: string | null
+          score_a: number
+          score_b: number
           total_value: number
           updated_at: string
         }
@@ -399,6 +486,7 @@ export type Database = {
           lembrete_3h_enviado?: boolean
           lng?: number | null
           location?: string | null
+          match_started?: boolean
           max_players?: number
           name: string
           pix_holder?: string | null
@@ -406,6 +494,8 @@ export type Database = {
           pix_key_type?: string | null
           place_id?: string | null
           scheduled_at?: string | null
+          score_a?: number
+          score_b?: number
           total_value?: number
           updated_at?: string
         }
@@ -422,6 +512,7 @@ export type Database = {
           lembrete_3h_enviado?: boolean
           lng?: number | null
           location?: string | null
+          match_started?: boolean
           max_players?: number
           name?: string
           pix_holder?: string | null
@@ -429,6 +520,8 @@ export type Database = {
           pix_key_type?: string | null
           place_id?: string | null
           scheduled_at?: string | null
+          score_a?: number
+          score_b?: number
           total_value?: number
           updated_at?: string
         }
@@ -694,6 +787,42 @@ export type Database = {
           user_id?: string
           voto?: Database["public"]["Enums"]["resenha_voto_tipo"]
           week_start?: string
+        }
+        Relationships: []
+      }
+      trofeus: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          metadata: Json
+          partida_id: string | null
+          racha_id: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          metadata?: Json
+          partida_id?: string | null
+          racha_id?: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          metadata?: Json
+          partida_id?: string | null
+          racha_id?: string | null
+          tipo?: string
+          titulo?: string
+          user_id?: string
         }
         Relationships: []
       }

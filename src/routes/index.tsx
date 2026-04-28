@@ -27,6 +27,12 @@ import { SoccerField, type Player, type FieldMode } from "@/components/SoccerFie
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRacha, useActiveRachaId, SKILL_WEIGHT, type JogadorManual } from "@/hooks/useRacha";
+import {
+  useLivePlacar,
+  finalizarRacha,
+  useDevedoresOrganizador,
+  useMinhasDividas,
+} from "@/hooks/usePartida";
 import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { ManualPlayersEditor } from "@/components/ManualPlayersEditor";
@@ -119,8 +125,18 @@ function Index() {
   const [teamA, setTeamA] = useState<Player[]>([]);
   const [teamB, setTeamB] = useState<Player[]>([]);
   const [reserves, setReserves] = useState<Player[]>([]);
-  const [scoreA, setScoreA] = useState(0);
-  const [scoreB, setScoreB] = useState(0);
+  const {
+    scoreA,
+    scoreB,
+    matchStarted,
+    incA,
+    decA,
+    incB,
+    decB,
+    resetScore,
+    startMatch,
+  } = useLivePlacar(activeRachaId);
+  const { dividas: minhasDividas } = useMinhasDividas();
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
 
   // Sync local players list from racha inscricoes + jogadores manuais (com skill e paid)
@@ -281,8 +297,7 @@ function Index() {
     setTeamA(tA);
     setTeamB(tB);
     setReserves(rs);
-    setScoreA(0);
-    setScoreB(0);
+    resetScore();
     setActiveTab("tactical");
     toast.success("Times equilibrados por nível! ⚖️");
   }
@@ -307,8 +322,7 @@ function Index() {
     setTeamA([]);
     setTeamB([]);
     setReserves([]);
-    setScoreA(0);
-    setScoreB(0);
+    resetScore();
     setNewName("");
   }
 
@@ -633,10 +647,71 @@ function Index() {
 
       {/* ============== MAIN ============== */}
       <main className="mx-auto max-w-2xl px-4 py-5 pb-10">
+        {/* Banner de devedor — bloqueia inscrição em novos rachas */}
+        {minhasDividas.length > 0 && (
+          <div className="mb-4 rounded-2xl border-2 border-orange-500/50 bg-orange-500/10 p-4 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🚨</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-black text-orange-400 text-sm uppercase tracking-wider">
+                  Lei do Cão · Você está devendo
+                </h3>
+                <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
+                  Você foi marcado como devedor por {minhasDividas.length}{" "}
+                  {minhasDividas.length === 1 ? "organizador" : "organizadores"}. Quite a dívida pra
+                  voltar a se inscrever em rachas.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
           <div key="tab-tactical" className="space-y-5 animate-fade-in">
-            {/* Placar ao vivo removido a pedido do usuário */}
+            {/* Placar ao vivo (sincronizado em tempo real entre todos os jogadores) */}
+            {teamsReady && activeRachaId && (
+              <section className="rounded-2xl bg-gradient-to-br from-graphite via-black to-graphite border border-neon/40 p-4 shadow-card">
+                <div className="flex items-center justify-between mb-2">
+                  <SectionTitle icon={Trophy} title="Placar ao vivo" />
+                  {matchStarted && (
+                    <span className="text-[9px] font-black uppercase tracking-widest text-orange-400 animate-pulse flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> Ao vivo
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 items-center gap-2">
+                  <LivePlacarBlock
+                    label="Time A"
+                    color="var(--team-a)"
+                    score={scoreA}
+                    onMinus={isAdmin ? decA : undefined}
+                    onPlus={isAdmin ? incA : undefined}
+                  />
+                  <div className="text-center text-2xl font-black text-muted-foreground">×</div>
+                  <LivePlacarBlock
+                    label="Time B"
+                    color="var(--team-b)"
+                    score={scoreB}
+                    onMinus={isAdmin ? decB : undefined}
+                    onPlus={isAdmin ? incB : undefined}
+                  />
+                </div>
+                {!isAdmin && (
+                  <p className="text-[10px] text-muted-foreground text-center mt-2">
+                    Apenas o organizador atualiza o placar.
+                  </p>
+                )}
+                {isAdmin && !matchStarted && (
+                  <button
+                    onClick={startMatch}
+                    className="mt-3 w-full py-2 rounded-lg bg-neon/15 border border-neon/40 text-neon text-xs font-bold uppercase tracking-wider hover:bg-neon/25 transition"
+                  >
+                    ▶ Iniciar partida
+                  </button>
+                )}
+              </section>
+            )}
 
             {/* Modality */}
             <section className="space-y-2">
@@ -1517,6 +1592,54 @@ function Index() {
               </p>
             </section>
 
+            {/* Encerrar partida — só admin, libera MVP automático e troféus */}
+            {isAdmin && racha && teamsReady && !racha.finalizado_em && (
+              <section className="rounded-2xl bg-gradient-to-br from-orange-500/10 to-neon/10 border border-neon/40 p-4 shadow-card space-y-3">
+                <SectionTitle icon={Trophy} title="Encerrar partida" />
+                <p className="text-xs text-muted-foreground">
+                  Ao encerrar: o sistema escolhe o MVP por gols + assistências, distribui troféus
+                  pra quem venceu e ajusta o nível do MVP. Placar final: <span className="font-bold text-neon">{scoreA} × {scoreB}</span>.
+                </p>
+                <button
+                  onClick={async () => {
+                    if (!user || !activeRachaId) return;
+                    if (!confirm("Encerrar partida e calcular MVP?")) return;
+                    const res = await finalizarRacha({
+                      rachaId: activeRachaId,
+                      scoreA,
+                      scoreB,
+                      teamAIds: teamA.map((p) => p.id),
+                      teamBIds: teamB.map((p) => p.id),
+                      createdBy: user.id,
+                    });
+                    if (res.error) {
+                      toast.error(res.error);
+                    } else {
+                      toast.success(
+                        res.mvpNome
+                          ? `🏆 MVP: ${res.mvpNome}!`
+                          : "Partida encerrada (sem MVP — registre gols)",
+                      );
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-black uppercase tracking-widest text-sm shadow-neon hover:brightness-110 active:scale-[0.98] transition"
+                >
+                  <Trophy className="w-5 h-5" strokeWidth={2.5} />
+                  Encerrar e premiar MVP
+                </button>
+              </section>
+            )}
+
+            {racha?.finalizado_em && (
+              <section className="rounded-2xl bg-graphite border border-neon/30 p-4 text-center">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Partida finalizada em</p>
+                <p className="text-sm font-bold text-neon mt-1">
+                  {new Date(racha.finalizado_em).toLocaleString("pt-BR")}
+                </p>
+                <p className="text-3xl font-black text-foreground mt-2">{scoreA} × {scoreB}</p>
+              </section>
+            )}
+
             <section className="space-y-2">
               <SectionTitle icon={Send} title="Compartilhar" />
               <div className="grid grid-cols-1 gap-2">
@@ -1773,6 +1896,52 @@ function TeamScore({
           +
         </button>
       </div>
+    </div>
+  );
+}
+
+function LivePlacarBlock({
+  label,
+  color,
+  score,
+  onMinus,
+  onPlus,
+}: {
+  label: string;
+  color: string;
+  score: number;
+  onMinus?: () => void;
+  onPlus?: () => void;
+}) {
+  return (
+    <div className="text-center">
+      <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color }}>
+        {label}
+      </p>
+      <p className="text-5xl font-black text-foreground tabular-nums leading-none mb-2">{score}</p>
+      {(onMinus || onPlus) && (
+        <div className="flex items-center justify-center gap-1.5">
+          {onMinus && (
+            <button
+              onClick={onMinus}
+              className="w-8 h-8 rounded-lg bg-secondary text-foreground hover:bg-muted transition flex items-center justify-center text-lg font-bold active:scale-95"
+              aria-label={`Tirar gol ${label}`}
+            >
+              −
+            </button>
+          )}
+          {onPlus && (
+            <button
+              onClick={onPlus}
+              className="w-8 h-8 rounded-lg text-black font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center text-lg"
+              style={{ backgroundColor: color }}
+              aria-label={`Marcar gol ${label}`}
+            >
+              +
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
