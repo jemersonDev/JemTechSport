@@ -335,7 +335,7 @@ export async function finalizarRacha(input: {
     partida_id: string;
     titulo: string;
     descricao: string | null;
-    metadata: Record<string, unknown>;
+    metadata: Record<string, number | string | boolean>;
   }> = [];
 
   // Troféu MVP
