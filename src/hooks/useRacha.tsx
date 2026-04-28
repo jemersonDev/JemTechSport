@@ -22,6 +22,7 @@ export type Racha = {
   pix_key_type: string | null;
   pix_holder: string | null;
   invite_code: string;
+  finalizado_em?: string | null;
 };
 
 export type Inscricao = {
