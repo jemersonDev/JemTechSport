@@ -4,6 +4,7 @@ import { TrendingUp, Trophy, Medal } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchAssiduidadeMes, type AssiduidadeRow } from "@/hooks/usePartida";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AssiduidadeRanking() {
   const [rows, setRows] = useState<AssiduidadeRow[]>([]);
