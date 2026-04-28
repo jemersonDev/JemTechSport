@@ -264,6 +264,11 @@ function RachasPage() {
                 <KeyRound className="w-4 h-4" /> Entrar com código
               </Button>
             </div>
+
+            {/* Ranking de assiduidade do mês */}
+            <div className="pt-2">
+              <AssiduidadeRanking />
+            </div>
           </>
         )}
 
