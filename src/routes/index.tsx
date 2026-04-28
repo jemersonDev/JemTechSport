@@ -1592,6 +1592,54 @@ function Index() {
               </p>
             </section>
 
+            {/* Encerrar partida — só admin, libera MVP automático e troféus */}
+            {isAdmin && racha && teamsReady && !racha.finalizado_em && (
+              <section className="rounded-2xl bg-gradient-to-br from-orange-500/10 to-neon/10 border border-neon/40 p-4 shadow-card space-y-3">
+                <SectionTitle icon={Trophy} title="Encerrar partida" />
+                <p className="text-xs text-muted-foreground">
+                  Ao encerrar: o sistema escolhe o MVP por gols + assistências, distribui troféus
+                  pra quem venceu e ajusta o nível do MVP. Placar final: <span className="font-bold text-neon">{scoreA} × {scoreB}</span>.
+                </p>
+                <button
+                  onClick={async () => {
+                    if (!user || !activeRachaId) return;
+                    if (!confirm("Encerrar partida e calcular MVP?")) return;
+                    const res = await finalizarRacha({
+                      rachaId: activeRachaId,
+                      scoreA,
+                      scoreB,
+                      teamAIds: teamA.map((p) => p.id),
+                      teamBIds: teamB.map((p) => p.id),
+                      createdBy: user.id,
+                    });
+                    if (res.error) {
+                      toast.error(res.error);
+                    } else {
+                      toast.success(
+                        res.mvpNome
+                          ? `🏆 MVP: ${res.mvpNome}!`
+                          : "Partida encerrada (sem MVP — registre gols)",
+                      );
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-black uppercase tracking-widest text-sm shadow-neon hover:brightness-110 active:scale-[0.98] transition"
+                >
+                  <Trophy className="w-5 h-5" strokeWidth={2.5} />
+                  Encerrar e premiar MVP
+                </button>
+              </section>
+            )}
+
+            {racha?.finalizado_em && (
+              <section className="rounded-2xl bg-graphite border border-neon/30 p-4 text-center">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Partida finalizada em</p>
+                <p className="text-sm font-bold text-neon mt-1">
+                  {new Date(racha.finalizado_em).toLocaleString("pt-BR")}
+                </p>
+                <p className="text-3xl font-black text-foreground mt-2">{scoreA} × {scoreB}</p>
+              </section>
+            )}
+
             <section className="space-y-2">
               <SectionTitle icon={Send} title="Compartilhar" />
               <div className="grid grid-cols-1 gap-2">
