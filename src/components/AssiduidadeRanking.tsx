@@ -14,6 +14,12 @@ export function AssiduidadeRanking() {
     let active = true;
     (async () => {
       setLoading(true);
+      // Garante que o "Fominha do Mês" do mês corrente seja concedido (idempotente)
+      try {
+        await supabase.rpc("premiar_fominha_mes");
+      } catch {
+        // silencioso — apenas exibir ranking se a função falhar
+      }
       const data = await fetchAssiduidadeMes();
       if (active) {
         setRows(data);
