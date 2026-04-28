@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { AddressMap } from "@/components/AddressMap";
+import { AssiduidadeRanking } from "@/components/AssiduidadeRanking";
 import {
   ArrowLeft,
   Plus,
@@ -262,6 +263,11 @@ function RachasPage() {
               <Button onClick={() => setMode("join")} variant="outline" className="h-12">
                 <KeyRound className="w-4 h-4" /> Entrar com código
               </Button>
+            </div>
+
+            {/* Ranking de assiduidade do mês */}
+            <div className="pt-2">
+              <AssiduidadeRanking />
             </div>
           </>
         )}

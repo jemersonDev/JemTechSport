@@ -892,6 +892,7 @@ export type Database = {
         Args: { _racha_id: string; _user_id: string }
         Returns: boolean
       }
+      premiar_fominha_mes: { Args: never; Returns: Json }
       resenha_get_or_create_conversa: {
         Args: { _other_user: string }
         Returns: string

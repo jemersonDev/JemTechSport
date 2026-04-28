@@ -30,6 +30,7 @@ import {
   type PositionExt,
 } from "@/hooks/useRacha";
 import { PlayerStats } from "@/components/PlayerStats";
+import { TrofeusShelf } from "@/components/TrofeusShelf";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -345,6 +346,13 @@ function PerfilPage() {
             </h2>
             <PlayerStats userId={user.id} />
           </div>
+        )}
+
+        {/* Prateleira de troféus */}
+        {user && (
+          <Card className="overflow-hidden p-0">
+            <TrofeusShelf userId={user.id} />
+          </Card>
         )}
 
         <Card className="p-2 divide-y divide-border">

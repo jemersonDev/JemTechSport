@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFollow } from "@/hooks/useResenha";
 import { openOrCreateConversa } from "@/hooks/useResenhaDM";
 import { ReelsViewer, type ReelPost, formatCount } from "@/components/ReelsViewer";
+import { TrofeusShelf } from "@/components/TrofeusShelf";
 
 export const Route = createFileRoute("/atleta/$userId")({
   component: AthleteProfile,
@@ -180,6 +181,9 @@ function AthleteProfile() {
           </Link>
         )}
       </section>
+
+      {/* Prateleira de troféus */}
+      <TrofeusShelf userId={userId} />
 
       {/* Tabs (only one for now: Grid) */}
       <div className="flex border-y border-border/60">
