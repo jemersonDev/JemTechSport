@@ -125,8 +125,18 @@ function Index() {
   const [teamA, setTeamA] = useState<Player[]>([]);
   const [teamB, setTeamB] = useState<Player[]>([]);
   const [reserves, setReserves] = useState<Player[]>([]);
-  const [scoreA, setScoreA] = useState(0);
-  const [scoreB, setScoreB] = useState(0);
+  const {
+    scoreA,
+    scoreB,
+    matchStarted,
+    incA,
+    decA,
+    incB,
+    decB,
+    resetScore,
+    startMatch,
+  } = useLivePlacar(activeRachaId);
+  const { dividas: minhasDividas } = useMinhasDividas();
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
 
   // Sync local players list from racha inscricoes + jogadores manuais (com skill e paid)
