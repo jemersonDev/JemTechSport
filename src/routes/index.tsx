@@ -647,6 +647,25 @@ function Index() {
 
       {/* ============== MAIN ============== */}
       <main className="mx-auto max-w-2xl px-4 py-5 pb-10">
+        {/* Banner de devedor — bloqueia inscrição em novos rachas */}
+        {minhasDividas.length > 0 && (
+          <div className="mb-4 rounded-2xl border-2 border-orange-500/50 bg-orange-500/10 p-4 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🚨</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-black text-orange-400 text-sm uppercase tracking-wider">
+                  Lei do Cão · Você está devendo
+                </h3>
+                <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
+                  Você foi marcado como devedor por {minhasDividas.length}{" "}
+                  {minhasDividas.length === 1 ? "organizador" : "organizadores"}. Quite a dívida pra
+                  voltar a se inscrever em rachas.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
           <div key="tab-tactical" className="space-y-5 animate-fade-in">
