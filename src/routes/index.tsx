@@ -297,8 +297,7 @@ function Index() {
     setTeamA(tA);
     setTeamB(tB);
     setReserves(rs);
-    setScoreA(0);
-    setScoreB(0);
+    resetScore();
     setActiveTab("tactical");
     toast.success("Times equilibrados por nível! ⚖️");
   }
@@ -323,8 +322,7 @@ function Index() {
     setTeamA([]);
     setTeamB([]);
     setReserves([]);
-    setScoreA(0);
-    setScoreB(0);
+    resetScore();
     setNewName("");
   }
 
