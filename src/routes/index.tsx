@@ -1852,6 +1852,52 @@ function TeamScore({
   );
 }
 
+function LivePlacarBlock({
+  label,
+  color,
+  score,
+  onMinus,
+  onPlus,
+}: {
+  label: string;
+  color: string;
+  score: number;
+  onMinus?: () => void;
+  onPlus?: () => void;
+}) {
+  return (
+    <div className="text-center">
+      <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color }}>
+        {label}
+      </p>
+      <p className="text-5xl font-black text-foreground tabular-nums leading-none mb-2">{score}</p>
+      {(onMinus || onPlus) && (
+        <div className="flex items-center justify-center gap-1.5">
+          {onMinus && (
+            <button
+              onClick={onMinus}
+              className="w-8 h-8 rounded-lg bg-secondary text-foreground hover:bg-muted transition flex items-center justify-center text-lg font-bold active:scale-95"
+              aria-label={`Tirar gol ${label}`}
+            >
+              −
+            </button>
+          )}
+          {onPlus && (
+            <button
+              onClick={onPlus}
+              className="w-8 h-8 rounded-lg text-black font-bold hover:brightness-110 active:scale-95 transition flex items-center justify-center text-lg"
+              style={{ backgroundColor: color }}
+              aria-label={`Marcar gol ${label}`}
+            >
+              +
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TeamSummary({
   label,
   color,
