@@ -669,7 +669,49 @@ function Index() {
         {/* ─────────────── TAB: TÁTICO ─────────────── */}
         {activeTab === "tactical" && (
           <div key="tab-tactical" className="space-y-5 animate-fade-in">
-            {/* Placar ao vivo removido a pedido do usuário */}
+            {/* Placar ao vivo (sincronizado em tempo real entre todos os jogadores) */}
+            {teamsReady && activeRachaId && (
+              <section className="rounded-2xl bg-gradient-to-br from-graphite via-black to-graphite border border-neon/40 p-4 shadow-card">
+                <div className="flex items-center justify-between mb-2">
+                  <SectionTitle icon={Trophy} title="Placar ao vivo" />
+                  {matchStarted && (
+                    <span className="text-[9px] font-black uppercase tracking-widest text-orange-400 animate-pulse flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400" /> Ao vivo
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-3 items-center gap-2">
+                  <LivePlacarBlock
+                    label="Time A"
+                    color="var(--team-a)"
+                    score={scoreA}
+                    onMinus={isAdmin ? decA : undefined}
+                    onPlus={isAdmin ? incA : undefined}
+                  />
+                  <div className="text-center text-2xl font-black text-muted-foreground">×</div>
+                  <LivePlacarBlock
+                    label="Time B"
+                    color="var(--team-b)"
+                    score={scoreB}
+                    onMinus={isAdmin ? decB : undefined}
+                    onPlus={isAdmin ? incB : undefined}
+                  />
+                </div>
+                {!isAdmin && (
+                  <p className="text-[10px] text-muted-foreground text-center mt-2">
+                    Apenas o organizador atualiza o placar.
+                  </p>
+                )}
+                {isAdmin && !matchStarted && (
+                  <button
+                    onClick={startMatch}
+                    className="mt-3 w-full py-2 rounded-lg bg-neon/15 border border-neon/40 text-neon text-xs font-bold uppercase tracking-wider hover:bg-neon/25 transition"
+                  >
+                    ▶ Iniciar partida
+                  </button>
+                )}
+              </section>
+            )}
 
             {/* Modality */}
             <section className="space-y-2">
