@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { AddressMap } from "@/components/AddressMap";
+import { AssiduidadeRanking } from "@/components/AssiduidadeRanking";
 import {
   ArrowLeft,
   Plus,
