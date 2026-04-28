@@ -30,6 +30,7 @@ import {
   type PositionExt,
 } from "@/hooks/useRacha";
 import { PlayerStats } from "@/components/PlayerStats";
+import { TrofeusShelf } from "@/components/TrofeusShelf";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
