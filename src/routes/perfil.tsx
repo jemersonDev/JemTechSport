@@ -348,6 +348,13 @@ function PerfilPage() {
           </div>
         )}
 
+        {/* Prateleira de troféus */}
+        {user && (
+          <Card className="overflow-hidden p-0">
+            <TrofeusShelf userId={user.id} />
+          </Card>
+        )}
+
         <Card className="p-2 divide-y divide-border">
           <Link
             to="/organizador"
