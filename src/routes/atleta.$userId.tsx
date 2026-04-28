@@ -182,6 +182,9 @@ function AthleteProfile() {
         )}
       </section>
 
+      {/* Prateleira de troféus */}
+      <TrofeusShelf userId={userId} />
+
       {/* Tabs (only one for now: Grid) */}
       <div className="flex border-y border-border/60">
         <div className="flex flex-1 items-center justify-center gap-1.5 border-t-2 border-foreground py-2.5 text-xs font-semibold">
