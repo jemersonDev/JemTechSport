@@ -27,6 +27,12 @@ import { SoccerField, type Player, type FieldMode } from "@/components/SoccerFie
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRacha, useActiveRachaId, SKILL_WEIGHT, type JogadorManual } from "@/hooks/useRacha";
+import {
+  useLivePlacar,
+  finalizarRacha,
+  useDevedoresOrganizador,
+  useMinhasDividas,
+} from "@/hooks/usePartida";
 import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { ManualPlayersEditor } from "@/components/ManualPlayersEditor";
