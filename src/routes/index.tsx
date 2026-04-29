@@ -798,14 +798,22 @@ function Index() {
                       gridTemplateColumns: `repeat(${Math.min(groups.length, 2)}, minmax(0, 1fr))`,
                     }}
                   >
-                    {groups.map((group, gi) => (
+                    {groups.map((group, gi) => {
+                      const isNext = gi === 0;
+                      return (
                       <div
                         key={gi}
-                        className="rounded-xl bg-secondary/40 border border-border p-2 space-y-1.5"
+                        className={`rounded-xl border p-2 space-y-1.5 transition ${
+                          isNext
+                            ? "bg-gradient-to-br from-neon/15 via-neon/5 to-transparent border-neon/60 shadow-neon"
+                            : "bg-secondary/40 border-border"
+                        }`}
                       >
                         <div className="flex items-center justify-between px-1 pb-1 border-b border-border/60">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-neon">
+                          <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${isNext ? "text-neon" : "text-neon"}`}>
+                            {isNext && <span className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse" />}
                             Time {teamLabels[gi] ?? gi + 3}
+                            {isNext && <span className="text-[8px] bg-neon/20 text-neon px-1 py-0.5 rounded">PRÓXIMO</span>}
                           </span>
                           <span className="text-[9px] text-muted-foreground font-semibold">
                             {group.length}/{size}
@@ -841,7 +849,8 @@ function Index() {
                           ))}
                         </ul>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </section>
               );
