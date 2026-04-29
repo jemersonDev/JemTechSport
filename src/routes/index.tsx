@@ -129,12 +129,17 @@ function Index() {
     scoreA,
     scoreB,
     matchStarted,
+    matchStartedAt,
+    pausedElapsedMs,
     incA,
     decA,
     incB,
     decB,
     resetScore,
     startMatch,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
   } = useLivePlacar(activeRachaId);
   const { dividas: minhasDividas } = useMinhasDividas();
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
