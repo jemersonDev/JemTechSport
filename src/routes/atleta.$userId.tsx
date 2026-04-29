@@ -9,6 +9,7 @@ import { useFollow } from "@/hooks/useResenha";
 import { openOrCreateConversa } from "@/hooks/useResenhaDM";
 import { ReelsViewer, type ReelPost, formatCount } from "@/components/ReelsViewer";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
+import { AthleteCard } from "@/components/AthleteCard";
 
 export const Route = createFileRoute("/atleta/$userId")({
   component: AthleteProfile,
@@ -182,6 +183,18 @@ function AthleteProfile() {
         )}
       </section>
 
+      {/* Card FIFA */}
+      <section className="px-4 py-4">
+        <AthleteCard
+          displayName={profile.display_name}
+          avatarUrl={profile.avatar_url}
+          position={profile.preferred_position}
+          partidas={stats.partidas}
+          gols={stats.gols}
+          assistencias={stats.assistencias}
+        />
+      </section>
+
       {/* Prateleira de troféus */}
       <TrofeusShelf userId={userId} />
 
@@ -205,7 +218,7 @@ function AthleteProfile() {
                 key={p.id}
                 type="button"
                 onClick={() => setReelsOpenAt(idx)}
-                className="group relative aspect-square overflow-hidden bg-black"
+                className="group relative aspect-[9/16] overflow-hidden bg-black"
               >
                 {p.thumb_url ? (
                   <img
