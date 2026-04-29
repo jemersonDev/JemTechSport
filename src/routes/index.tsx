@@ -694,7 +694,15 @@ function Index() {
                     onMinus={isAdmin ? decA : undefined}
                     onPlus={isAdmin ? incA : undefined}
                   />
-                  <div className="text-center text-2xl font-black text-muted-foreground">×</div>
+                  <MatchTimer
+                    startedAt={matchStartedAt}
+                    pausedElapsedMs={pausedElapsedMs}
+                    isRunning={matchStarted}
+                    isAdmin={!!isAdmin}
+                    onPlay={resumeTimer}
+                    onPause={pauseTimer}
+                    onReset={resetTimer}
+                  />
                   <LivePlacarBlock
                     label="Time B"
                     color="var(--team-b)"
@@ -707,14 +715,6 @@ function Index() {
                   <p className="text-[10px] text-muted-foreground text-center mt-2">
                     Apenas o organizador atualiza o placar.
                   </p>
-                )}
-                {isAdmin && !matchStarted && (
-                  <button
-                    onClick={startMatch}
-                    className="mt-3 w-full py-2 rounded-lg bg-neon/15 border border-neon/40 text-neon text-xs font-bold uppercase tracking-wider hover:bg-neon/25 transition"
-                  >
-                    ▶ Iniciar partida
-                  </button>
                 )}
               </section>
             )}
