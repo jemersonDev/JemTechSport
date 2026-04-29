@@ -1,4 +1,5 @@
 import { Minus, Plus, Shield, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export type Player = {
   id: string;
@@ -17,7 +18,32 @@ type Props = {
   teamB: Player[];
   mode: FieldMode;
   onGoalChange: (playerId: string, delta: number) => void;
+  /** Permite arrastar e soltar os pinos para reposicionar manualmente. */
+  draggable?: boolean;
+  /** Chave de persistência das posições customizadas (ex: rachaId). */
+  storageKey?: string | null;
 };
+
+type PosOverrides = Record<string, [number, number]>; // playerId -> [x%, y%] em coords da metade do time
+
+function loadOverrides(key: string | null): PosOverrides {
+  if (!key || typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(`tactical-${key}`);
+    return raw ? (JSON.parse(raw) as PosOverrides) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveOverrides(key: string | null, ov: PosOverrides) {
+  if (!key || typeof window === "undefined") return;
+  try {
+    localStorage.setItem(`tactical-${key}`, JSON.stringify(ov));
+  } catch {
+    // ignore quota
+  }
+}
 
 // Positions normalized 0-100 inside each team's HALF (x: 0 = own goal line, 100 = midfield).
 // y: 0 = top, 100 = bottom. Slot 0 is the goalkeeper.
