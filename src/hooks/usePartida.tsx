@@ -47,6 +47,8 @@ export function useLivePlacar(rachaId: string | null) {
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [matchStarted, setMatchStarted] = useState(false);
+  const [matchStartedAt, setMatchStartedAt] = useState<string | null>(null);
+  const [pausedElapsedMs, setPausedElapsedMs] = useState(0);
 
   // Carregar do servidor + assinar realtime
   useEffect(() => {
@@ -55,13 +57,22 @@ export function useLivePlacar(rachaId: string | null) {
     (async () => {
       const { data } = await supabase
         .from("rachas")
-        .select("score_a, score_b, match_started")
+        .select("score_a, score_b, match_started, match_started_at, match_paused_elapsed_ms")
         .eq("id", rachaId)
         .maybeSingle();
       if (!active || !data) return;
-      setScoreA(data.score_a ?? 0);
-      setScoreB(data.score_b ?? 0);
-      setMatchStarted(!!data.match_started);
+      const r = data as {
+        score_a: number;
+        score_b: number;
+        match_started: boolean;
+        match_started_at: string | null;
+        match_paused_elapsed_ms: number | null;
+      };
+      setScoreA(r.score_a ?? 0);
+      setScoreB(r.score_b ?? 0);
+      setMatchStarted(!!r.match_started);
+      setMatchStartedAt(r.match_started_at ?? null);
+      setPausedElapsedMs(Number(r.match_paused_elapsed_ms ?? 0));
     })();
 
     const ch = supabase
@@ -70,10 +81,18 @@ export function useLivePlacar(rachaId: string | null) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "rachas", filter: `id=eq.${rachaId}` },
         (payload) => {
-          const r = payload.new as { score_a: number; score_b: number; match_started: boolean };
+          const r = payload.new as {
+            score_a: number;
+            score_b: number;
+            match_started: boolean;
+            match_started_at: string | null;
+            match_paused_elapsed_ms: number | null;
+          };
           setScoreA(r.score_a ?? 0);
           setScoreB(r.score_b ?? 0);
           setMatchStarted(!!r.match_started);
+          setMatchStartedAt(r.match_started_at ?? null);
+          setPausedElapsedMs(Number(r.match_paused_elapsed_ms ?? 0));
         },
       )
       .subscribe();
@@ -93,26 +112,89 @@ export function useLivePlacar(rachaId: string | null) {
       setScoreA(newA);
       setScoreB(newB);
       if (typeof started === "boolean") setMatchStarted(started);
-      const patch: { score_a: number; score_b: number; match_started?: boolean } = {
+      const patch: {
+        score_a: number;
+        score_b: number;
+        match_started?: boolean;
+        match_started_at?: string | null;
+      } = {
         score_a: newA,
         score_b: newB,
       };
-      if (typeof started === "boolean") patch.match_started = started;
+      if (typeof started === "boolean") {
+        patch.match_started = started;
+        // Quando inicia (transição parado -> rodando) e ainda não tinha clock, marca agora.
+        if (started && !matchStartedAt) {
+          const now = new Date().toISOString();
+          patch.match_started_at = now;
+          setMatchStartedAt(now);
+        }
+      }
       await supabase.from("rachas").update(patch).eq("id", rachaId);
     },
-    [rachaId],
+    [rachaId, matchStartedAt],
   );
+
+  // Timer: pausar = persistir ms acumulados e zerar started_at
+  const pauseTimer = useCallback(async () => {
+    if (!rachaId) return;
+    const startedMs = matchStartedAt ? new Date(matchStartedAt).getTime() : 0;
+    const elapsed = startedMs ? Date.now() - startedMs : 0;
+    const total = pausedElapsedMs + Math.max(0, elapsed);
+    setMatchStarted(false);
+    setMatchStartedAt(null);
+    setPausedElapsedMs(total);
+    await supabase
+      .from("rachas")
+      .update({
+        match_started: false,
+        match_started_at: null,
+        match_paused_elapsed_ms: total,
+      } as never)
+      .eq("id", rachaId);
+  }, [rachaId, matchStartedAt, pausedElapsedMs]);
+
+  const resumeTimer = useCallback(async () => {
+    if (!rachaId) return;
+    const now = new Date().toISOString();
+    setMatchStarted(true);
+    setMatchStartedAt(now);
+    await supabase
+      .from("rachas")
+      .update({ match_started: true, match_started_at: now } as never)
+      .eq("id", rachaId);
+  }, [rachaId]);
+
+  const resetTimer = useCallback(async () => {
+    if (!rachaId) return;
+    setMatchStarted(false);
+    setMatchStartedAt(null);
+    setPausedElapsedMs(0);
+    await supabase
+      .from("rachas")
+      .update({
+        match_started: false,
+        match_started_at: null,
+        match_paused_elapsed_ms: 0,
+      } as never)
+      .eq("id", rachaId);
+  }, [rachaId]);
 
   return {
     scoreA,
     scoreB,
     matchStarted,
+    matchStartedAt,
+    pausedElapsedMs,
     incA: () => updateScore(scoreA + 1, scoreB, true),
     decA: () => updateScore(scoreA - 1, scoreB),
     incB: () => updateScore(scoreA, scoreB + 1, true),
     decB: () => updateScore(scoreA, scoreB - 1),
     resetScore: () => updateScore(0, 0, false),
     startMatch: () => updateScore(scoreA, scoreB, true),
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
   };
 }
 

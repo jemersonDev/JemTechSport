@@ -24,6 +24,7 @@ import {
   Bell,
 } from "lucide-react";
 import { SoccerField, type Player, type FieldMode } from "@/components/SoccerField";
+import { MatchTimer } from "@/components/MatchTimer";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRacha, useActiveRachaId, SKILL_WEIGHT, type JogadorManual } from "@/hooks/useRacha";
@@ -129,12 +130,16 @@ function Index() {
     scoreA,
     scoreB,
     matchStarted,
+    matchStartedAt,
+    pausedElapsedMs,
     incA,
     decA,
     incB,
     decB,
     resetScore,
-    startMatch,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
   } = useLivePlacar(activeRachaId);
   const { dividas: minhasDividas } = useMinhasDividas();
   const [fieldMode, setFieldMode] = useState<FieldMode>("society");
@@ -688,7 +693,15 @@ function Index() {
                     onMinus={isAdmin ? decA : undefined}
                     onPlus={isAdmin ? incA : undefined}
                   />
-                  <div className="text-center text-2xl font-black text-muted-foreground">×</div>
+                  <MatchTimer
+                    startedAt={matchStartedAt}
+                    pausedElapsedMs={pausedElapsedMs}
+                    isRunning={matchStarted}
+                    isAdmin={!!isAdmin}
+                    onPlay={resumeTimer}
+                    onPause={pauseTimer}
+                    onReset={resetTimer}
+                  />
                   <LivePlacarBlock
                     label="Time B"
                     color="var(--team-b)"
@@ -701,14 +714,6 @@ function Index() {
                   <p className="text-[10px] text-muted-foreground text-center mt-2">
                     Apenas o organizador atualiza o placar.
                   </p>
-                )}
-                {isAdmin && !matchStarted && (
-                  <button
-                    onClick={startMatch}
-                    className="mt-3 w-full py-2 rounded-lg bg-neon/15 border border-neon/40 text-neon text-xs font-bold uppercase tracking-wider hover:bg-neon/25 transition"
-                  >
-                    ▶ Iniciar partida
-                  </button>
                 )}
               </section>
             )}
@@ -758,6 +763,8 @@ function Index() {
                 teamB={teamB}
                 mode={fieldMode}
                 onGoalChange={handleGoalChange}
+                draggable={!!isAdmin}
+                storageKey={activeRachaId}
               />
               {!teamsReady && (
                 <p className="text-center text-xs text-muted-foreground italic pt-1">
@@ -791,14 +798,22 @@ function Index() {
                       gridTemplateColumns: `repeat(${Math.min(groups.length, 2)}, minmax(0, 1fr))`,
                     }}
                   >
-                    {groups.map((group, gi) => (
+                    {groups.map((group, gi) => {
+                      const isNext = gi === 0;
+                      return (
                       <div
                         key={gi}
-                        className="rounded-xl bg-secondary/40 border border-border p-2 space-y-1.5"
+                        className={`rounded-xl border p-2 space-y-1.5 transition ${
+                          isNext
+                            ? "bg-gradient-to-br from-neon/15 via-neon/5 to-transparent border-neon/60 shadow-neon"
+                            : "bg-secondary/40 border-border"
+                        }`}
                       >
                         <div className="flex items-center justify-between px-1 pb-1 border-b border-border/60">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-neon">
+                          <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${isNext ? "text-neon" : "text-neon"}`}>
+                            {isNext && <span className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse" />}
                             Time {teamLabels[gi] ?? gi + 3}
+                            {isNext && <span className="text-[8px] bg-neon/20 text-neon px-1 py-0.5 rounded">PRÓXIMO</span>}
                           </span>
                           <span className="text-[9px] text-muted-foreground font-semibold">
                             {group.length}/{size}
@@ -834,7 +849,8 @@ function Index() {
                           ))}
                         </ul>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </section>
               );

@@ -460,7 +460,9 @@ export type Database = {
           lembrete_3h_enviado: boolean
           lng: number | null
           location: string | null
+          match_paused_elapsed_ms: number
           match_started: boolean
+          match_started_at: string | null
           max_players: number
           name: string
           pix_holder: string | null
@@ -486,7 +488,9 @@ export type Database = {
           lembrete_3h_enviado?: boolean
           lng?: number | null
           location?: string | null
+          match_paused_elapsed_ms?: number
           match_started?: boolean
+          match_started_at?: string | null
           max_players?: number
           name: string
           pix_holder?: string | null
@@ -512,7 +516,9 @@ export type Database = {
           lembrete_3h_enviado?: boolean
           lng?: number | null
           location?: string | null
+          match_paused_elapsed_ms?: number
           match_started?: boolean
+          match_started_at?: string | null
           max_players?: number
           name?: string
           pix_holder?: string | null

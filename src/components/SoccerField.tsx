@@ -1,4 +1,5 @@
 import { Minus, Plus, Shield, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export type Player = {
   id: string;
@@ -17,7 +18,32 @@ type Props = {
   teamB: Player[];
   mode: FieldMode;
   onGoalChange: (playerId: string, delta: number) => void;
+  /** Permite arrastar e soltar os pinos para reposicionar manualmente. */
+  draggable?: boolean;
+  /** Chave de persistência das posições customizadas (ex: rachaId). */
+  storageKey?: string | null;
 };
+
+type PosOverrides = Record<string, [number, number]>; // playerId -> [x%, y%] em coords da metade do time
+
+function loadOverrides(key: string | null): PosOverrides {
+  if (!key || typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(`tactical-${key}`);
+    return raw ? (JSON.parse(raw) as PosOverrides) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveOverrides(key: string | null, ov: PosOverrides) {
+  if (!key || typeof window === "undefined") return;
+  try {
+    localStorage.setItem(`tactical-${key}`, JSON.stringify(ov));
+  } catch {
+    // ignore quota
+  }
+}
 
 // Positions normalized 0-100 inside each team's HALF (x: 0 = own goal line, 100 = midfield).
 // y: 0 = top, 100 = bottom. Slot 0 is the goalkeeper.
@@ -257,152 +283,237 @@ function PlayerPin({
   );
 }
 
-export function SoccerField({ teamA, teamB, mode, onGoalChange }: Props) {
+export function SoccerField({
+  teamA,
+  teamB,
+  mode,
+  onGoalChange,
+  draggable = false,
+  storageKey = null,
+}: Props) {
   const formationA = getFormation(mode, teamA.length);
   const formationB = getFormation(mode, teamB.length);
 
-  // Aspect ratio per modality (closer to real proportions)
+  const fullStorageKey = storageKey ? `${storageKey}-${mode}` : null;
+  const [overrides, setOverrides] = useState<PosOverrides>(() => loadOverrides(fullStorageKey));
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+
+  // Recarrega overrides quando troca racha/modo
+  useEffect(() => {
+    setOverrides(loadOverrides(fullStorageKey));
+  }, [fullStorageKey]);
+
+  // Aspect ratio per modality
   const aspect =
     mode === "futsal" ? "aspect-[16/9]" : mode === "society" ? "aspect-[16/10]" : "aspect-[16/10]";
 
+  // Converte coords de tela -> coords do campo (% global), depois pra % da metade do time.
+  const handleDrag = (e: React.PointerEvent, playerId: string, team: "A" | "B") => {
+    if (!draggable || !fieldRef.current) return;
+    const rect = fieldRef.current.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Clamp dentro da metade do time. Time A ocupa 1-46% global; Time B 54-99%.
+    let halfX: number;
+    if (team === "A") {
+      const clamped = Math.max(1, Math.min(46, xPct));
+      halfX = ((clamped - 1) / 45) * 100;
+    } else {
+      const clamped = Math.max(54, Math.min(99, xPct));
+      halfX = ((99 - clamped) / 45) * 100;
+    }
+    const halfY = Math.max(5, Math.min(95, yPct));
+
+    setOverrides((prev) => {
+      const next = { ...prev, [playerId]: [halfX, halfY] as [number, number] };
+      saveOverrides(fullStorageKey, next);
+      return next;
+    });
+  };
+
+  const startDrag = (e: React.PointerEvent, playerId: string, team: "A" | "B") => {
+    if (!draggable) return;
+    e.preventDefault();
+    setDraggingId(playerId);
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    handleDrag(e, playerId, team);
+  };
+
+  const moveDrag = (e: React.PointerEvent, team: "A" | "B") => {
+    if (!draggingId) return;
+    handleDrag(e, draggingId, team);
+  };
+
+  const endDrag = () => setDraggingId(null);
+
+  const resetOverrides = () => {
+    setOverrides({});
+    saveOverrides(fullStorageKey, {});
+  };
+
+  const hasOverrides = Object.keys(overrides).length > 0;
+
   return (
-    <div
-      className={`relative w-full ${aspect} rounded-2xl overflow-hidden border-2 border-border shadow-card`}
-    >
-      {/* Field background */}
+    <div className="space-y-2">
       <div
-        className="absolute inset-0"
-        style={{
-          background:
-            mode === "futsal"
-              ? "linear-gradient(180deg, color-mix(in oklab, var(--field) 70%, black) 0%, var(--field) 50%, color-mix(in oklab, var(--field) 70%, black) 100%)"
-              : "repeating-linear-gradient(90deg, var(--field) 0 8%, color-mix(in oklab, var(--field) 85%, black) 8% 16%)",
-        }}
-      />
-
-      {/* Field markings */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 160 100"
-        preserveAspectRatio="none"
-        fill="none"
-        stroke="var(--field-line)"
-        strokeWidth="0.4"
-        opacity="0.85"
+        ref={fieldRef}
+        className={`relative w-full ${aspect} rounded-2xl overflow-hidden border-2 border-border shadow-card ${
+          draggable ? "touch-none" : ""
+        }`}
       >
-        {/* Outer border */}
-        <rect x="2" y="2" width="156" height="96" />
-        {/* Center line */}
-        <line x1="80" y1="2" x2="80" y2="98" />
-        {/* Center circle */}
-        <circle cx="80" cy="50" r={mode === "futsal" ? 7 : mode === "society" ? 9 : 11} />
-        <circle cx="80" cy="50" r="0.8" fill="var(--field-line)" />
+        {/* Field background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              mode === "futsal"
+                ? "linear-gradient(180deg, color-mix(in oklab, var(--field) 70%, black) 0%, var(--field) 50%, color-mix(in oklab, var(--field) 70%, black) 100%)"
+                : "repeating-linear-gradient(90deg, var(--field) 0 8%, color-mix(in oklab, var(--field) 85%, black) 8% 16%)",
+          }}
+        />
 
-        {mode === "futsal" ? (
-          <>
-            {/* Futsal half circles (penalty arcs) */}
-            <path d="M 2 30 A 22 22 0 0 1 2 70" />
-            <path d="M 158 30 A 22 22 0 0 0 158 70" />
-            {/* Penalty mark */}
-            <circle cx="14" cy="50" r="0.6" fill="var(--field-line)" />
-            <circle cx="146" cy="50" r="0.6" fill="var(--field-line)" />
-            {/* Goals */}
-            <rect x="0" y="44" width="2" height="12" />
-            <rect x="158" y="44" width="2" height="12" />
-          </>
-        ) : mode === "society" ? (
-          <>
-            {/* Society penalty area */}
-            <rect x="2" y="28" width="14" height="44" />
-            <rect x="144" y="28" width="14" height="44" />
-            {/* Penalty mark */}
-            <circle cx="11" cy="50" r="0.6" fill="var(--field-line)" />
-            <circle cx="149" cy="50" r="0.6" fill="var(--field-line)" />
-            {/* Goals */}
-            <rect x="0" y="44" width="2" height="12" />
-            <rect x="158" y="44" width="2" height="12" />
-          </>
-        ) : (
-          <>
-            {/* Campo: penalty + goal areas */}
-            <rect x="2" y="22" width="20" height="56" />
-            <rect x="138" y="22" width="20" height="56" />
-            <rect x="2" y="36" width="8" height="28" />
-            <rect x="150" y="36" width="8" height="28" />
-            {/* Penalty mark */}
-            <circle cx="16" cy="50" r="0.6" fill="var(--field-line)" />
-            <circle cx="144" cy="50" r="0.6" fill="var(--field-line)" />
-            {/* Penalty arc */}
-            <path d="M 22 42 A 8 8 0 0 1 22 58" />
-            <path d="M 138 42 A 8 8 0 0 0 138 58" />
-            {/* Corner arcs */}
-            <path d="M 2 4 A 2 2 0 0 1 4 2" />
-            <path d="M 156 2 A 2 2 0 0 1 158 4" />
-            <path d="M 2 96 A 2 2 0 0 0 4 98" />
-            <path d="M 156 98 A 2 2 0 0 0 158 96" />
-            {/* Goals */}
-            <rect x="0" y="44" width="2" height="12" />
-            <rect x="158" y="44" width="2" height="12" />
-          </>
-        )}
-      </svg>
+        {/* Field markings */}
+        <svg
+          className="absolute inset-0 w-full h-full"
+          viewBox="0 0 160 100"
+          preserveAspectRatio="none"
+          fill="none"
+          stroke="var(--field-line)"
+          strokeWidth="0.4"
+          opacity="0.85"
+        >
+          <rect x="2" y="2" width="156" height="96" />
+          <line x1="80" y1="2" x2="80" y2="98" />
+          <circle cx="80" cy="50" r={mode === "futsal" ? 7 : mode === "society" ? 9 : 11} />
+          <circle cx="80" cy="50" r="0.8" fill="var(--field-line)" />
 
-      {/* Team labels */}
-      <div className="absolute top-2 left-2 z-20">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--team-a)] bg-black/70 px-2 py-0.5 rounded-full">
-          Time A
-        </span>
-      </div>
-      <div className="absolute top-2 right-2 z-20">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--team-b)] bg-black/70 px-2 py-0.5 rounded-full">
-          Time B
-        </span>
-      </div>
+          {mode === "futsal" ? (
+            <>
+              <path d="M 2 30 A 22 22 0 0 1 2 70" />
+              <path d="M 158 30 A 22 22 0 0 0 158 70" />
+              <circle cx="14" cy="50" r="0.6" fill="var(--field-line)" />
+              <circle cx="146" cy="50" r="0.6" fill="var(--field-line)" />
+              <rect x="0" y="44" width="2" height="12" />
+              <rect x="158" y="44" width="2" height="12" />
+            </>
+          ) : mode === "society" ? (
+            <>
+              <rect x="2" y="28" width="14" height="44" />
+              <rect x="144" y="28" width="14" height="44" />
+              <circle cx="11" cy="50" r="0.6" fill="var(--field-line)" />
+              <circle cx="149" cy="50" r="0.6" fill="var(--field-line)" />
+              <rect x="0" y="44" width="2" height="12" />
+              <rect x="158" y="44" width="2" height="12" />
+            </>
+          ) : (
+            <>
+              <rect x="2" y="22" width="20" height="56" />
+              <rect x="138" y="22" width="20" height="56" />
+              <rect x="2" y="36" width="8" height="28" />
+              <rect x="150" y="36" width="8" height="28" />
+              <circle cx="16" cy="50" r="0.6" fill="var(--field-line)" />
+              <circle cx="144" cy="50" r="0.6" fill="var(--field-line)" />
+              <path d="M 22 42 A 8 8 0 0 1 22 58" />
+              <path d="M 138 42 A 8 8 0 0 0 138 58" />
+              <path d="M 2 4 A 2 2 0 0 1 4 2" />
+              <path d="M 156 2 A 2 2 0 0 1 158 4" />
+              <path d="M 2 96 A 2 2 0 0 0 4 98" />
+              <path d="M 156 98 A 2 2 0 0 0 158 96" />
+              <rect x="0" y="44" width="2" height="12" />
+              <rect x="158" y="44" width="2" height="12" />
+            </>
+          )}
+        </svg>
 
-      {/* Players overlay - absolutely positioned per formation */}
-      <div className="absolute inset-0 z-10">
-        {teamA.length === 0 && teamB.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-xs text-foreground/80 italic bg-black/60 px-3 py-1.5 rounded-full">
-              Sorteie os times pra ver a formação
-            </p>
-          </div>
-        )}
+        {/* Team labels */}
+        <div className="absolute top-2 left-2 z-20">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--team-a)] bg-black/70 px-2 py-0.5 rounded-full">
+            Time A
+          </span>
+        </div>
+        <div className="absolute top-2 right-2 z-20">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--team-b)] bg-black/70 px-2 py-0.5 rounded-full">
+            Time B
+          </span>
+        </div>
 
-        {teamA.map((p, i) => {
-          const pos = formationA[i];
-          if (!pos) return null;
-          // Team A on left half: x mapped to 1%-46% of full width
-          const left = (pos[0] / 100) * 45 + 1;
-          const top = pos[1];
-          return (
-            <div
-              key={p.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${left}%`, top: `${top}%` }}
-            >
-              <PlayerPin player={p} team="A" onGoalChange={onGoalChange} />
+        {/* Players overlay */}
+        <div className="absolute inset-0 z-10">
+          {teamA.length === 0 && teamB.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-xs text-foreground/80 italic bg-black/60 px-3 py-1.5 rounded-full">
+                Sorteie os times pra ver a formação
+              </p>
             </div>
-          );
-        })}
+          )}
 
-        {teamB.map((p, i) => {
-          const pos = formationB[i];
-          if (!pos) return null;
-          // Team B on right half: mirror — x mapped to 99%-54%
-          const left = 99 - ((pos[0] / 100) * 45 + 1);
-          const top = pos[1];
-          return (
-            <div
-              key={p.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${left}%`, top: `${top}%` }}
-            >
-              <PlayerPin player={p} team="B" onGoalChange={onGoalChange} />
-            </div>
-          );
-        })}
+          {teamA.map((p, i) => {
+            const ov = overrides[p.id];
+            const pos = ov ?? formationA[i];
+            if (!pos) return null;
+            const left = (pos[0] / 100) * 45 + 1;
+            const top = pos[1];
+            const isDragging = draggingId === p.id;
+            return (
+              <div
+                key={p.id}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 ${
+                  draggable ? "cursor-grab active:cursor-grabbing" : ""
+                } ${isDragging ? "z-30 scale-110 drop-shadow-[0_0_8px_var(--neon)]" : ""}`}
+                style={{ left: `${left}%`, top: `${top}%` }}
+                onPointerDown={(e) => startDrag(e, p.id, "A")}
+                onPointerMove={(e) => moveDrag(e, "A")}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+              >
+                <PlayerPin player={p} team="A" onGoalChange={onGoalChange} />
+              </div>
+            );
+          })}
+
+          {teamB.map((p, i) => {
+            const ov = overrides[p.id];
+            const pos = ov ?? formationB[i];
+            if (!pos) return null;
+            const left = 99 - ((pos[0] / 100) * 45 + 1);
+            const top = pos[1];
+            const isDragging = draggingId === p.id;
+            return (
+              <div
+                key={p.id}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 ${
+                  draggable ? "cursor-grab active:cursor-grabbing" : ""
+                } ${isDragging ? "z-30 scale-110 drop-shadow-[0_0_8px_var(--neon)]" : ""}`}
+                style={{ left: `${left}%`, top: `${top}%` }}
+                onPointerDown={(e) => startDrag(e, p.id, "B")}
+                onPointerMove={(e) => moveDrag(e, "B")}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+              >
+                <PlayerPin player={p} team="B" onGoalChange={onGoalChange} />
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {draggable && (
+        <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+          <span>✋ Arraste os jogadores para ajustar o tático</span>
+          {hasOverrides && (
+            <button
+              type="button"
+              onClick={resetOverrides}
+              className="px-2 py-1 rounded-md bg-secondary border border-border font-bold uppercase tracking-wider hover:text-foreground transition"
+            >
+              Reset formação
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
