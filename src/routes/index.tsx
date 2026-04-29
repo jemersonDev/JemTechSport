@@ -763,6 +763,8 @@ function Index() {
                 teamB={teamB}
                 mode={fieldMode}
                 onGoalChange={handleGoalChange}
+                draggable={!!isAdmin}
+                storageKey={activeRachaId}
               />
               {!teamsReady && (
                 <p className="text-center text-xs text-muted-foreground italic pt-1">
