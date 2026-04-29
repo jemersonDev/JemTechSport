@@ -516,5 +516,4 @@ export function SoccerField({
     </div>
   );
 }
-  );
-}
+
