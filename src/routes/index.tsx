@@ -137,7 +137,6 @@ function Index() {
     incB,
     decB,
     resetScore,
-    startMatch,
     pauseTimer,
     resumeTimer,
     resetTimer,
