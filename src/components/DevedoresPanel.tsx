@@ -40,6 +40,18 @@ export function DevedoresPanel() {
   const [motivo, setMotivo] = useState("");
   const [busy, setBusy] = useState(false);
   const [profMap, setProfMap] = useState<Map<string, MemberOption>>(new Map());
+  const [zapTarget, setZapTarget] = useState<{
+    devedor_id: string;
+    user_id: string;
+    nome: string;
+    valor: number;
+    motivo: string | null;
+  } | null>(null);
+  const [zapPhone, setZapPhone] = useState("");
+  const [zapTemplate, setZapTemplate] = useState<string>(() => {
+    if (typeof window === "undefined") return DEFAULT_TEMPLATE;
+    return localStorage.getItem(COBRANCA_TEMPLATE_KEY) ?? DEFAULT_TEMPLATE;
+  });
 
   // Carrega todos jogadores dos rachas que sou admin
   useEffect(() => {
