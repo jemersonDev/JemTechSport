@@ -241,9 +241,13 @@ function PerfilPage() {
           {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <Avatar className="w-24 h-24 border-4 border-primary/20">
-                <AvatarImage src={profile.avatar_url ?? undefined} alt={displayName} />
-                <AvatarFallback className="text-2xl">{initials || "??"}</AvatarFallback>
+              <Avatar className="w-32 h-32 border-4 border-primary/20">
+                <AvatarImage
+                  src={profile.avatar_url ?? undefined}
+                  alt={displayName}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-3xl">{initials || "??"}</AvatarFallback>
               </Avatar>
               <button
                 onClick={() => fileInputRef.current?.click()}
