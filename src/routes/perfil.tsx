@@ -32,6 +32,7 @@ import {
 import { PlayerStats } from "@/components/PlayerStats";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
 import { AthleteCard } from "@/components/AthleteCard";
+import { processAvatar } from "@/utils/processAvatar";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
