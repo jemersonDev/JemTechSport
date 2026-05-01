@@ -315,6 +315,88 @@ export function DevedoresPanel() {
           })}
         </div>
       )}
+
+      <Dialog open={!!zapTarget} onOpenChange={(o) => !o && setZapTarget(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-green-500" />
+              Cobrar via WhatsApp
+            </DialogTitle>
+          </DialogHeader>
+          {zapTarget && (
+            <div className="space-y-3">
+              <div className="text-sm">
+                Cobrando: <strong>{zapTarget.nome}</strong>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground font-bold">
+                  Telefone (DDD + número, opcional)
+                </label>
+                <Input
+                  value={zapPhone}
+                  onChange={(e) => setZapPhone(e.target.value.replace(/\D/g, ""))}
+                  placeholder="11999998888"
+                  inputMode="tel"
+                  className="h-9 text-sm mt-1"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Sem telefone? Abre o WhatsApp pra você escolher o contato.
+                </p>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground font-bold">
+                  Mensagem (use {"{nome}"}, {"{valor}"}, {"{motivo}"})
+                </label>
+                <Textarea
+                  value={zapTemplate}
+                  onChange={(e) => setZapTemplate(e.target.value)}
+                  rows={6}
+                  className="text-sm mt-1 font-mono"
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 text-[10px] mt-1 px-2"
+                  onClick={() => {
+                    setZapTemplate(DEFAULT_TEMPLATE);
+                    localStorage.removeItem(COBRANCA_TEMPLATE_KEY);
+                  }}
+                >
+                  Restaurar padrão
+                </Button>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setZapTarget(null)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-green-500 hover:bg-green-600 text-white"
+              onClick={() => {
+                if (!zapTarget) return;
+                localStorage.setItem(COBRANCA_TEMPLATE_KEY, zapTemplate);
+                const valor = `R$ ${zapTarget.valor.toFixed(2).replace(".", ",")}`;
+                const motivo = zapTarget.motivo ? ` (${zapTarget.motivo})` : "";
+                const msg = zapTemplate
+                  .replaceAll("{nome}", zapTarget.nome)
+                  .replaceAll("{valor}", valor)
+                  .replaceAll("{motivo}", motivo);
+                const phone = zapPhone.trim();
+                const url = phone
+                  ? `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`
+                  : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                window.open(url, "_blank");
+                setZapTarget(null);
+                setZapPhone("");
+              }}
+            >
+              <MessageCircle className="w-4 h-4 mr-1" /> Abrir Zap
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
