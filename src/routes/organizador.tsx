@@ -160,6 +160,9 @@ function OrganizadorPage() {
           </p>
         </Card>
 
+        {/* Relatório Mensal com export PDF */}
+        <RelatorioMensal />
+
         {/* Devedores */}
         <DevedoresPanel />
 
