@@ -260,23 +260,33 @@ function PlayerPin({
       >
         {player.name.split(" ")[0]}
       </p>
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1 mt-0.5">
         <button
-          onClick={() => onGoalChange(player.id, -1)}
-          className="w-3.5 h-3.5 rounded bg-destructive/80 text-white flex items-center justify-center hover:bg-destructive transition"
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onGoalChange(player.id, -1);
+          }}
+          className="w-6 h-6 rounded-md bg-destructive/90 text-white flex items-center justify-center active:scale-95 hover:bg-destructive transition touch-manipulation"
           aria-label="Remover gol"
         >
-          <Minus className="w-2 h-2" strokeWidth={3} />
+          <Minus className="w-3 h-3" strokeWidth={3} />
         </button>
-        <span className="text-[10px] font-black text-neon w-2.5 text-center leading-none">
+        <span className="text-[11px] font-black text-neon min-w-[14px] text-center leading-none">
           {player.goals}
         </span>
         <button
-          onClick={() => onGoalChange(player.id, 1)}
-          className="w-3.5 h-3.5 rounded bg-neon text-black flex items-center justify-center hover:brightness-110 transition"
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onGoalChange(player.id, 1);
+          }}
+          className="w-6 h-6 rounded-md bg-neon text-black flex items-center justify-center active:scale-95 hover:brightness-110 transition touch-manipulation"
           aria-label="Adicionar gol"
         >
-          <Plus className="w-2 h-2" strokeWidth={3} />
+          <Plus className="w-3 h-3" strokeWidth={3} />
         </button>
       </div>
     </div>
