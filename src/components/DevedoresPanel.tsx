@@ -7,8 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Check, Trash2, Plus, Loader2 } from "lucide-react";
+import { AlertCircle, Check, Trash2, Plus, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+
+const COBRANCA_TEMPLATE_KEY = "jemtech_template_cobranca";
+const DEFAULT_TEMPLATE =
+  "Eai {nome}, beleza? 🤝\n\nFicou pendente sua parte do racha: R$ {valor}{motivo}.\n\nManda o PIX quando puder pra eu fechar a conta — valeu! ⚽";
 
 type MemberOption = {
   user_id: string;
@@ -28,6 +40,18 @@ export function DevedoresPanel() {
   const [motivo, setMotivo] = useState("");
   const [busy, setBusy] = useState(false);
   const [profMap, setProfMap] = useState<Map<string, MemberOption>>(new Map());
+  const [zapTarget, setZapTarget] = useState<{
+    devedor_id: string;
+    user_id: string;
+    nome: string;
+    valor: number;
+    motivo: string | null;
+  } | null>(null);
+  const [zapPhone, setZapPhone] = useState("");
+  const [zapTemplate, setZapTemplate] = useState<string>(() => {
+    if (typeof window === "undefined") return DEFAULT_TEMPLATE;
+    return localStorage.getItem(COBRANCA_TEMPLATE_KEY) ?? DEFAULT_TEMPLATE;
+  });
 
   // Carrega todos jogadores dos rachas que sou admin
   useEffect(() => {
@@ -242,18 +266,36 @@ export function DevedoresPanel() {
                 </div>
                 <div className="flex flex-col gap-1">
                   {isDevendo && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-[10px] px-2 border-green-500/40 text-green-500 hover:bg-green-500/10"
-                      onClick={async () => {
-                        const { error } = await quitarDivida(d.id);
-                        if (error) toast.error(error);
-                        else toast.success("Dívida quitada");
-                      }}
-                    >
-                      <Check className="w-3 h-3 mr-1" /> Quitar
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[10px] px-2 border-green-500/40 text-green-500 hover:bg-green-500/10"
+                        onClick={() =>
+                          setZapTarget({
+                            devedor_id: d.id,
+                            user_id: d.user_id,
+                            nome: p?.display_name ?? "Jogador",
+                            valor: Number(d.valor),
+                            motivo: d.motivo,
+                          })
+                        }
+                      >
+                        <MessageCircle className="w-3 h-3 mr-1" /> Zap
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[10px] px-2 border-green-500/40 text-green-500 hover:bg-green-500/10"
+                        onClick={async () => {
+                          const { error } = await quitarDivida(d.id);
+                          if (error) toast.error(error);
+                          else toast.success("Dívida quitada");
+                        }}
+                      >
+                        <Check className="w-3 h-3 mr-1" /> Quitar
+                      </Button>
+                    </>
                   )}
                   <Button
                     size="sm"
@@ -273,6 +315,88 @@ export function DevedoresPanel() {
           })}
         </div>
       )}
+
+      <Dialog open={!!zapTarget} onOpenChange={(o) => !o && setZapTarget(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-green-500" />
+              Cobrar via WhatsApp
+            </DialogTitle>
+          </DialogHeader>
+          {zapTarget && (
+            <div className="space-y-3">
+              <div className="text-sm">
+                Cobrando: <strong>{zapTarget.nome}</strong>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground font-bold">
+                  Telefone (DDD + número, opcional)
+                </label>
+                <Input
+                  value={zapPhone}
+                  onChange={(e) => setZapPhone(e.target.value.replace(/\D/g, ""))}
+                  placeholder="11999998888"
+                  inputMode="tel"
+                  className="h-9 text-sm mt-1"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Sem telefone? Abre o WhatsApp pra você escolher o contato.
+                </p>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase text-muted-foreground font-bold">
+                  Mensagem (use {"{nome}"}, {"{valor}"}, {"{motivo}"})
+                </label>
+                <Textarea
+                  value={zapTemplate}
+                  onChange={(e) => setZapTemplate(e.target.value)}
+                  rows={6}
+                  className="text-sm mt-1 font-mono"
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 text-[10px] mt-1 px-2"
+                  onClick={() => {
+                    setZapTemplate(DEFAULT_TEMPLATE);
+                    localStorage.removeItem(COBRANCA_TEMPLATE_KEY);
+                  }}
+                >
+                  Restaurar padrão
+                </Button>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setZapTarget(null)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-green-500 hover:bg-green-600 text-white"
+              onClick={() => {
+                if (!zapTarget) return;
+                localStorage.setItem(COBRANCA_TEMPLATE_KEY, zapTemplate);
+                const valor = `R$ ${zapTarget.valor.toFixed(2).replace(".", ",")}`;
+                const motivo = zapTarget.motivo ? ` (${zapTarget.motivo})` : "";
+                const msg = zapTemplate
+                  .replaceAll("{nome}", zapTarget.nome)
+                  .replaceAll("{valor}", valor)
+                  .replaceAll("{motivo}", motivo);
+                const phone = zapPhone.trim();
+                const url = phone
+                  ? `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`
+                  : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                window.open(url, "_blank");
+                setZapTarget(null);
+                setZapPhone("");
+              }}
+            >
+              <MessageCircle className="w-4 h-4 mr-1" /> Abrir Zap
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
