@@ -266,18 +266,36 @@ export function DevedoresPanel() {
                 </div>
                 <div className="flex flex-col gap-1">
                   {isDevendo && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-[10px] px-2 border-green-500/40 text-green-500 hover:bg-green-500/10"
-                      onClick={async () => {
-                        const { error } = await quitarDivida(d.id);
-                        if (error) toast.error(error);
-                        else toast.success("Dívida quitada");
-                      }}
-                    >
-                      <Check className="w-3 h-3 mr-1" /> Quitar
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[10px] px-2 border-green-500/40 text-green-500 hover:bg-green-500/10"
+                        onClick={() =>
+                          setZapTarget({
+                            devedor_id: d.id,
+                            user_id: d.user_id,
+                            nome: p?.display_name ?? "Jogador",
+                            valor: Number(d.valor),
+                            motivo: d.motivo,
+                          })
+                        }
+                      >
+                        <MessageCircle className="w-3 h-3 mr-1" /> Zap
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-[10px] px-2 border-green-500/40 text-green-500 hover:bg-green-500/10"
+                        onClick={async () => {
+                          const { error } = await quitarDivida(d.id);
+                          if (error) toast.error(error);
+                          else toast.success("Dívida quitada");
+                        }}
+                      >
+                        <Check className="w-3 h-3 mr-1" /> Quitar
+                      </Button>
+                    </>
                   )}
                   <Button
                     size="sm"
