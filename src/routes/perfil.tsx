@@ -152,8 +152,8 @@ function PerfilPage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Imagem muito grande (máx 5MB)");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 10MB)");
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -162,34 +162,44 @@ function PerfilPage() {
     }
 
     setUploading(true);
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const path = `${user.id}/avatar.${ext}`;
+    try {
+      // Redimensiona/recorta quadrado central em alta qualidade (estilo WhatsApp)
+      const processed = await processAvatar(file, 512);
+      const path = `${user.id}/avatar.jpg`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(path, file, { upsert: true, cacheControl: "0" });
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, processed, {
+          upsert: true,
+          cacheControl: "3600",
+          contentType: "image/jpeg",
+        });
 
-    if (uploadError) {
+      if (uploadError) {
+        toast.error("Erro no upload: " + uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${data.publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        toast.error("Erro ao salvar foto: " + updateError.message);
+        return;
+      }
+      await refreshProfile();
+      toast.success("Foto atualizada!");
+    } catch (err) {
+      toast.error("Erro ao processar imagem");
+      console.error(err);
+    } finally {
       setUploading(false);
-      toast.error("Erro no upload: " + uploadError.message);
-      return;
     }
-
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    const url = `${data.publicUrl}?t=${Date.now()}`;
-
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({ avatar_url: url })
-      .eq("user_id", user.id);
-
-    setUploading(false);
-    if (updateError) {
-      toast.error("Erro ao salvar foto: " + updateError.message);
-      return;
-    }
-    await refreshProfile();
-    toast.success("Foto atualizada!");
   };
 
   const handleSignOut = async () => {
