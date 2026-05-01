@@ -7,8 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Check, Trash2, Plus, Loader2 } from "lucide-react";
+import { AlertCircle, Check, Trash2, Plus, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+
+const COBRANCA_TEMPLATE_KEY = "jemtech_template_cobranca";
+const DEFAULT_TEMPLATE =
+  "Eai {nome}, beleza? 🤝\n\nFicou pendente sua parte do racha: R$ {valor}{motivo}.\n\nManda o PIX quando puder pra eu fechar a conta — valeu! ⚽";
 
 type MemberOption = {
   user_id: string;
