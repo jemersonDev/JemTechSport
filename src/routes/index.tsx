@@ -1699,7 +1699,6 @@ function Index() {
                 players={[...teamA, ...teamB].map((p) => ({
                   id: p.id,
                   name: p.name,
-                  avatar_url: p.avatar_url ?? null,
                 }))}
               />
             )}
