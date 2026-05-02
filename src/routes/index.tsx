@@ -37,6 +37,8 @@ import {
 import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { ManualPlayersEditor } from "@/components/ManualPlayersEditor";
+import { CraqueBagreVote } from "@/components/CraqueBagreVote";
+import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
 
