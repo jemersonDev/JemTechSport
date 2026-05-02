@@ -37,6 +37,8 @@ import {
 import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { ManualPlayersEditor } from "@/components/ManualPlayersEditor";
+import { CraqueBagreVote } from "@/components/CraqueBagreVote";
+import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
 
@@ -188,6 +190,29 @@ function Index() {
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("roster");
   const [shareCopied, setShareCopied] = useState(false);
+  const [partidaFinalizadaId, setPartidaFinalizadaId] = useState<string | null>(null);
+
+  // Carrega a partida finalizada mais recente quando o racha está encerrado, pra habilitar a votação Craque/Bagre
+  useEffect(() => {
+    if (!activeRachaId || !racha?.finalizado_em) {
+      setPartidaFinalizadaId(null);
+      return;
+    }
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("partidas_finalizadas")
+        .select("id")
+        .eq("racha_id", activeRachaId)
+        .order("finalizada_em", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (active) setPartidaFinalizadaId(data?.id ?? null);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [activeRachaId, racha?.finalizado_em]);
 
   // PIX
   type PixKeyType = "cpf" | "telefone" | "email" | "aleatoria";
@@ -1665,6 +1690,17 @@ function Index() {
                 </p>
                 <p className="text-3xl font-black text-foreground mt-2">{scoreA} × {scoreB}</p>
               </section>
+            )}
+
+            {racha?.finalizado_em && partidaFinalizadaId && activeRachaId && (
+              <CraqueBagreVote
+                partidaId={partidaFinalizadaId}
+                rachaId={activeRachaId}
+                players={[...teamA, ...teamB].map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                }))}
+              />
             )}
 
             <section className="space-y-2">
