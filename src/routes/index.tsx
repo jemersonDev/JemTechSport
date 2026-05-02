@@ -1692,6 +1692,18 @@ function Index() {
               </section>
             )}
 
+            {racha?.finalizado_em && partidaFinalizadaId && activeRachaId && (
+              <CraqueBagreVote
+                partidaId={partidaFinalizadaId}
+                rachaId={activeRachaId}
+                players={[...teamA, ...teamB].map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  avatar_url: p.avatar_url ?? null,
+                }))}
+              />
+            )}
+
             <section className="space-y-2">
               <SectionTitle icon={Send} title="Compartilhar" />
               <div className="grid grid-cols-1 gap-2">
