@@ -327,6 +327,47 @@ export type Database = {
         }
         Relationships: []
       }
+      partida_votos: {
+        Row: {
+          bagre_target: string | null
+          craque_target: string | null
+          created_at: string
+          id: string
+          partida_id: string
+          racha_id: string
+          updated_at: string
+          voter_id: string
+        }
+        Insert: {
+          bagre_target?: string | null
+          craque_target?: string | null
+          created_at?: string
+          id?: string
+          partida_id: string
+          racha_id: string
+          updated_at?: string
+          voter_id: string
+        }
+        Update: {
+          bagre_target?: string | null
+          craque_target?: string | null
+          created_at?: string
+          id?: string
+          partida_id?: string
+          racha_id?: string
+          updated_at?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partida_votos_partida_id_fkey"
+            columns: ["partida_id"]
+            isOneToOne: false
+            referencedRelation: "partidas_finalizadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partidas_finalizadas: {
         Row: {
           created_by: string
