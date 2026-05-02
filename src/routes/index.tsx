@@ -190,6 +190,29 @@ function Index() {
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("roster");
   const [shareCopied, setShareCopied] = useState(false);
+  const [partidaFinalizadaId, setPartidaFinalizadaId] = useState<string | null>(null);
+
+  // Carrega a partida finalizada mais recente quando o racha está encerrado, pra habilitar a votação Craque/Bagre
+  useEffect(() => {
+    if (!activeRachaId || !racha?.finalizado_em) {
+      setPartidaFinalizadaId(null);
+      return;
+    }
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("partidas_finalizadas")
+        .select("id")
+        .eq("racha_id", activeRachaId)
+        .order("finalizada_em", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (active) setPartidaFinalizadaId(data?.id ?? null);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [activeRachaId, racha?.finalizado_em]);
 
   // PIX
   type PixKeyType = "cpf" | "telefone" | "email" | "aleatoria";
