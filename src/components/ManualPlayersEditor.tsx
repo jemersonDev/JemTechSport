@@ -30,6 +30,16 @@ export function ManualPlayersEditor({ manuais, onAdd, onRemove, onTogglePaid }: 
   const [position, setPosition] = useState<PositionExt>("meia");
   const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState<PositionExt | "todos">("todos");
+
+  const filtered = filter === "todos" ? manuais : manuais.filter((m) => m.position === filter);
+  const counts: Record<PositionExt | "todos", number> = {
+    todos: manuais.length,
+    goleiro: manuais.filter((m) => m.position === "goleiro").length,
+    zagueiro: manuais.filter((m) => m.position === "zagueiro").length,
+    meia: manuais.filter((m) => m.position === "meia").length,
+    atacante: manuais.filter((m) => m.position === "atacante").length,
+  };
 
   async function handleAdd() {
     const trimmed = name.trim();
