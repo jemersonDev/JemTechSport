@@ -605,16 +605,27 @@ function Index() {
                 </div>
 
                 {(racha.address || racha.location) ? (
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1 text-[11px] font-semibold text-sky-400 hover:text-neon underline-offset-2 hover:underline transition max-w-full"
-                    title={racha.address || racha.location || ""}
-                  >
-                    <MapPin className="w-3 h-3 shrink-0" strokeWidth={2.5} />
-                    <span className="truncate">{racha.address || racha.location}</span>
-                  </a>
+                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(racha.address || racha.location || "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 hover:text-neon underline-offset-2 hover:underline transition max-w-[60%]"
+                      title={racha.address || racha.location || ""}
+                    >
+                      <MapPin className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                      <span className="truncate">{racha.address || racha.location}</span>
+                    </a>
+                    <a
+                      href={`https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(racha.address || racha.location || "")}&dropoff[nickname]=${encodeURIComponent(racha.name || "Quadra")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-foreground text-background hover:opacity-90 transition shrink-0"
+                      title="Pedir Uber pra quadra"
+                    >
+                      🚗 Uber
+                    </a>
+                  </div>
                 ) : (
                   <p className="text-[11px] text-muted-foreground inline-flex items-center justify-center gap-1">
                     <MapPin className="w-3 h-3 shrink-0" /> Adicione o endereço

@@ -30,6 +30,16 @@ export function ManualPlayersEditor({ manuais, onAdd, onRemove, onTogglePaid }: 
   const [position, setPosition] = useState<PositionExt>("meia");
   const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState<PositionExt | "todos">("todos");
+
+  const filtered = filter === "todos" ? manuais : manuais.filter((m) => m.position === filter);
+  const counts: Record<PositionExt | "todos", number> = {
+    todos: manuais.length,
+    goleiro: manuais.filter((m) => m.position === "goleiro").length,
+    zagueiro: manuais.filter((m) => m.position === "zagueiro").length,
+    meia: manuais.filter((m) => m.position === "meia").length,
+    atacante: manuais.filter((m) => m.position === "atacante").length,
+  };
 
   async function handleAdd() {
     const trimmed = name.trim();
@@ -153,10 +163,44 @@ export function ManualPlayersEditor({ manuais, onAdd, onRemove, onTogglePaid }: 
         </div>
       )}
 
-      {/* Lista de manuais */}
+      {/* Filtros por posição */}
       {manuais.length > 0 && (
+        <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-1 scrollbar-none">
+          {(["todos", "goleiro", "zagueiro", "meia", "atacante"] as const).map((f) => {
+            const active = filter === f;
+            const emoji =
+              f === "todos" ? "👥" : POSITIONS.find((p) => p.id === f)?.emoji ?? "⚽";
+            const label =
+              f === "todos" ? "Todos" : POSITIONS.find((p) => p.id === f)?.label ?? f;
+            return (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition ${
+                  active
+                    ? "bg-neon text-black shadow-neon"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span className="text-sm leading-none">{emoji}</span>
+                {label}
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                    active ? "bg-black/20" : "bg-background/40"
+                  }`}
+                >
+                  {counts[f]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Lista de manuais */}
+      {filtered.length > 0 && (
         <div className="space-y-1.5 max-h-[40vh] overflow-y-auto pr-1 -mr-1">
-          {manuais.map((m) => {
+          {filtered.map((m) => {
             const pos = POSITIONS.find((p) => p.id === m.position);
             const sk = SKILLS.find((s) => s.id === m.skill_level);
             return (
