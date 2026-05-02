@@ -617,11 +617,7 @@ function Index() {
                       <span className="truncate">{racha.address || racha.location}</span>
                     </a>
                     <a
-                      href={
-                        racha.lat && racha.lng
-                          ? `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${racha.lat}&dropoff[longitude]=${racha.lng}&dropoff[nickname]=${encodeURIComponent(racha.name || "Quadra")}`
-                          : `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(racha.address || racha.location || "")}`
-                      }
+                      href={`https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[formatted_address]=${encodeURIComponent(racha.address || racha.location || "")}&dropoff[nickname]=${encodeURIComponent(racha.name || "Quadra")}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-foreground text-background hover:opacity-90 transition shrink-0"
