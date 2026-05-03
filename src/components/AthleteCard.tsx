@@ -42,6 +42,8 @@ export function AthleteCard({
   partidas,
   gols,
   assistencias,
+  craqueWins = 0,
+  bagreWins = 0,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
