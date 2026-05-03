@@ -59,23 +59,33 @@ function PerfilPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [cardStats, setCardStats] = useState({ partidas: 0, gols: 0, assistencias: 0 });
+  const [cardStats, setCardStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [partidasRes, golsRes] = await Promise.all([
+      const [partidasRes, golsRes, craqueRes, bagreRes] = await Promise.all([
         supabase
           .from("racha_membros")
           .select("racha_id", { count: "exact", head: true })
           .eq("user_id", user.id),
         supabase.from("gols_jogador").select("gols, assistencias").eq("user_id", user.id),
+        supabase
+          .from("partida_votos")
+          .select("partida_id", { count: "exact", head: true })
+          .eq("craque_target", user.id),
+        supabase
+          .from("partida_votos")
+          .select("partida_id", { count: "exact", head: true })
+          .eq("bagre_target", user.id),
       ]);
       const arr = (golsRes.data ?? []) as { gols: number; assistencias: number }[];
       setCardStats({
         partidas: partidasRes.count ?? 0,
         gols: arr.reduce((s, g) => s + (g.gols ?? 0), 0),
         assistencias: arr.reduce((s, g) => s + (g.assistencias ?? 0), 0),
+        craque: craqueRes.count ?? 0,
+        bagre: bagreRes.count ?? 0,
       });
     })();
   }, [user]);
@@ -398,6 +408,8 @@ function PerfilPage() {
               partidas={cardStats.partidas}
               gols={cardStats.gols}
               assistencias={cardStats.assistencias}
+              craqueWins={cardStats.craque}
+              bagreWins={cardStats.bagre}
             />
           </Card>
         )}

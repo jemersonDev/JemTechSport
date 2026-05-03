@@ -30,7 +30,7 @@ function AthleteProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<ReelPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ partidas: 0, gols: 0, assistencias: 0 });
+  const [stats, setStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
   const [reelsOpenAt, setReelsOpenAt] = useState<number | null>(null);
   const { isFollowing, followers, following, toggle } = useFollow(userId);
 
@@ -38,7 +38,7 @@ function AthleteProfile() {
     let active = true;
     (async () => {
       setLoading(true);
-      const [profRes, postsRes, partidasRes, golsRes] = await Promise.all([
+      const [profRes, postsRes, partidasRes, golsRes, craqueRes, bagreRes] = await Promise.all([
         supabase
           .from("profiles")
           .select("user_id, display_name, avatar_url, preferred_position, bio")
@@ -58,6 +58,14 @@ function AthleteProfile() {
           .from("gols_jogador")
           .select("gols, assistencias")
           .eq("user_id", userId),
+        supabase
+          .from("partida_votos")
+          .select("partida_id", { count: "exact", head: true })
+          .eq("craque_target", userId),
+        supabase
+          .from("partida_votos")
+          .select("partida_id", { count: "exact", head: true })
+          .eq("bagre_target", userId),
       ]);
       if (!active) return;
       setProfile((profRes.data as Profile) ?? null);
@@ -67,6 +75,8 @@ function AthleteProfile() {
         partidas: partidasRes.count ?? 0,
         gols: golsArr.reduce((s, g) => s + (g.gols ?? 0), 0),
         assistencias: golsArr.reduce((s, g) => s + (g.assistencias ?? 0), 0),
+        craque: craqueRes.count ?? 0,
+        bagre: bagreRes.count ?? 0,
       });
       setLoading(false);
     })();
@@ -192,6 +202,8 @@ function AthleteProfile() {
           partidas={stats.partidas}
           gols={stats.gols}
           assistencias={stats.assistencias}
+          craqueWins={stats.craque}
+          bagreWins={stats.bagre}
         />
       </section>
 

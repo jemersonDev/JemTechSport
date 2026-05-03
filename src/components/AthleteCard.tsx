@@ -7,11 +7,13 @@ import { toast } from "sonner";
 type Props = {
   displayName: string;
   avatarUrl: string | null;
-  position: string; // ex: "meia"
-  skillLevel?: string; // ex: "craque"
+  position: string;
+  skillLevel?: string;
   partidas: number;
   gols: number;
   assistencias: number;
+  craqueWins?: number;
+  bagreWins?: number;
 };
 
 const POS_SHORT: Record<string, string> = {
@@ -40,6 +42,8 @@ export function AthleteCard({
   partidas,
   gols,
   assistencias,
+  craqueWins = 0,
+  bagreWins = 0,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
@@ -151,6 +155,20 @@ export function AthleteCard({
               {displayName}
             </div>
             <div className="h-px bg-zinc-900/40 mt-1 mx-6" />
+            {(craqueWins > 0 || bagreWins > 0) && (
+              <div className="mt-1.5 flex items-center justify-center gap-1.5">
+                {craqueWins > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-zinc-900/85 text-yellow-300 text-[9px] font-black tracking-wider">
+                    ⭐ CRAQUE x{craqueWins}
+                  </span>
+                )}
+                {bagreWins > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-zinc-900/85 text-orange-300 text-[9px] font-black tracking-wider">
+                    🐟 BAGRE x{bagreWins}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Stats grid */}
