@@ -7,11 +7,13 @@ import { toast } from "sonner";
 type Props = {
   displayName: string;
   avatarUrl: string | null;
-  position: string; // ex: "meia"
-  skillLevel?: string; // ex: "craque"
+  position: string;
+  skillLevel?: string;
   partidas: number;
   gols: number;
   assistencias: number;
+  craqueWins?: number;
+  bagreWins?: number;
 };
 
 const POS_SHORT: Record<string, string> = {
