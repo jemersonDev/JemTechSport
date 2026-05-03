@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { TrendingUp, Trophy, Medal } from "lucide-react";
+import { Flame, Trophy, Medal } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchAssiduidadeMes, type AssiduidadeRow } from "@/hooks/usePartida";
@@ -39,9 +39,12 @@ export function AssiduidadeRanking() {
   return (
     <Card className="p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <TrendingUp className="w-4 h-4 text-neon" />
-        <h3 className="text-sm font-bold capitalize">Top assiduidade · {mesAtual}</h3>
+        <Flame className="w-4 h-4 text-orange-400" />
+        <h3 className="text-sm font-bold capitalize">Fominhas do Mês 🔥 · {mesAtual}</h3>
       </div>
+      <p className="text-[10px] text-muted-foreground -mt-1">
+        Os bem chegados — quem mais não falha um racha
+      </p>
       <div className="space-y-2">
         {rows.slice(0, 10).map((r, idx) => {
           const pct = (r.participacoes / max) * 100;
