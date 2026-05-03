@@ -381,24 +381,25 @@ function CreateRachaForm({
         <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <LayoutGrid className="w-3 h-3" /> Modalidade
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div translate="no" className="notranslate grid grid-cols-3 gap-2">
           {FIELD_MODES.map((m) => {
             const active = fieldMode === m.id;
             return (
               <button
                 key={m.id}
                 type="button"
+                translate="no"
                 onClick={() => setFieldMode(m.id)}
-                className={`py-3 rounded-xl border-2 text-center transition ${
+                className={`notranslate py-3 rounded-xl border-2 text-center transition ${
                   active
                     ? "border-neon bg-neon/15 shadow-neon"
                     : "border-border bg-background hover:border-neon/40"
                 }`}
               >
-                <p className={`text-xs font-black uppercase tracking-wider leading-none ${active ? "text-neon" : "text-foreground"}`}>
+                <p translate="no" className={`notranslate text-xs font-black uppercase tracking-wider leading-none ${active ? "text-neon" : "text-foreground"}`}>
                   {m.label}
                 </p>
-                <p className="text-[9px] mt-1 leading-none text-muted-foreground">{m.sub}</p>
+                <p translate="no" className="notranslate text-[9px] mt-1 leading-none text-muted-foreground">{m.sub}</p>
               </button>
             );
           })}
