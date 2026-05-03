@@ -202,6 +202,8 @@ function AthleteProfile() {
           partidas={stats.partidas}
           gols={stats.gols}
           assistencias={stats.assistencias}
+          craqueWins={stats.craque}
+          bagreWins={stats.bagre}
         />
       </section>
 
