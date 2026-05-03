@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { TrendingUp, Trophy, Medal } from "lucide-react";
+import { Flame, Trophy, Medal } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchAssiduidadeMes, type AssiduidadeRow } from "@/hooks/usePartida";
