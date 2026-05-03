@@ -757,24 +757,26 @@ function Index() {
             {/* Modality */}
             <section className="space-y-2">
               <SectionTitle icon={LayoutGrid} title="Modalidade" />
-              <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-graphite border border-border">
+              <div translate="no" className="notranslate grid grid-cols-3 gap-2 p-1 rounded-xl bg-graphite border border-border">
                 {FIELD_MODES.map((m) => {
                   const active = fieldMode === m.id;
                   return (
                     <button
                       key={m.id}
                       onClick={() => setFieldMode(m.id)}
-                      className={`py-2.5 rounded-lg text-center transition ${
+                      translate="no"
+                      className={`notranslate py-2.5 rounded-lg text-center transition ${
                         active
                           ? "bg-neon text-black shadow-neon"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <p className="text-xs font-black uppercase tracking-wider leading-none">
+                      <p translate="no" className="notranslate text-xs font-black uppercase tracking-wider leading-none">
                         {m.label}
                       </p>
                       <p
-                        className={`text-[9px] mt-1 leading-none ${active ? "text-black/70" : "text-muted-foreground"}`}
+                        translate="no"
+                        className={`notranslate text-[9px] mt-1 leading-none ${active ? "text-black/70" : "text-muted-foreground"}`}
                       >
                         {m.sub}
                       </p>
