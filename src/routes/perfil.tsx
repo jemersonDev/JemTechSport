@@ -408,6 +408,8 @@ function PerfilPage() {
               partidas={cardStats.partidas}
               gols={cardStats.gols}
               assistencias={cardStats.assistencias}
+              craqueWins={cardStats.craque}
+              bagreWins={cardStats.bagre}
             />
           </Card>
         )}
