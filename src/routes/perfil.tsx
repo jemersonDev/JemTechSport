@@ -73,11 +73,11 @@ function PerfilPage() {
         supabase
           .from("partida_votos")
           .select("partida_id", { count: "exact", head: true })
-          .eq("craque_user_id", user.id),
+          .eq("craque_target", user.id),
         supabase
           .from("partida_votos")
           .select("partida_id", { count: "exact", head: true })
-          .eq("bagre_user_id", user.id),
+          .eq("bagre_target", user.id),
       ]);
       const arr = (golsRes.data ?? []) as { gols: number; assistencias: number }[];
       setCardStats({
