@@ -30,7 +30,7 @@ function AthleteProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<ReelPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ partidas: 0, gols: 0, assistencias: 0 });
+  const [stats, setStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
   const [reelsOpenAt, setReelsOpenAt] = useState<number | null>(null);
   const { isFollowing, followers, following, toggle } = useFollow(userId);
 
