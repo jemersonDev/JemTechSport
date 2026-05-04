@@ -174,16 +174,30 @@ function PerfilPage() {
 
     setUploading(true);
     try {
-      // Redimensiona/recorta quadrado central em alta qualidade (estilo WhatsApp)
-      const processed = await processAvatar(file, 512);
-      const path = `${user.id}/avatar.jpg`;
+      // 1) Recorta quadrado e redimensiona
+      const processed = await processAvatar(file, 768);
 
+      // 2) Tenta remover fundo (modelo no browser)
+      let finalBlob: Blob = processed;
+      let ext = "jpg";
+      let contentType = "image/jpeg";
+      try {
+        toast.info("Removendo fundo da foto…");
+        const { removeBackgroundFromBlob } = await import("@/utils/removeBackground");
+        finalBlob = await removeBackgroundFromBlob(processed);
+        ext = "png";
+        contentType = "image/png";
+      } catch (bgErr) {
+        console.warn("bg removal falhou, usando original", bgErr);
+      }
+
+      const path = `${user.id}/avatar.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(path, processed, {
+        .upload(path, finalBlob, {
           upsert: true,
           cacheControl: "3600",
-          contentType: "image/jpeg",
+          contentType,
         });
 
       if (uploadError) {
