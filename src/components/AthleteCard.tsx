@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, Loader2 } from "lucide-react";
+import { Download, Share2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { removeBackgroundFromUrl } from "@/utils/removeBackground";
 
 type Props = {
   displayName: string;
@@ -24,7 +24,6 @@ const POS_SHORT: Record<string, string> = {
   linha: "LIN",
 };
 
-// OVR estilo FIFA: pondera gols e assists por partida + bônus por habilidade
 function computeOverall(p: number, g: number, a: number, skill?: string) {
   const base = 60;
   const perMatch = p > 0 ? (g * 1.5 + a) / p : 0;
@@ -32,6 +31,41 @@ function computeOverall(p: number, g: number, a: number, skill?: string) {
     skill === "craque" ? 12 : skill === "bom_de_bola" ? 7 : skill === "casual" ? 3 : 0;
   const ovr = Math.min(99, Math.round(base + perMatch * 6 + skillBonus + Math.min(p, 20) * 0.4));
   return Math.max(50, ovr);
+}
+
+// Atributos derivados (estilo FIFA) — mantidos no range 50-99
+function computeAttrs(
+  ovr: number,
+  position: string,
+  partidas: number,
+  gols: number,
+  assistencias: number,
+) {
+  const pos = position?.toLowerCase();
+  const gpm = partidas > 0 ? gols / partidas : 0;
+  const apm = partidas > 0 ? assistencias / partidas : 0;
+  const clamp = (v: number) => Math.max(50, Math.min(99, Math.round(v)));
+
+  // bases por posição
+  const bias =
+    pos === "goleiro"
+      ? { PAC: -8, SHO: -20, PAS: -5, DRI: -8, DEF: 12, PHY: 6 }
+      : pos === "zagueiro"
+      ? { PAC: -2, SHO: -10, PAS: 0, DRI: -4, DEF: 12, PHY: 8 }
+      : pos === "meia"
+      ? { PAC: 2, SHO: 0, PAS: 8, DRI: 5, DEF: -2, PHY: 0 }
+      : pos === "atacante"
+      ? { PAC: 6, SHO: 10, PAS: -2, DRI: 6, DEF: -10, PHY: 2 }
+      : { PAC: 0, SHO: 0, PAS: 0, DRI: 0, DEF: 0, PHY: 0 };
+
+  return {
+    PAC: clamp(ovr + bias.PAC + gpm * 6),
+    SHO: clamp(ovr + bias.SHO + gpm * 14),
+    PAS: clamp(ovr + bias.PAS + apm * 14),
+    DRI: clamp(ovr + bias.DRI + (gpm + apm) * 5),
+    DEF: clamp(ovr + bias.DEF - gpm * 4),
+    PHY: clamp(ovr + bias.PHY + Math.min(partidas, 20) * 0.2),
+  };
 }
 
 export function AthleteCard({
@@ -47,19 +81,77 @@ export function AthleteCard({
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
+  const [cleanAvatar, setCleanAvatar] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   const ovr = computeOverall(partidas, gols, assistencias, skillLevel);
   const pos = POS_SHORT[position?.toLowerCase()] ?? "JOG";
+  const attrs = useMemo(
+    () => computeAttrs(ovr, position, partidas, gols, assistencias),
+    [ovr, position, partidas, gols, assistencias],
+  );
 
-  // Tier visual (cor do card) baseado no OVR
+  // Tier visual
   const tier =
     ovr >= 90
-      ? { from: "from-yellow-300", via: "via-amber-400", to: "to-yellow-600", label: "ICON" }
+      ? {
+          label: "ICON",
+          ringFrom: "#fde68a",
+          ringTo: "#b45309",
+          base: "from-amber-900 via-yellow-700 to-amber-950",
+          glow: "rgba(251,191,36,0.55)",
+          accent: "#fde047",
+        }
       : ovr >= 80
-      ? { from: "from-amber-200", via: "via-yellow-300", to: "to-amber-500", label: "OURO" }
+      ? {
+          label: "OURO",
+          ringFrom: "#fcd34d",
+          ringTo: "#92400e",
+          base: "from-yellow-900 via-amber-700 to-yellow-950",
+          glow: "rgba(250,204,21,0.45)",
+          accent: "#fde047",
+        }
       : ovr >= 70
-      ? { from: "from-zinc-200", via: "via-zinc-300", to: "to-zinc-500", label: "PRATA" }
-      : { from: "from-orange-300", via: "via-amber-600", to: "to-orange-800", label: "BRONZE" };
+      ? {
+          label: "PRATA",
+          ringFrom: "#e5e7eb",
+          ringTo: "#52525b",
+          base: "from-slate-700 via-zinc-600 to-slate-900",
+          glow: "rgba(226,232,240,0.35)",
+          accent: "#e2e8f0",
+        }
+      : {
+          label: "BRONZE",
+          ringFrom: "#fdba74",
+          ringTo: "#7c2d12",
+          base: "from-orange-900 via-amber-800 to-orange-950",
+          glow: "rgba(251,146,60,0.4)",
+          accent: "#fed7aa",
+        };
+
+  // Tenta remover fundo automaticamente quando há foto
+  useEffect(() => {
+    if (!avatarUrl) {
+      setCleanAvatar(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setRemoving(true);
+      try {
+        const out = await removeBackgroundFromUrl(avatarUrl);
+        if (!cancelled) setCleanAvatar(out);
+      } catch (e) {
+        console.warn("bg removal failed", e);
+        if (!cancelled) setCleanAvatar(avatarUrl);
+      } finally {
+        if (!cancelled) setRemoving(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [avatarUrl]);
 
   const initials = displayName
     .split(" ")
@@ -82,8 +174,6 @@ export function AthleteCard({
         canvas.toBlob((b) => res(b as Blob), "image/png", 1),
       );
       const file = new File([blob], `${displayName}-card.png`, { type: "image/png" });
-
-      // Tenta share nativo
       const navAny = navigator as Navigator & {
         canShare?: (data: { files: File[] }) => boolean;
       };
@@ -94,7 +184,6 @@ export function AthleteCard({
           text: `Meu card no JemTech Sports — OVR ${ovr}`,
         });
       } else {
-        // Fallback: download
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -111,87 +200,258 @@ export function AthleteCard({
     }
   };
 
+  // SVG path do escudo (formato pentagonal estilizado)
+  const shieldClip = "polygon(50% 0%, 100% 8%, 100% 70%, 50% 100%, 0% 70%, 0% 8%)";
+
   return (
     <div className="space-y-3">
       <div className="flex justify-center">
         <div
           ref={ref}
-          className={`relative w-[260px] aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br ${tier.from} ${tier.via} ${tier.to} shadow-2xl`}
+          className="relative"
           style={{
-            boxShadow:
-              "0 0 30px rgba(255,200,50,0.3), inset 0 0 20px rgba(255,255,255,0.1)",
+            width: 280,
+            height: 400,
+            filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
-          {/* Padrão decorativo */}
+          {/* Borda externa (anel dourado/neon do escudo) */}
           <div
-            className="absolute inset-0 opacity-20 pointer-events-none"
+            className="absolute inset-0"
             style={{
+              clipPath: shieldClip,
+              background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo}, ${tier.ringFrom})`,
+            }}
+          />
+          {/* Camada interna (1px de espessura da borda) */}
+          <div
+            className={`absolute inset-[3px] bg-gradient-to-br ${tier.base}`}
+            style={{ clipPath: shieldClip }}
+          />
+
+          {/* Texturas: raios de luz */}
+          <div
+            className="absolute inset-[3px] opacity-40 pointer-events-none"
+            style={{
+              clipPath: shieldClip,
+              background: `radial-gradient(ellipse at 50% 0%, ${tier.glow}, transparent 60%),
+                           conic-gradient(from 220deg at 50% 30%, transparent 0deg, rgba(255,255,255,0.18) 30deg, transparent 70deg, rgba(255,255,255,0.1) 130deg, transparent 180deg)`,
+            }}
+          />
+          {/* Padrão geométrico */}
+          <div
+            className="absolute inset-[3px] opacity-15 pointer-events-none mix-blend-overlay"
+            style={{
+              clipPath: shieldClip,
               backgroundImage:
-                "repeating-linear-gradient(45deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 8px)",
+                "repeating-linear-gradient(60deg, rgba(255,255,255,0.4) 0 1px, transparent 1px 14px), repeating-linear-gradient(-60deg, rgba(0,0,0,0.3) 0 1px, transparent 1px 14px)",
             }}
           />
 
-          {/* OVR + Posição */}
-          <div className="absolute top-4 left-4 text-zinc-900 leading-none">
-            <div className="text-5xl font-black tracking-tight">{ovr}</div>
-            <div className="text-sm font-bold mt-1 tracking-widest">{pos}</div>
-            <div className="mt-2 h-px w-10 bg-zinc-900/50" />
-            <div className="text-[9px] font-bold mt-1 tracking-widest opacity-70">{tier.label}</div>
-          </div>
+          {/* Reflexo no topo */}
+          <div
+            className="absolute inset-x-[3px] top-[3px] h-1/2 opacity-25 pointer-events-none"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.6), transparent 70%)",
+            }}
+          />
 
-          {/* Avatar central */}
-          <div className="absolute top-4 right-4 left-20 flex items-center justify-center">
-            <Avatar className="h-28 w-28 ring-4 ring-zinc-900/20">
-              <AvatarImage src={avatarUrl ?? undefined} crossOrigin="anonymous" />
-              <AvatarFallback className="bg-zinc-900 text-2xl text-white">
-                {initials || "??"}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-
-          {/* Nome */}
-          <div className="absolute left-0 right-0 top-[58%] text-center px-3">
-            <div className="text-zinc-900 font-black text-lg uppercase tracking-wide truncate drop-shadow">
-              {displayName}
+          {/* OVR + posição (esquerda topo) */}
+          <div
+            className="absolute top-7 left-6 leading-none select-none"
+            style={{ color: tier.accent, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}
+          >
+            <div
+              className="font-black tracking-tighter"
+              style={{
+                fontSize: 56,
+                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                letterSpacing: "-0.04em",
+              }}
+            >
+              {ovr}
             </div>
-            <div className="h-px bg-zinc-900/40 mt-1 mx-6" />
-            {(craqueWins > 0 || bagreWins > 0) && (
-              <div className="mt-1.5 flex items-center justify-center gap-1.5">
-                {craqueWins > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-zinc-900/85 text-yellow-300 text-[9px] font-black tracking-wider">
-                    ⭐ CRAQUE x{craqueWins}
-                  </span>
-                )}
-                {bagreWins > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full bg-zinc-900/85 text-orange-300 text-[9px] font-black tracking-wider">
-                    🐟 BAGRE x{bagreWins}
-                  </span>
-                )}
+            <div
+              className="font-black mt-1 tracking-[0.25em]"
+              style={{
+                fontSize: 13,
+                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+              }}
+            >
+              {pos}
+            </div>
+            <div
+              className="mt-1.5 h-px w-9"
+              style={{ background: tier.accent, opacity: 0.6 }}
+            />
+            {/* "Bandeira" + escudo do clube */}
+            <div className="flex items-center gap-1 mt-2">
+              <div
+                className="w-5 h-3.5 rounded-sm overflow-hidden border"
+                style={{ borderColor: `${tier.accent}55` }}
+                title="Brasil"
+              >
+                <div className="h-full bg-green-600 relative">
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, transparent 35%, #fde047 35% 65%, transparent 65%)",
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-700" />
+                  </div>
+                </div>
+              </div>
+              <div
+                className="w-4 h-4 rounded-sm flex items-center justify-center text-[7px] font-black"
+                style={{
+                  background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo})`,
+                  color: "#0a0a0a",
+                }}
+                title="JemTech Sports"
+              >
+                JT
+              </div>
+            </div>
+          </div>
+
+          {/* Avatar (busto sem fundo, integrado) */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: 18,
+              right: -6,
+              width: 200,
+              height: 220,
+            }}
+          >
+            {cleanAvatar ? (
+              <img
+                src={cleanAvatar}
+                alt={displayName}
+                crossOrigin="anonymous"
+                className="w-full h-full object-contain object-bottom"
+                style={{
+                  filter:
+                    "drop-shadow(0 8px 12px rgba(0,0,0,0.55)) drop-shadow(0 2px 3px rgba(0,0,0,0.4))",
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-end justify-center pb-2">
+                <div
+                  className="w-28 h-28 rounded-full flex items-center justify-center text-3xl font-black"
+                  style={{
+                    background: "rgba(0,0,0,0.45)",
+                    color: tier.accent,
+                    border: `2px solid ${tier.accent}55`,
+                  }}
+                >
+                  {removing ? (
+                    <Loader2 className="w-7 h-7 animate-spin" />
+                  ) : (
+                    initials || "??"
+                  )}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Stats grid */}
-          <div className="absolute bottom-5 left-0 right-0 px-6 grid grid-cols-3 gap-1 text-center text-zinc-900">
-            <Stat label="PJ" value={partidas} />
-            <Stat label="GOL" value={gols} />
-            <Stat label="AST" value={assistencias} />
+          {/* Nome */}
+          <div className="absolute left-0 right-0 px-6 text-center" style={{ top: 232 }}>
+            <div
+              className="font-black uppercase truncate"
+              style={{
+                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                fontSize: 22,
+                letterSpacing: "0.06em",
+                color: tier.accent,
+                textShadow: "0 2px 6px rgba(0,0,0,0.7)",
+              }}
+            >
+              {displayName}
+            </div>
+            <div
+              className="h-px mx-8 mt-0.5"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${tier.accent}, transparent)`,
+                opacity: 0.7,
+              }}
+            />
           </div>
 
-          {/* Selo da marca */}
-          <div className="absolute bottom-1 right-2 text-[8px] font-black tracking-widest text-zinc-900/60">
-            JEMTECH
+          {/* Atributos 3x2 */}
+          <div
+            className="absolute left-0 right-0 px-7 grid grid-cols-2 gap-x-5 gap-y-1"
+            style={{ top: 268, color: tier.accent }}
+          >
+            {(
+              [
+                ["PAC", attrs.PAC],
+                ["DRI", attrs.DRI],
+                ["SHO", attrs.SHO],
+                ["DEF", attrs.DEF],
+                ["PAS", attrs.PAS],
+                ["PHY", attrs.PHY],
+              ] as const
+            ).map(([k, v]) => (
+              <div
+                key={k}
+                className="flex items-center justify-between"
+                style={{
+                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                }}
+              >
+                <span className="text-[18px] font-black tabular-nums leading-none">{v}</span>
+                <span className="text-[11px] font-bold tracking-[0.2em] opacity-75 leading-none">
+                  {k}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Selos craque/bagre */}
+          {(craqueWins > 0 || bagreWins > 0) && (
+            <div
+              className="absolute left-0 right-0 flex justify-center gap-1.5 px-4"
+              style={{ top: 358 }}
+            >
+              {craqueWins > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-black/70 text-yellow-300 text-[9px] font-black tracking-wider border border-yellow-500/50">
+                  ⭐ CRAQUE x{craqueWins}
+                </span>
+              )}
+              {bagreWins > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-black/70 text-orange-300 text-[9px] font-black tracking-wider border border-orange-500/50">
+                  🐟 BAGRE x{bagreWins}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Marca */}
+          <div
+            className="absolute bottom-[18px] left-0 right-0 text-center text-[8px] font-black tracking-[0.4em]"
+            style={{ color: tier.accent, opacity: 0.55 }}
+          >
+            JEMTECH · {tier.label}
           </div>
         </div>
       </div>
 
+      {removing && (
+        <p className="text-[11px] text-center text-muted-foreground flex items-center justify-center gap-1.5">
+          <Sparkles className="w-3 h-3 animate-pulse" />
+          Recortando sua foto…
+        </p>
+      )}
+
       <div className="flex gap-2 justify-center">
         <Button onClick={handleShare} disabled={busy} size="sm" className="gap-2">
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Share2 className="h-4 w-4" />
-          )}
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
           Compartilhar card
         </Button>
         <Button
@@ -205,15 +465,6 @@ export function AthleteCard({
           Baixar
         </Button>
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="text-xl font-black leading-none">{value}</div>
-      <div className="text-[9px] font-bold tracking-widest opacity-70 mt-0.5">{label}</div>
     </div>
   );
 }
