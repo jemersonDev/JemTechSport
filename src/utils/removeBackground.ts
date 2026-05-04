@@ -101,3 +101,49 @@ export async function removeBackgroundFromUrl(url: string): Promise<string> {
   }
   return dataUrl;
 }
+
+/** Remove o fundo de um File/Blob e retorna um Blob PNG transparente. */
+export async function removeBackgroundFromBlob(file: Blob): Promise<Blob> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImage(url);
+    const canvas = resizeToCanvas(img);
+    const pipe = (await getPipeline()) as (
+      input: HTMLCanvasElement,
+    ) => Promise<unknown>;
+    const result = (await pipe(canvas)) as
+      | { toCanvas?: () => HTMLCanvasElement }
+      | Array<{ mask?: { data: Uint8Array; width: number; height: number } }>;
+
+    let outCanvas: HTMLCanvasElement;
+    if (Array.isArray(result) && result[0]?.mask) {
+      const { mask } = result[0];
+      outCanvas = document.createElement("canvas");
+      outCanvas.width = canvas.width;
+      outCanvas.height = canvas.height;
+      const ctx = outCanvas.getContext("2d")!;
+      ctx.drawImage(canvas, 0, 0);
+      const imageData = ctx.getImageData(0, 0, outCanvas.width, outCanvas.height);
+      const data = imageData.data;
+      const m = mask!.data;
+      for (let i = 0; i < m.length; i++) data[i * 4 + 3] = m[i];
+      ctx.putImageData(imageData, 0, 0);
+    } else if (
+      typeof (result as { toCanvas?: () => HTMLCanvasElement }).toCanvas ===
+      "function"
+    ) {
+      outCanvas = (result as { toCanvas: () => HTMLCanvasElement }).toCanvas();
+    } else {
+      throw new Error("background removal failed");
+    }
+
+    return await new Promise<Blob>((resolve, reject) =>
+      outCanvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+        "image/png",
+      ),
+    );
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
