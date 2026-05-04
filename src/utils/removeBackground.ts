@@ -13,9 +13,8 @@ async function getPipeline() {
       env.allowLocalModels = false;
       env.useBrowserCache = true;
       return pipeline("background-removal", "briaai/RMBG-1.4", {
-        // @ts-expect-error device support varies
         device: "webgpu",
-      }).catch(() =>
+      } as Parameters<typeof pipeline>[2]).catch(() =>
         pipeline("background-removal", "briaai/RMBG-1.4"),
       );
     })();
