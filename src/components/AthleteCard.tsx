@@ -319,14 +319,18 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar (busto sem fundo, integrado) */}
+          {/* Avatar (busto sem fundo, integrado, ocupa quase toda a altura) */}
           <div
-            className="absolute pointer-events-none"
+            className="absolute pointer-events-none overflow-visible"
             style={{
-              top: 18,
-              right: -6,
-              width: 200,
-              height: 220,
+              top: -12,
+              left: 40,
+              right: 0,
+              height: 290,
+              WebkitMaskImage:
+                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
+              maskImage:
+                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
             }}
           >
             {cleanAvatar ? (
@@ -337,21 +341,20 @@ export function AthleteCard({
                 className="w-full h-full object-contain object-bottom"
                 style={{
                   filter:
-                    "drop-shadow(0 8px 12px rgba(0,0,0,0.55)) drop-shadow(0 2px 3px rgba(0,0,0,0.4))",
+                    "drop-shadow(0 10px 14px rgba(0,0,0,0.7)) drop-shadow(0 2px 3px rgba(0,0,0,0.5))",
                 }}
               />
             ) : (
-              <div className="w-full h-full flex items-end justify-center pb-2">
+              <div className="w-full h-full flex items-end justify-center pb-4">
                 <div
-                  className="w-28 h-28 rounded-full flex items-center justify-center text-3xl font-black"
+                  className="text-5xl font-black"
                   style={{
-                    background: "rgba(0,0,0,0.45)",
                     color: tier.accent,
-                    border: `2px solid ${tier.accent}55`,
+                    textShadow: "0 2px 8px rgba(0,0,0,0.7)",
                   }}
                 >
                   {removing ? (
-                    <Loader2 className="w-7 h-7 animate-spin" />
+                    <Loader2 className="w-9 h-9 animate-spin" />
                   ) : (
                     initials || "??"
                   )}
@@ -360,33 +363,33 @@ export function AthleteCard({
             )}
           </div>
 
-          {/* Nome */}
-          <div className="absolute left-0 right-0 px-6 text-center" style={{ top: 232 }}>
+          {/* Nome — alto contraste com glow neon */}
+          <div className="absolute left-0 right-0 px-4 text-center z-10" style={{ top: 244 }}>
             <div
               className="font-black uppercase truncate"
               style={{
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                fontSize: 22,
-                letterSpacing: "0.06em",
-                color: tier.accent,
-                textShadow: "0 2px 6px rgba(0,0,0,0.7)",
+                fontSize: 28,
+                letterSpacing: "0.08em",
+                color: "#ffffff",
+                textShadow: `0 0 12px ${tier.accent}, 0 0 24px ${tier.accent}, 0 2px 4px rgba(0,0,0,0.9)`,
               }}
             >
               {displayName}
             </div>
             <div
-              className="h-px mx-8 mt-0.5"
+              className="h-[2px] mx-6 mt-1 rounded-full"
               style={{
                 background: `linear-gradient(90deg, transparent, ${tier.accent}, transparent)`,
-                opacity: 0.7,
+                boxShadow: `0 0 8px ${tier.accent}`,
               }}
             />
           </div>
 
-          {/* Atributos 3x2 */}
+          {/* Atributos 3x2 — brancos com glow neon */}
           <div
-            className="absolute left-0 right-0 px-7 grid grid-cols-2 gap-x-5 gap-y-1"
-            style={{ top: 268, color: tier.accent }}
+            className="absolute left-0 right-0 px-8 grid grid-cols-2 gap-x-6 gap-y-1.5 z-10"
+            style={{ top: 286 }}
           >
             {(
               [
@@ -403,10 +406,12 @@ export function AthleteCard({
                 className="flex items-center justify-between"
                 style={{
                   fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  color: "#ffffff",
+                  textShadow: `0 0 8px ${tier.accent}, 0 1px 3px rgba(0,0,0,0.9)`,
                 }}
               >
-                <span className="text-[18px] font-black tabular-nums leading-none">{v}</span>
-                <span className="text-[11px] font-bold tracking-[0.2em] opacity-75 leading-none">
+                <span className="text-[20px] font-black tabular-nums leading-none">{v}</span>
+                <span className="text-[12px] font-bold tracking-[0.22em] opacity-95 leading-none">
                   {k}
                 </span>
               </div>
