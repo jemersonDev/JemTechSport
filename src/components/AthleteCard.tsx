@@ -319,14 +319,18 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar (busto sem fundo, integrado) */}
+          {/* Avatar (busto sem fundo, integrado, ocupa quase toda a altura) */}
           <div
-            className="absolute pointer-events-none"
+            className="absolute pointer-events-none overflow-visible"
             style={{
-              top: 18,
-              right: -6,
-              width: 200,
-              height: 220,
+              top: -12,
+              left: 40,
+              right: 0,
+              height: 290,
+              WebkitMaskImage:
+                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
+              maskImage:
+                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
             }}
           >
             {cleanAvatar ? (
@@ -337,21 +341,20 @@ export function AthleteCard({
                 className="w-full h-full object-contain object-bottom"
                 style={{
                   filter:
-                    "drop-shadow(0 8px 12px rgba(0,0,0,0.55)) drop-shadow(0 2px 3px rgba(0,0,0,0.4))",
+                    "drop-shadow(0 10px 14px rgba(0,0,0,0.7)) drop-shadow(0 2px 3px rgba(0,0,0,0.5))",
                 }}
               />
             ) : (
-              <div className="w-full h-full flex items-end justify-center pb-2">
+              <div className="w-full h-full flex items-end justify-center pb-4">
                 <div
-                  className="w-28 h-28 rounded-full flex items-center justify-center text-3xl font-black"
+                  className="text-5xl font-black"
                   style={{
-                    background: "rgba(0,0,0,0.45)",
                     color: tier.accent,
-                    border: `2px solid ${tier.accent}55`,
+                    textShadow: "0 2px 8px rgba(0,0,0,0.7)",
                   }}
                 >
                   {removing ? (
-                    <Loader2 className="w-7 h-7 animate-spin" />
+                    <Loader2 className="w-9 h-9 animate-spin" />
                   ) : (
                     initials || "??"
                   )}
