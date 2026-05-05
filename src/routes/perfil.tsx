@@ -293,8 +293,13 @@ function PerfilPage() {
                 onChange={handleAvatarUpload}
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Toque na câmera pra trocar a foto
+            <p className="text-xs text-muted-foreground text-center max-w-xs">
+              Toque na câmera pra trocar a foto.
+              <br />
+              <span className="text-[10px] opacity-80">
+                💡 Dica: pra um card profissional estilo FIFA, use uma foto com
+                fundo claro/neutro ou já com fundo transparente (PNG).
+              </span>
             </p>
           </div>
 

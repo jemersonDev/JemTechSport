@@ -200,8 +200,9 @@ export function AthleteCard({
     }
   };
 
-  // SVG path do escudo (formato pentagonal estilizado)
-  const shieldClip = "polygon(50% 0%, 100% 8%, 100% 70%, 50% 100%, 0% 70%, 0% 8%)";
+  // Escudo mais alto/envolvente (curvas pelos cantos verticais)
+  const shieldClip =
+    "polygon(50% 0%, 92% 4%, 100% 14%, 100% 78%, 50% 100%, 0% 78%, 0% 14%, 8% 4%)";
 
   return (
     <div className="space-y-3">
@@ -210,8 +211,8 @@ export function AthleteCard({
           ref={ref}
           className="relative"
           style={{
-            width: 280,
-            height: 400,
+            width: 290,
+            height: 460,
             filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
@@ -319,18 +320,19 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar (busto sem fundo, integrado, ocupa quase toda a altura) */}
+          {/* Avatar (busto integrado, atrás do texto, com clip do escudo) */}
           <div
-            className="absolute pointer-events-none overflow-visible"
+            className="absolute pointer-events-none overflow-hidden z-0"
             style={{
-              top: -12,
-              left: 40,
-              right: 0,
-              height: 290,
+              top: 8,
+              left: 8,
+              right: 8,
+              bottom: 8,
+              clipPath: shieldClip,
               WebkitMaskImage:
-                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, #000 14%, #000 70%, transparent 92%)",
               maskImage:
-                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, #000 14%, #000 70%, transparent 92%)",
             }}
           >
             {cleanAvatar ? (
@@ -338,16 +340,24 @@ export function AthleteCard({
                 src={cleanAvatar}
                 alt={displayName}
                 crossOrigin="anonymous"
-                className="w-full h-full object-contain object-bottom"
+                className="absolute inset-x-0 mx-auto"
                 style={{
+                  top: -4,
+                  height: "78%",
+                  width: "auto",
+                  maxWidth: "none",
+                  left: "50%",
+                  transform: "translateX(-42%)",
+                  objectFit: "contain",
+                  mixBlendMode: "screen",
                   filter:
-                    "drop-shadow(0 10px 14px rgba(0,0,0,0.7)) drop-shadow(0 2px 3px rgba(0,0,0,0.5))",
+                    "contrast(1.08) saturate(1.15) brightness(1.08) drop-shadow(0 12px 16px rgba(0,0,0,0.6))",
                 }}
               />
             ) : (
-              <div className="w-full h-full flex items-end justify-center pb-4">
+              <div className="w-full h-full flex items-end justify-center pb-10">
                 <div
-                  className="text-5xl font-black"
+                  className="text-6xl font-black"
                   style={{
                     color: tier.accent,
                     textShadow: "0 2px 8px rgba(0,0,0,0.7)",
@@ -364,7 +374,7 @@ export function AthleteCard({
           </div>
 
           {/* Nome — alto contraste com glow neon */}
-          <div className="absolute left-0 right-0 px-4 text-center z-10" style={{ top: 244 }}>
+          <div className="absolute left-0 right-0 px-4 text-center z-20" style={{ top: 280 }}>
             <div
               className="font-black uppercase truncate"
               style={{
@@ -388,8 +398,8 @@ export function AthleteCard({
 
           {/* Atributos 3x2 — brancos com glow neon */}
           <div
-            className="absolute left-0 right-0 px-8 grid grid-cols-2 gap-x-6 gap-y-1.5 z-10"
-            style={{ top: 286 }}
+            className="absolute left-0 right-0 px-8 grid grid-cols-2 gap-x-6 gap-y-1.5 z-20"
+            style={{ top: 326 }}
           >
             {(
               [
@@ -421,8 +431,8 @@ export function AthleteCard({
           {/* Selos craque/bagre */}
           {(craqueWins > 0 || bagreWins > 0) && (
             <div
-              className="absolute left-0 right-0 flex justify-center gap-1.5 px-4"
-              style={{ top: 358 }}
+              className="absolute left-0 right-0 flex justify-center gap-1.5 px-4 z-20"
+              style={{ top: 408 }}
             >
               {craqueWins > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full bg-black/70 text-yellow-300 text-[9px] font-black tracking-wider border border-yellow-500/50">
