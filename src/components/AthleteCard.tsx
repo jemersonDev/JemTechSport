@@ -398,8 +398,8 @@ export function AthleteCard({
 
           {/* Atributos 3x2 — brancos com glow neon */}
           <div
-            className="absolute left-0 right-0 px-8 grid grid-cols-2 gap-x-6 gap-y-1.5 z-10"
-            style={{ top: 286 }}
+            className="absolute left-0 right-0 px-8 grid grid-cols-2 gap-x-6 gap-y-1.5 z-20"
+            style={{ top: 326 }}
           >
             {(
               [
