@@ -8,14 +8,16 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  *
  * Fluxo:
  *   1. Valida que o utilizador é membro do racha e tem inscrição.
- *   2. Calcula valor (rateio): total_value / max_players, dividindo
- *      em valor_organizador (1 - app_fee) e valor_plataforma (app_fee).
- *   3. Chama a API do Mercado Pago para criar um pagamento PIX
- *      (payment_method_id: "pix").
- *   4. Insere uma linha em `pagamentos` com status "pendente" + dados
- *      do QR code. O webhook (api/public/mp-webhook) actualiza depois
- *      para "aprovado" quando o utilizador pagar.
+ *   2. Calcula valor (rateio): total_value / max_players. A taxa da
+ *      plataforma é fixa: R$ 5,00 por racha (rateado) + R$ 0,12 por
+ *      jogador. valor_organizador = valor_por_jogador - valor_plataforma.
+ *   3. Chama a API do Mercado Pago para criar um pagamento PIX.
+ *   4. Insere uma linha em `pagamentos` com status "pendente" + QR code.
+ *      O webhook (api/public/mp-webhook) actualiza para "aprovado".
  */
+
+export const TAXA_FIXA_RACHA = 5.0;
+export const TAXA_POR_JOGADOR = 0.12;
 
 const InputSchema = z.object({
   inscricaoId: z.string().uuid(),
