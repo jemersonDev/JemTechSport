@@ -320,18 +320,19 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar (busto sem fundo, integrado, ocupa quase toda a altura) */}
+          {/* Avatar (busto integrado, atrás do texto, com clip do escudo) */}
           <div
-            className="absolute pointer-events-none overflow-visible"
+            className="absolute pointer-events-none overflow-hidden z-0"
             style={{
-              top: -12,
-              left: 40,
-              right: 0,
-              height: 290,
+              top: 8,
+              left: 8,
+              right: 8,
+              bottom: 8,
+              clipPath: shieldClip,
               WebkitMaskImage:
-                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, #000 14%, #000 70%, transparent 92%)",
               maskImage:
-                "linear-gradient(180deg, #000 0%, #000 78%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, #000 14%, #000 70%, transparent 92%)",
             }}
           >
             {cleanAvatar ? (
@@ -339,16 +340,24 @@ export function AthleteCard({
                 src={cleanAvatar}
                 alt={displayName}
                 crossOrigin="anonymous"
-                className="w-full h-full object-contain object-bottom"
+                className="absolute inset-x-0 mx-auto"
                 style={{
+                  top: -4,
+                  height: "78%",
+                  width: "auto",
+                  maxWidth: "none",
+                  left: "50%",
+                  transform: "translateX(-42%)",
+                  objectFit: "contain",
+                  mixBlendMode: "screen",
                   filter:
-                    "drop-shadow(0 10px 14px rgba(0,0,0,0.7)) drop-shadow(0 2px 3px rgba(0,0,0,0.5))",
+                    "contrast(1.08) saturate(1.15) brightness(1.08) drop-shadow(0 12px 16px rgba(0,0,0,0.6))",
                 }}
               />
             ) : (
-              <div className="w-full h-full flex items-end justify-center pb-4">
+              <div className="w-full h-full flex items-end justify-center pb-10">
                 <div
-                  className="text-5xl font-black"
+                  className="text-6xl font-black"
                   style={{
                     color: tier.accent,
                     textShadow: "0 2px 8px rgba(0,0,0,0.7)",
