@@ -374,7 +374,7 @@ export function AthleteCard({
           </div>
 
           {/* Nome — alto contraste com glow neon */}
-          <div className="absolute left-0 right-0 px-4 text-center z-10" style={{ top: 244 }}>
+          <div className="absolute left-0 right-0 px-4 text-center z-20" style={{ top: 280 }}>
             <div
               className="font-black uppercase truncate"
               style={{
