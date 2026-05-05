@@ -200,8 +200,9 @@ export function AthleteCard({
     }
   };
 
-  // SVG path do escudo (formato pentagonal estilizado)
-  const shieldClip = "polygon(50% 0%, 100% 8%, 100% 70%, 50% 100%, 0% 70%, 0% 8%)";
+  // Escudo mais alto/envolvente (curvas pelos cantos verticais)
+  const shieldClip =
+    "polygon(50% 0%, 92% 4%, 100% 14%, 100% 78%, 50% 100%, 0% 78%, 0% 14%, 8% 4%)";
 
   return (
     <div className="space-y-3">
@@ -210,8 +211,8 @@ export function AthleteCard({
           ref={ref}
           className="relative"
           style={{
-            width: 280,
-            height: 400,
+            width: 290,
+            height: 460,
             filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
