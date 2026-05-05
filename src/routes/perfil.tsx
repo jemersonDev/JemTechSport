@@ -444,6 +444,21 @@ function PerfilPage() {
 
         <Card className="p-2 divide-y divide-border">
           <Link
+            to="/ajuda"
+            className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-md transition"
+          >
+            <div className="w-9 h-9 rounded-full bg-[#00FF00]/10 text-[#00FF00] flex items-center justify-center">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-medium">Central de ajuda</div>
+              <div className="text-[11px] text-muted-foreground">
+                FAQ + assistente IA
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          <Link
             to="/organizador"
             className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-md transition"
           >
