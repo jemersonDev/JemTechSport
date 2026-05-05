@@ -76,12 +76,14 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
 
     const maxPlayers = Math.max(1, racha.max_players);
     const valorTotalRacha = Number(racha.total_value) || 0;
-    const appFee = Number(racha.app_fee) || 0;
     const valorPorJogador = +(valorTotalRacha / maxPlayers).toFixed(2);
     if (valorPorJogador <= 0) {
       return { ok: false as const, error: "Racha sem valor definido" };
     }
-    const valorPlataforma = +(valorPorJogador * appFee).toFixed(2);
+    // Taxa fixa: R$ 5,00 por racha (rateado pelos jogadores) + R$ 0,12 por jogador
+    const valorPlataforma = +(
+      TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR
+    ).toFixed(2);
     const valorOrganizador = +(valorPorJogador - valorPlataforma).toFixed(2);
 
     // 3) Verificar se já existe pagamento pendente para esta inscrição
