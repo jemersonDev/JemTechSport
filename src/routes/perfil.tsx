@@ -33,6 +33,7 @@ import { PlayerStats } from "@/components/PlayerStats";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
 import { AthleteCard } from "@/components/AthleteCard";
 import { processAvatar } from "@/utils/processAvatar";
+import { FounderBadge } from "@/components/FounderBadge";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -261,6 +262,7 @@ function PerfilPage() {
       </header>
 
       <main className="max-w-2xl mx-auto p-4 space-y-4">
+        <FounderBadge />
         <Card className="p-6 space-y-6">
           {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
