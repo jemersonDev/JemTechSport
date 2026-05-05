@@ -19,6 +19,7 @@ import {
   Trophy,
   Star,
   FileText,
+  Sparkles,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
