@@ -431,8 +431,8 @@ export function AthleteCard({
           {/* Selos craque/bagre */}
           {(craqueWins > 0 || bagreWins > 0) && (
             <div
-              className="absolute left-0 right-0 flex justify-center gap-1.5 px-4"
-              style={{ top: 358 }}
+              className="absolute left-0 right-0 flex justify-center gap-1.5 px-4 z-20"
+              style={{ top: 408 }}
             >
               {craqueWins > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full bg-black/70 text-yellow-300 text-[9px] font-black tracking-wider border border-yellow-500/50">
