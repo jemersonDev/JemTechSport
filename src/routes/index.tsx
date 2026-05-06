@@ -1697,14 +1697,25 @@ function Index() {
             )}
 
             {racha?.finalizado_em && partidaFinalizadaId && activeRachaId && (
-              <CraqueBagreVote
-                partidaId={partidaFinalizadaId}
-                rachaId={activeRachaId}
-                players={[...teamA, ...teamB].map((p) => ({
-                  id: p.id,
-                  name: p.name,
-                }))}
-              />
+              <>
+                <CraqueBagreVote
+                  partidaId={partidaFinalizadaId}
+                  rachaId={activeRachaId}
+                  players={[...teamA, ...teamB].map((p) => ({
+                    id: p.id,
+                    name: p.name,
+                  }))}
+                />
+                <MatchStoryShare
+                  partidaId={partidaFinalizadaId}
+                  rachaId={activeRachaId}
+                  rachaName={racha?.name ?? "Racha"}
+                  scoreA={scoreA}
+                  scoreB={scoreB}
+                  teamA={teamA.map((p) => ({ id: p.id, name: p.name }))}
+                  teamB={teamB.map((p) => ({ id: p.id, name: p.name }))}
+                />
+              </>
             )}
 
             <section className="space-y-2">
