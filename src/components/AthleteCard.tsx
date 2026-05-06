@@ -237,13 +237,23 @@ export function AthleteCard({
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-center">
+      <div className="flex justify-center" style={{ perspective: 1200 }}>
         <div
-          ref={ref}
-          className="relative"
+          ref={tiltRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={resetTilt}
+          className="relative transition-transform duration-200 ease-out will-change-transform"
           style={{
             width: 290,
             height: 460,
+            transformStyle: "preserve-3d",
+            transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+          }}
+        >
+        <div
+          ref={ref}
+          className="relative w-full h-full"
+          style={{
             filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
