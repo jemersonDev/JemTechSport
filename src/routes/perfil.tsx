@@ -53,6 +53,7 @@ function PerfilPage() {
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cardFileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
@@ -60,6 +61,7 @@ function PerfilPage() {
   const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCard, setUploadingCard] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cardStats, setCardStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
 
@@ -226,6 +228,67 @@ function PerfilPage() {
       console.error(err);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleCardAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 10MB)");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Arquivo precisa ser uma imagem");
+      return;
+    }
+
+    setUploadingCard(true);
+    try {
+      const processed = await processAvatar(file, 768);
+      let finalBlob: Blob = processed;
+      let ext = "jpg";
+      let contentType = "image/jpeg";
+      try {
+        toast.info("Removendo fundo da foto do card…");
+        const { removeBackgroundFromBlob } = await import("@/utils/removeBackground");
+        finalBlob = await removeBackgroundFromBlob(processed);
+        ext = "png";
+        contentType = "image/png";
+      } catch (bgErr) {
+        console.warn("bg removal falhou, usando original", bgErr);
+      }
+
+      const path = `${user.id}/card-avatar.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, finalBlob, { upsert: true, cacheControl: "3600", contentType });
+
+      if (uploadError) {
+        toast.error("Erro no upload: " + uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${data.publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ card_avatar_url: url } as never)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        toast.error("Erro ao salvar foto do card: " + updateError.message);
+        return;
+      }
+      await refreshProfile();
+      toast.success("Foto do card atualizada!");
+    } catch (err) {
+      toast.error("Erro ao processar imagem");
+      console.error(err);
+    } finally {
+      setUploadingCard(false);
+      if (cardFileInputRef.current) cardFileInputRef.current.value = "";
     }
   };
 
@@ -424,7 +487,7 @@ function PerfilPage() {
             </h2>
             <AthleteCard
               displayName={displayName || profile.display_name}
-              avatarUrl={profile.avatar_url}
+              avatarUrl={(profile as { card_avatar_url?: string | null }).card_avatar_url ?? profile.avatar_url}
               position={position}
               skillLevel={skill}
               partidas={cardStats.partidas}
@@ -433,6 +496,34 @@ function PerfilPage() {
               craqueWins={cardStats.craque}
               bagreWins={cardStats.bagre}
             />
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <Button
+                onClick={() => cardFileInputRef.current?.click()}
+                disabled={uploadingCard}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                {uploadingCard ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+                {(profile as { card_avatar_url?: string | null }).card_avatar_url
+                  ? "Trocar foto do card"
+                  : "Adicionar foto do card"}
+              </Button>
+              <input
+                ref={cardFileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCardAvatarUpload}
+              />
+              <p className="text-[11px] text-muted-foreground text-center max-w-xs">
+                Foto exclusiva do card (independente da foto do perfil). Use uma foto de corpo/busto pra ficar igual aos cards do FIFA.
+              </p>
+            </div>
           </Card>
         )}
 
