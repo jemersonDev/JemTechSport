@@ -487,7 +487,7 @@ function PerfilPage() {
             </h2>
             <AthleteCard
               displayName={displayName || profile.display_name}
-              avatarUrl={profile.avatar_url}
+              avatarUrl={(profile as { card_avatar_url?: string | null }).card_avatar_url ?? profile.avatar_url}
               position={position}
               skillLevel={skill}
               partidas={cardStats.partidas}
@@ -496,6 +496,34 @@ function PerfilPage() {
               craqueWins={cardStats.craque}
               bagreWins={cardStats.bagre}
             />
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <Button
+                onClick={() => cardFileInputRef.current?.click()}
+                disabled={uploadingCard}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                {uploadingCard ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+                {(profile as { card_avatar_url?: string | null }).card_avatar_url
+                  ? "Trocar foto do card"
+                  : "Adicionar foto do card"}
+              </Button>
+              <input
+                ref={cardFileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCardAvatarUpload}
+              />
+              <p className="text-[11px] text-muted-foreground text-center max-w-xs">
+                Foto exclusiva do card (independente da foto do perfil). Use uma foto de corpo/busto pra ficar igual aos cards do FIFA.
+              </p>
+            </div>
           </Card>
         )}
 
