@@ -231,6 +231,67 @@ function PerfilPage() {
     }
   };
 
+  const handleCardAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 10MB)");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Arquivo precisa ser uma imagem");
+      return;
+    }
+
+    setUploadingCard(true);
+    try {
+      const processed = await processAvatar(file, 768);
+      let finalBlob: Blob = processed;
+      let ext = "jpg";
+      let contentType = "image/jpeg";
+      try {
+        toast.info("Removendo fundo da foto do card…");
+        const { removeBackgroundFromBlob } = await import("@/utils/removeBackground");
+        finalBlob = await removeBackgroundFromBlob(processed);
+        ext = "png";
+        contentType = "image/png";
+      } catch (bgErr) {
+        console.warn("bg removal falhou, usando original", bgErr);
+      }
+
+      const path = `${user.id}/card-avatar.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, finalBlob, { upsert: true, cacheControl: "3600", contentType });
+
+      if (uploadError) {
+        toast.error("Erro no upload: " + uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = `${data.publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ card_avatar_url: url } as never)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        toast.error("Erro ao salvar foto do card: " + updateError.message);
+        return;
+      }
+      await refreshProfile();
+      toast.success("Foto do card atualizada!");
+    } catch (err) {
+      toast.error("Erro ao processar imagem");
+      console.error(err);
+    } finally {
+      setUploadingCard(false);
+      if (cardFileInputRef.current) cardFileInputRef.current.value = "";
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/login" });
