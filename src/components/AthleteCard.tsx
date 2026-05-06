@@ -80,9 +80,40 @@ export function AthleteCard({
   bagreWins = 0,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const [cleanAvatar, setCleanAvatar] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
+
+  // Tilt 3D com mouse / touch + giroscópio
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = tiltRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const ry = (x - 0.5) * 22; // rotateY
+    const rx = (0.5 - y) * 22; // rotateX
+    setTilt({ rx, ry, mx: x * 100, my: y * 100, active: true });
+  };
+  const resetTilt = () =>
+    setTilt({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
+
+  // Giroscópio (mobile) — só ativa se não tiver toque
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = (e: DeviceOrientationEvent) => {
+      if (tilt.active) return;
+      const gamma = e.gamma ?? 0; // -90..90 (esq/dir)
+      const beta = e.beta ?? 0; // -180..180 (cima/baixo)
+      const ry = Math.max(-15, Math.min(15, gamma / 3));
+      const rx = Math.max(-15, Math.min(15, (beta - 45) / 3));
+      setTilt((t) => (t.active ? t : { ...t, rx, ry, mx: 50 + ry * 2, my: 50 - rx * 2 }));
+    };
+    window.addEventListener("deviceorientation", handler);
+    return () => window.removeEventListener("deviceorientation", handler);
+  }, [tilt.active]);
 
   const ovr = computeOverall(partidas, gols, assistencias, skillLevel);
   const pos = POS_SHORT[position?.toLowerCase()] ?? "JOG";
