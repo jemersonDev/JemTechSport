@@ -490,11 +490,53 @@ export function AthleteCard({
 
           {/* Marca */}
           <div
-            className="absolute bottom-[18px] left-0 right-0 text-center text-[8px] font-black tracking-[0.4em]"
+            className="absolute bottom-[18px] left-0 right-0 text-center text-[8px] font-black tracking-[0.4em] z-20"
             style={{ color: tier.accent, opacity: 0.55 }}
           >
             JEMTECH · {tier.label}
           </div>
+
+          {/* ✨ Camada HOLOGRÁFICA — shimmer arco-íris que segue o cursor */}
+          <div
+            className="absolute inset-[3px] pointer-events-none z-30 transition-opacity duration-300"
+            style={{
+              clipPath: shieldClip,
+              opacity: tilt.active ? 0.55 : 0.25,
+              mixBlendMode: "color-dodge",
+              background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(255,255,255,0.9) 0%, rgba(255,0,150,0.5) 15%, rgba(0,200,255,0.4) 30%, rgba(255,255,0,0.3) 45%, transparent 65%)`,
+            }}
+          />
+          {/* Faixa diagonal arco-íris */}
+          <div
+            className="absolute inset-[3px] pointer-events-none z-30"
+            style={{
+              clipPath: shieldClip,
+              opacity: 0.18,
+              mixBlendMode: "screen",
+              background: `linear-gradient(${110 + tilt.ry * 2}deg,
+                transparent 0%,
+                transparent 30%,
+                #ff00cc 40%,
+                #00ffff 50%,
+                #ffff00 60%,
+                transparent 70%,
+                transparent 100%)`,
+              backgroundSize: "200% 200%",
+              backgroundPosition: `${tilt.mx}% ${tilt.my}%`,
+            }}
+          />
+          {/* Brilho no ponto do cursor */}
+          {tilt.active && (
+            <div
+              className="absolute inset-[3px] pointer-events-none z-30"
+              style={{
+                clipPath: shieldClip,
+                background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(255,255,255,0.35), transparent 25%)`,
+                mixBlendMode: "overlay",
+              }}
+            />
+          )}
+        </div>
         </div>
       </div>
 
