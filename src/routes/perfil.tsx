@@ -61,6 +61,7 @@ function PerfilPage() {
   const [skill, setSkill] = useState<SkillLevel>("casual");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCard, setUploadingCard] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cardStats, setCardStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
 
