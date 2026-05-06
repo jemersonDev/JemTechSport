@@ -15,6 +15,7 @@ import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OrganizadorRouteImport } from './routes/organizador'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as AjudaRouteImport } from './routes/ajuda'
@@ -53,6 +54,11 @@ const OrganizadorRoute = OrganizadorRouteImport.update({
 const NotificacoesRoute = NotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MercadoRoute = MercadoRouteImport.update({
+  id: '/mercado',
+  path: '/mercado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/mercado': typeof MercadoRoute
   '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/mercado': typeof MercadoRoute
   '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/mercado': typeof MercadoRoute
   '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
   '/perfil': typeof PerfilRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/inbox'
     | '/login'
+    | '/mercado'
     | '/notificacoes'
     | '/organizador'
     | '/perfil'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/inbox'
     | '/login'
+    | '/mercado'
     | '/notificacoes'
     | '/organizador'
     | '/perfil'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/inbox'
     | '/login'
+    | '/mercado'
     | '/notificacoes'
     | '/organizador'
     | '/perfil'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   AjudaRoute: typeof AjudaRoute
   InboxRoute: typeof InboxRoute
   LoginRoute: typeof LoginRoute
+  MercadoRoute: typeof MercadoRoute
   NotificacoesRoute: typeof NotificacoesRoute
   OrganizadorRoute: typeof OrganizadorRoute
   PerfilRoute: typeof PerfilRoute
@@ -267,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/notificacoes'
       preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mercado': {
+      id: '/mercado'
+      path: '/mercado'
+      fullPath: '/mercado'
+      preLoaderRoute: typeof MercadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   AjudaRoute: AjudaRoute,
   InboxRoute: InboxRoute,
   LoginRoute: LoginRoute,
+  MercadoRoute: MercadoRoute,
   NotificacoesRoute: NotificacoesRoute,
   OrganizadorRoute: OrganizadorRoute,
   PerfilRoute: PerfilRoute,

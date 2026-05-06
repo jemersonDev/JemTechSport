@@ -80,9 +80,40 @@ export function AthleteCard({
   bagreWins = 0,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const [cleanAvatar, setCleanAvatar] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
+
+  // Tilt 3D com mouse / touch + giroscópio
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = tiltRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const ry = (x - 0.5) * 22; // rotateY
+    const rx = (0.5 - y) * 22; // rotateX
+    setTilt({ rx, ry, mx: x * 100, my: y * 100, active: true });
+  };
+  const resetTilt = () =>
+    setTilt({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
+
+  // Giroscópio (mobile) — só ativa se não tiver toque
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = (e: DeviceOrientationEvent) => {
+      if (tilt.active) return;
+      const gamma = e.gamma ?? 0; // -90..90 (esq/dir)
+      const beta = e.beta ?? 0; // -180..180 (cima/baixo)
+      const ry = Math.max(-15, Math.min(15, gamma / 3));
+      const rx = Math.max(-15, Math.min(15, (beta - 45) / 3));
+      setTilt((t) => (t.active ? t : { ...t, rx, ry, mx: 50 + ry * 2, my: 50 - rx * 2 }));
+    };
+    window.addEventListener("deviceorientation", handler);
+    return () => window.removeEventListener("deviceorientation", handler);
+  }, [tilt.active]);
 
   const ovr = computeOverall(partidas, gols, assistencias, skillLevel);
   const pos = POS_SHORT[position?.toLowerCase()] ?? "JOG";
@@ -206,13 +237,23 @@ export function AthleteCard({
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-center">
+      <div className="flex justify-center" style={{ perspective: 1200 }}>
         <div
-          ref={ref}
-          className="relative"
+          ref={tiltRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={resetTilt}
+          className="relative transition-transform duration-200 ease-out will-change-transform"
           style={{
             width: 290,
             height: 460,
+            transformStyle: "preserve-3d",
+            transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
+          }}
+        >
+        <div
+          ref={ref}
+          className="relative w-full h-full"
+          style={{
             filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
@@ -449,11 +490,53 @@ export function AthleteCard({
 
           {/* Marca */}
           <div
-            className="absolute bottom-[18px] left-0 right-0 text-center text-[8px] font-black tracking-[0.4em]"
+            className="absolute bottom-[18px] left-0 right-0 text-center text-[8px] font-black tracking-[0.4em] z-20"
             style={{ color: tier.accent, opacity: 0.55 }}
           >
             JEMTECH · {tier.label}
           </div>
+
+          {/* ✨ Camada HOLOGRÁFICA — shimmer arco-íris que segue o cursor */}
+          <div
+            className="absolute inset-[3px] pointer-events-none z-30 transition-opacity duration-300"
+            style={{
+              clipPath: shieldClip,
+              opacity: tilt.active ? 0.55 : 0.25,
+              mixBlendMode: "color-dodge",
+              background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(255,255,255,0.9) 0%, rgba(255,0,150,0.5) 15%, rgba(0,200,255,0.4) 30%, rgba(255,255,0,0.3) 45%, transparent 65%)`,
+            }}
+          />
+          {/* Faixa diagonal arco-íris */}
+          <div
+            className="absolute inset-[3px] pointer-events-none z-30"
+            style={{
+              clipPath: shieldClip,
+              opacity: 0.18,
+              mixBlendMode: "screen",
+              background: `linear-gradient(${110 + tilt.ry * 2}deg,
+                transparent 0%,
+                transparent 30%,
+                #ff00cc 40%,
+                #00ffff 50%,
+                #ffff00 60%,
+                transparent 70%,
+                transparent 100%)`,
+              backgroundSize: "200% 200%",
+              backgroundPosition: `${tilt.mx}% ${tilt.my}%`,
+            }}
+          />
+          {/* Brilho no ponto do cursor */}
+          {tilt.active && (
+            <div
+              className="absolute inset-[3px] pointer-events-none z-30"
+              style={{
+                clipPath: shieldClip,
+                background: `radial-gradient(circle at ${tilt.mx}% ${tilt.my}%, rgba(255,255,255,0.35), transparent 25%)`,
+                mixBlendMode: "overlay",
+              }}
+            />
+          )}
+        </div>
         </div>
       </div>
 
