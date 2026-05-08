@@ -292,6 +292,16 @@ export function AthleteCard({
             }}
           />
 
+          {/* Textura metálica escovada */}
+          <div
+            className="absolute inset-[3px] opacity-25 pointer-events-none mix-blend-overlay"
+            style={{
+              clipPath: shieldClip,
+              backgroundImage:
+                "repeating-linear-gradient(180deg, rgba(255,255,255,0.35) 0 1px, transparent 1px 3px)",
+            }}
+          />
+
           {/* Reflexo no topo */}
           <div
             className="absolute inset-x-[3px] top-[3px] h-1/2 opacity-25 pointer-events-none"
@@ -299,6 +309,37 @@ export function AthleteCard({
               clipPath: shieldClip,
               background:
                 "linear-gradient(180deg, rgba(255,255,255,0.6), transparent 70%)",
+            }}
+          />
+
+          {/* Feixe de luz diagonal — carta especial */}
+          <div
+            className="absolute inset-[3px] pointer-events-none opacity-30"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.55) 48%, rgba(255,255,255,0.15) 52%, transparent 65%)",
+              mixBlendMode: "screen",
+            }}
+          />
+
+          {/* Partículas de luz dourada */}
+          <div
+            className="absolute inset-[3px] pointer-events-none opacity-70"
+            style={{
+              clipPath: shieldClip,
+              backgroundImage: `
+                radial-gradient(1.5px 1.5px at 18% 22%, ${tier.accent}, transparent 60%),
+                radial-gradient(1px 1px at 78% 30%, #fff8c5, transparent 60%),
+                radial-gradient(1.5px 1.5px at 30% 70%, ${tier.accent}, transparent 60%),
+                radial-gradient(1px 1px at 85% 78%, #fff8c5, transparent 60%),
+                radial-gradient(1px 1px at 55% 18%, #fff8c5, transparent 60%),
+                radial-gradient(1.5px 1.5px at 12% 55%, ${tier.accent}, transparent 60%),
+                radial-gradient(1px 1px at 68% 60%, #fff8c5, transparent 60%),
+                radial-gradient(1.5px 1.5px at 88% 45%, ${tier.accent}, transparent 60%)
+              `,
+              filter: `drop-shadow(0 0 3px ${tier.accent})`,
+              mixBlendMode: "screen",
             }}
           />
 
