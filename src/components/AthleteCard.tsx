@@ -464,16 +464,16 @@ export function AthleteCard({
           {/* Painel inferior: nome + stats em zona limpa, alto contraste */}
           <div
             className="absolute left-0 right-0 z-20"
-            style={{ top: 282, paddingLeft: 24, paddingRight: 24 }}
+            style={{ top: 278, paddingLeft: 22, paddingRight: 22 }}
           >
-            {/* Divisor neon */}
+            {/* Divisor neon verde */}
             <div
               className="mx-auto mb-2"
               style={{
                 height: 2,
-                width: "70%",
-                background: `linear-gradient(90deg, transparent, ${tier.accent}, transparent)`,
-                boxShadow: `0 0 10px ${tier.accent}`,
+                width: "78%",
+                background: `linear-gradient(90deg, transparent, ${NEON}, transparent)`,
+                boxShadow: `0 0 12px ${NEON}, 0 0 24px ${NEON}`,
               }}
             />
             {/* Nome */}
@@ -484,7 +484,7 @@ export function AthleteCard({
                 fontSize: 28,
                 letterSpacing: "0.08em",
                 color: "#ffffff",
-                textShadow: `0 0 14px ${tier.accent}, 0 0 28px ${tier.accent}, 0 2px 4px rgba(0,0,0,0.95)`,
+                textShadow: `0 0 10px ${NEON}, 0 0 22px ${NEON}, 0 2px 4px rgba(0,0,0,0.95)`,
                 lineHeight: 1,
                 marginBottom: 10,
               }}
@@ -492,9 +492,16 @@ export function AthleteCard({
               {displayName}
             </div>
 
-            {/* Atributos 3x2 */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2 px-4">
-
+            {/* Atributos 3x2 com barra de progresso neon */}
+            <div
+              className="grid grid-cols-2 gap-x-5 gap-y-2 px-2 py-2 rounded-md"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35))",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.6)",
+              }}
+            >
             {(
               [
                 ["PAC", attrs.PAC],
@@ -504,22 +511,47 @@ export function AthleteCard({
                 ["PAS", attrs.PAS],
                 ["PHY", attrs.PHY],
               ] as const
-            ).map(([k, v]) => (
+            ).map(([k, v]) => {
+              const pct = Math.max(10, Math.min(100, ((v - 50) / 49) * 100));
+              return (
               <div
                 key={k}
-                className="flex items-center justify-between"
+                className="flex flex-col"
                 style={{
                   fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
                   color: "#ffffff",
-                  textShadow: `0 0 8px ${tier.accent}, 0 1px 3px rgba(0,0,0,0.9)`,
                 }}
               >
-                <span className="text-[20px] font-black tabular-nums leading-none">{v}</span>
-                <span className="text-[12px] font-bold tracking-[0.22em] opacity-95 leading-none">
-                  {k}
-                </span>
+                <div className="flex items-center justify-between leading-none">
+                  <span
+                    className="text-[20px] font-black tabular-nums"
+                    style={{ textShadow: `0 0 8px ${NEON}, 0 1px 2px rgba(0,0,0,0.95)` }}
+                  >
+                    {v}
+                  </span>
+                  <span
+                    className="text-[11px] font-bold tracking-[0.22em]"
+                    style={{ color: NEON, textShadow: `0 0 6px ${NEON}` }}
+                  >
+                    {k}
+                  </span>
+                </div>
+                <div
+                  className="mt-1 h-[3px] rounded-full overflow-hidden"
+                  style={{ background: "rgba(0,0,0,0.6)" }}
+                >
+                  <div
+                    style={{
+                      width: `${pct}%`,
+                      height: "100%",
+                      background: `linear-gradient(90deg, ${NEON}, #b6ff7a)`,
+                      boxShadow: `0 0 6px ${NEON}`,
+                    }}
+                  />
+                </div>
               </div>
-            ))}
+              );
+            })}
             </div>
           </div>
 
