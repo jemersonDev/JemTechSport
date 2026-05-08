@@ -447,7 +447,7 @@ export function AthleteCard({
           <div
             className="absolute left-0 right-0 px-10 grid grid-cols-2 gap-x-6 gap-y-2 z-20"
             style={{ top: 330 }}
-          >;
+          >
             {(
               [
                 ["PAC", attrs.PAC],
