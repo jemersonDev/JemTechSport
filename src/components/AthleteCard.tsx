@@ -235,6 +235,8 @@ export function AthleteCard({
   const shieldClip =
     "polygon(50% 0%, 92% 4%, 100% 14%, 100% 78%, 50% 100%, 0% 78%, 0% 14%, 8% 4%)";
 
+  const NEON = "#00FF88";
+
   return (
     <div className="space-y-3">
       <div className="flex justify-center" style={{ perspective: 1200 }}>
