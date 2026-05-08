@@ -361,20 +361,18 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar (zona dedicada — não invade o nome nem os atributos) */}
+          {/* Avatar — centralizado, sem borda, recorte suave, ocupa só o meio do card */}
           <div
-            className="absolute pointer-events-none overflow-hidden z-0"
+            className="absolute pointer-events-none z-0"
             style={{
-              top: 18,
-              left: 70,
-              right: 18,
-              height: 248,
-              clipPath:
-                "polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%)",
+              top: 70,
+              left: 60,
+              right: 24,
+              height: 200,
               WebkitMaskImage:
-                "linear-gradient(180deg, transparent 0%, #000 12%, #000 82%, transparent 100%)",
+                "radial-gradient(ellipse 70% 80% at 50% 45%, #000 55%, transparent 95%)",
               maskImage:
-                "linear-gradient(180deg, transparent 0%, #000 12%, #000 82%, transparent 100%)",
+                "radial-gradient(ellipse 70% 80% at 50% 45%, #000 55%, transparent 95%)",
             }}
           >
             {cleanAvatar ? (
@@ -392,7 +390,7 @@ export function AthleteCard({
                   transform: "translateX(-50%)",
                   objectFit: "contain",
                   filter:
-                    "contrast(1.06) saturate(1.12) brightness(1.05) drop-shadow(0 10px 14px rgba(0,0,0,0.6))",
+                    "contrast(1.06) saturate(1.12) brightness(1.05) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
                 }}
               />
             ) : (
@@ -414,40 +412,40 @@ export function AthleteCard({
             )}
           </div>
 
-          {/* Divisor entre foto e nome */}
+          {/* Painel inferior: nome + stats em zona limpa, alto contraste */}
           <div
-            className="absolute left-10 right-10 z-10"
-            style={{
-              top: 276,
-              height: 2,
-              background: `linear-gradient(90deg, transparent, ${tier.accent}, transparent)`,
-              boxShadow: `0 0 10px ${tier.accent}`,
-              opacity: 0.9,
-            }}
-          />
-
-          {/* Nome — zona dedicada */}
-          <div className="absolute left-0 right-0 px-4 text-center z-20" style={{ top: 286 }}>
+            className="absolute left-0 right-0 z-20"
+            style={{ top: 282, paddingLeft: 24, paddingRight: 24 }}
+          >
+            {/* Divisor neon */}
             <div
-              className="font-black uppercase truncate"
+              className="mx-auto mb-2"
+              style={{
+                height: 2,
+                width: "70%",
+                background: `linear-gradient(90deg, transparent, ${tier.accent}, transparent)`,
+                boxShadow: `0 0 10px ${tier.accent}`,
+              }}
+            />
+            {/* Nome */}
+            <div
+              className="font-black uppercase truncate text-center"
               style={{
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                fontSize: 26,
+                fontSize: 28,
                 letterSpacing: "0.08em",
                 color: "#ffffff",
-                textShadow: `0 0 12px ${tier.accent}, 0 0 24px ${tier.accent}, 0 2px 4px rgba(0,0,0,0.9)`,
+                textShadow: `0 0 14px ${tier.accent}, 0 0 28px ${tier.accent}, 0 2px 4px rgba(0,0,0,0.95)`,
                 lineHeight: 1,
+                marginBottom: 10,
               }}
             >
               {displayName}
             </div>
-          </div>
 
-          {/* Atributos 3x2 — zona dedicada, sem sobreposição */}
-          <div
-            className="absolute left-0 right-0 px-10 grid grid-cols-2 gap-x-6 gap-y-2 z-20"
-            style={{ top: 330 }}
-          >
+            {/* Atributos 3x2 */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 px-4">
+
             {(
               [
                 ["PAC", attrs.PAC],
