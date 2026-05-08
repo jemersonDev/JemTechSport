@@ -235,6 +235,8 @@ export function AthleteCard({
   const shieldClip =
     "polygon(50% 0%, 92% 4%, 100% 14%, 100% 78%, 50% 100%, 0% 78%, 0% 14%, 8% 4%)";
 
+  const NEON = "#00FF88";
+
   return (
     <div className="space-y-3">
       <div className="flex justify-center" style={{ perspective: 1200 }}>
@@ -290,6 +292,16 @@ export function AthleteCard({
             }}
           />
 
+          {/* Textura metálica escovada */}
+          <div
+            className="absolute inset-[3px] opacity-25 pointer-events-none mix-blend-overlay"
+            style={{
+              clipPath: shieldClip,
+              backgroundImage:
+                "repeating-linear-gradient(180deg, rgba(255,255,255,0.35) 0 1px, transparent 1px 3px)",
+            }}
+          />
+
           {/* Reflexo no topo */}
           <div
             className="absolute inset-x-[3px] top-[3px] h-1/2 opacity-25 pointer-events-none"
@@ -297,6 +309,37 @@ export function AthleteCard({
               clipPath: shieldClip,
               background:
                 "linear-gradient(180deg, rgba(255,255,255,0.6), transparent 70%)",
+            }}
+          />
+
+          {/* Feixe de luz diagonal — carta especial */}
+          <div
+            className="absolute inset-[3px] pointer-events-none opacity-30"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.55) 48%, rgba(255,255,255,0.15) 52%, transparent 65%)",
+              mixBlendMode: "screen",
+            }}
+          />
+
+          {/* Partículas de luz dourada */}
+          <div
+            className="absolute inset-[3px] pointer-events-none opacity-70"
+            style={{
+              clipPath: shieldClip,
+              backgroundImage: `
+                radial-gradient(1.5px 1.5px at 18% 22%, ${tier.accent}, transparent 60%),
+                radial-gradient(1px 1px at 78% 30%, #fff8c5, transparent 60%),
+                radial-gradient(1.5px 1.5px at 30% 70%, ${tier.accent}, transparent 60%),
+                radial-gradient(1px 1px at 85% 78%, #fff8c5, transparent 60%),
+                radial-gradient(1px 1px at 55% 18%, #fff8c5, transparent 60%),
+                radial-gradient(1.5px 1.5px at 12% 55%, ${tier.accent}, transparent 60%),
+                radial-gradient(1px 1px at 68% 60%, #fff8c5, transparent 60%),
+                radial-gradient(1.5px 1.5px at 88% 45%, ${tier.accent}, transparent 60%)
+              `,
+              filter: `drop-shadow(0 0 3px ${tier.accent})`,
+              mixBlendMode: "screen",
             }}
           />
 
@@ -311,6 +354,11 @@ export function AthleteCard({
                 fontSize: 56,
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
                 letterSpacing: "-0.04em",
+                background: `linear-gradient(180deg, #fff7c0 0%, ${tier.accent} 45%, #7a4a00 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.6))`,
               }}
             >
               {ovr}
@@ -320,6 +368,7 @@ export function AthleteCard({
               style={{
                 fontSize: 13,
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                textShadow: `0 0 6px ${NEON}, 0 1px 2px rgba(0,0,0,0.8)`,
               }}
             >
               {pos}
@@ -390,7 +439,7 @@ export function AthleteCard({
                   transform: "translateX(-50%)",
                   objectFit: "contain",
                   filter:
-                    "contrast(1.06) saturate(1.12) brightness(1.05) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
+                    "contrast(1.12) saturate(1.18) brightness(1.06) drop-shadow(0 0 14px rgba(0,0,0,0.55)) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
                 }}
               />
             ) : (
@@ -415,16 +464,16 @@ export function AthleteCard({
           {/* Painel inferior: nome + stats em zona limpa, alto contraste */}
           <div
             className="absolute left-0 right-0 z-20"
-            style={{ top: 282, paddingLeft: 24, paddingRight: 24 }}
+            style={{ top: 278, paddingLeft: 22, paddingRight: 22 }}
           >
-            {/* Divisor neon */}
+            {/* Divisor neon verde */}
             <div
               className="mx-auto mb-2"
               style={{
                 height: 2,
-                width: "70%",
-                background: `linear-gradient(90deg, transparent, ${tier.accent}, transparent)`,
-                boxShadow: `0 0 10px ${tier.accent}`,
+                width: "78%",
+                background: `linear-gradient(90deg, transparent, ${NEON}, transparent)`,
+                boxShadow: `0 0 12px ${NEON}, 0 0 24px ${NEON}`,
               }}
             />
             {/* Nome */}
@@ -435,7 +484,7 @@ export function AthleteCard({
                 fontSize: 28,
                 letterSpacing: "0.08em",
                 color: "#ffffff",
-                textShadow: `0 0 14px ${tier.accent}, 0 0 28px ${tier.accent}, 0 2px 4px rgba(0,0,0,0.95)`,
+                textShadow: `0 0 10px ${NEON}, 0 0 22px ${NEON}, 0 2px 4px rgba(0,0,0,0.95)`,
                 lineHeight: 1,
                 marginBottom: 10,
               }}
@@ -443,9 +492,16 @@ export function AthleteCard({
               {displayName}
             </div>
 
-            {/* Atributos 3x2 */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2 px-4">
-
+            {/* Atributos 3x2 com barra de progresso neon */}
+            <div
+              className="grid grid-cols-2 gap-x-5 gap-y-2 px-2 py-2 rounded-md"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35))",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.6)",
+              }}
+            >
             {(
               [
                 ["PAC", attrs.PAC],
@@ -455,22 +511,47 @@ export function AthleteCard({
                 ["PAS", attrs.PAS],
                 ["PHY", attrs.PHY],
               ] as const
-            ).map(([k, v]) => (
+            ).map(([k, v]) => {
+              const pct = Math.max(10, Math.min(100, ((v - 50) / 49) * 100));
+              return (
               <div
                 key={k}
-                className="flex items-center justify-between"
+                className="flex flex-col"
                 style={{
                   fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
                   color: "#ffffff",
-                  textShadow: `0 0 8px ${tier.accent}, 0 1px 3px rgba(0,0,0,0.9)`,
                 }}
               >
-                <span className="text-[20px] font-black tabular-nums leading-none">{v}</span>
-                <span className="text-[12px] font-bold tracking-[0.22em] opacity-95 leading-none">
-                  {k}
-                </span>
+                <div className="flex items-center justify-between leading-none">
+                  <span
+                    className="text-[20px] font-black tabular-nums"
+                    style={{ textShadow: `0 0 8px ${NEON}, 0 1px 2px rgba(0,0,0,0.95)` }}
+                  >
+                    {v}
+                  </span>
+                  <span
+                    className="text-[11px] font-bold tracking-[0.22em]"
+                    style={{ color: NEON, textShadow: `0 0 6px ${NEON}` }}
+                  >
+                    {k}
+                  </span>
+                </div>
+                <div
+                  className="mt-1 h-[3px] rounded-full overflow-hidden"
+                  style={{ background: "rgba(0,0,0,0.6)" }}
+                >
+                  <div
+                    style={{
+                      width: `${pct}%`,
+                      height: "100%",
+                      background: `linear-gradient(90deg, ${NEON}, #b6ff7a)`,
+                      boxShadow: `0 0 6px ${NEON}`,
+                    }}
+                  />
+                </div>
               </div>
-            ))}
+              );
+            })}
             </div>
           </div>
 
