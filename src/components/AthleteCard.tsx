@@ -354,6 +354,11 @@ export function AthleteCard({
                 fontSize: 56,
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
                 letterSpacing: "-0.04em",
+                background: `linear-gradient(180deg, #fff7c0 0%, ${tier.accent} 45%, #7a4a00 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.6))`,
               }}
             >
               {ovr}
@@ -363,6 +368,7 @@ export function AthleteCard({
               style={{
                 fontSize: 13,
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                textShadow: `0 0 6px ${NEON}, 0 1px 2px rgba(0,0,0,0.8)`,
               }}
             >
               {pos}
