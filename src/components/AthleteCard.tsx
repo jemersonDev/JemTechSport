@@ -471,6 +471,7 @@ export function AthleteCard({
                 </span>
               </div>
             ))}
+            </div>
           </div>
 
           {/* Selos craque/bagre */}
