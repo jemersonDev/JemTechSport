@@ -438,9 +438,29 @@ export function AthleteCard({
                   maxWidth: "none",
                   transform: "translateX(-50%)",
                   objectFit: "contain",
+                  mixBlendMode: "luminosity",
                   filter:
-                    "contrast(1.06) saturate(1.12) brightness(1.05) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
+                    "contrast(1.15) saturate(1.2) brightness(1.08) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
                 }}
+              />
+              {/* Re-camada da foto em multiply para fundir com o dourado (fundo "removido") */}
+              <img
+                src={cleanAvatar}
+                alt=""
+                aria-hidden
+                crossOrigin="anonymous"
+                className="absolute"
+                style={{
+                  top: 0,
+                  left: "50%",
+                  height: "100%",
+                  width: "auto",
+                  maxWidth: "none",
+                  transform: "translateX(-50%)",
+                  objectFit: "contain",
+                  mixBlendMode: "multiply",
+                  opacity: 0.85,
+                  filter: "contrast(1.1) saturate(1.15)",
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
