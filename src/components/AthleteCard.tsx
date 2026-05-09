@@ -454,20 +454,18 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar — centralizado, fade no topo para não cobrir o título */}
+          {/* Avatar — sai ligeiramente da borda do escudo (efeito de profundidade) */}
           <div
-            className="absolute pointer-events-none z-0"
+            className="absolute pointer-events-none z-10"
             style={{
-              top: 92,
-              left: 60,
-              right: 24,
-              height: 188,
+              top: 24,
+              left: 78,
+              right: 28,
+              height: 252,
               WebkitMaskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 12%, #000 28%, #000 80%, transparent 100%), radial-gradient(ellipse 70% 80% at 50% 50%, #000 55%, transparent 95%)",
-              WebkitMaskComposite: "source-in",
+                "radial-gradient(ellipse 78% 85% at 50% 58%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 100%)",
               maskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 12%, #000 28%, #000 80%, transparent 100%), radial-gradient(ellipse 70% 80% at 50% 50%, #000 55%, transparent 95%)",
-              maskComposite: "intersect",
+                "radial-gradient(ellipse 78% 85% at 50% 58%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 100%)",
             }}
           >
             {cleanAvatar ? (
@@ -485,7 +483,7 @@ export function AthleteCard({
                   transform: "translateX(-50%)",
                   objectFit: "contain",
                   filter:
-                    "contrast(1.12) saturate(1.18) brightness(1.06) drop-shadow(0 0 14px rgba(0,0,0,0.55)) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
+                    "contrast(1.1) saturate(1.15) brightness(1.08) drop-shadow(0 0 18px rgba(255,247,192,0.4)) drop-shadow(0 14px 22px rgba(0,0,0,0.85))",
                 }}
               />
             ) : (
