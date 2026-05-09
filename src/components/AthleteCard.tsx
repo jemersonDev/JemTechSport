@@ -254,17 +254,38 @@ export function AthleteCard({
         >
         <div
           ref={ref}
-          className="relative w-full h-full"
+          className="relative w-full h-full animate-neon-pulse"
           style={{
             filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
+          {/* Halo neon pulsante atrás do escudo */}
+          <div
+            className="absolute -inset-2 pointer-events-none"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "radial-gradient(ellipse at center, rgba(0,255,136,0.35), transparent 70%)",
+              filter: "blur(8px)",
+            }}
+          />
           {/* Borda externa (anel dourado/neon do escudo) */}
           <div
             className="absolute inset-0"
             style={{
               clipPath: shieldClip,
-              background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo}, ${tier.ringFrom})`,
+              background: `linear-gradient(135deg, ${tier.ringFrom} 0%, #fff7c0 18%, ${tier.ringTo} 50%, #fff7c0 78%, ${tier.ringFrom} 100%)`,
+              boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.4)`,
+            }}
+          />
+          {/* Bevel interno (sombra escura simulando profundidade) */}
+          <div
+            className="absolute inset-[2px] pointer-events-none"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.6) 100%)",
+              mixBlendMode: "overlay",
             }}
           />
           {/* Camada interna (1px de espessura da borda) */}
@@ -343,32 +364,54 @@ export function AthleteCard({
             }}
           />
 
-          {/* OVR + posição (esquerda topo) */}
+          {/* OVR + posição (esquerda topo) com lens flare */}
           <div
-            className="absolute top-7 left-6 leading-none select-none"
+            className="absolute top-7 left-6 leading-none select-none z-20"
             style={{ color: tier.accent, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}
           >
-            <div
-              className="font-black tracking-tighter"
-              style={{
-                fontSize: 56,
-                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                letterSpacing: "-0.04em",
-                background: `linear-gradient(180deg, #fff7c0 0%, ${tier.accent} 45%, #7a4a00 100%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.6))`,
-              }}
-            >
-              {ovr}
+            <div className="relative inline-block">
+              {/* Lens flare atrás do número */}
+              <div
+                className="absolute pointer-events-none animate-lens-flare"
+                style={{
+                  top: "50%",
+                  left: "50%",
+                  width: 110,
+                  height: 110,
+                  transform: "translate(-50%, -50%)",
+                  background:
+                    "radial-gradient(circle, rgba(255,247,192,0.85) 0%, rgba(253,224,71,0.45) 25%, transparent 60%)",
+                  mixBlendMode: "screen",
+                  filter: "blur(2px)",
+                }}
+              />
+              <div
+                className="font-black tracking-tighter relative"
+                style={{
+                  fontSize: 60,
+                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  letterSpacing: "-0.04em",
+                  background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 18%, ${tier.accent} 45%, #b8860b 78%, #5a3500 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 6px rgba(0,0,0,0.5))`,
+                  textShadow: "0 1px 0 rgba(255,255,255,0.4)",
+                }}
+              >
+                {ovr}
+              </div>
             </div>
             <div
               className="font-black mt-1 tracking-[0.25em]"
               style={{
                 fontSize: 13,
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                textShadow: `0 0 6px ${NEON}, 0 1px 2px rgba(0,0,0,0.8)`,
+                background: `linear-gradient(180deg, #fff7c0, ${tier.accent}, #7a4a00)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 1px 1px rgba(0,0,0,0.8))`,
               }}
             >
               {pos}
@@ -402,6 +445,7 @@ export function AthleteCard({
                 style={{
                   background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo})`,
                   color: "#0a0a0a",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.4)",
                 }}
                 title="JemTech Sports"
               >
@@ -410,20 +454,18 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar — centralizado, fade no topo para não cobrir o título */}
+          {/* Avatar — sai ligeiramente da borda do escudo (efeito de profundidade) */}
           <div
-            className="absolute pointer-events-none z-0"
+            className="absolute pointer-events-none z-10"
             style={{
-              top: 92,
-              left: 60,
-              right: 24,
-              height: 188,
+              top: 24,
+              left: 78,
+              right: 28,
+              height: 252,
               WebkitMaskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 12%, #000 28%, #000 80%, transparent 100%), radial-gradient(ellipse 70% 80% at 50% 50%, #000 55%, transparent 95%)",
-              WebkitMaskComposite: "source-in",
+                "radial-gradient(ellipse 78% 85% at 50% 58%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 100%)",
               maskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 12%, #000 28%, #000 80%, transparent 100%), radial-gradient(ellipse 70% 80% at 50% 50%, #000 55%, transparent 95%)",
-              maskComposite: "intersect",
+                "radial-gradient(ellipse 78% 85% at 50% 58%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 100%)",
             }}
           >
             {cleanAvatar ? (
@@ -441,7 +483,7 @@ export function AthleteCard({
                   transform: "translateX(-50%)",
                   objectFit: "contain",
                   filter:
-                    "contrast(1.12) saturate(1.18) brightness(1.06) drop-shadow(0 0 14px rgba(0,0,0,0.55)) drop-shadow(0 12px 18px rgba(0,0,0,0.7))",
+                    "contrast(1.1) saturate(1.15) brightness(1.08) drop-shadow(0 0 18px rgba(255,247,192,0.4)) drop-shadow(0 14px 22px rgba(0,0,0,0.85))",
                 }}
               />
             ) : (
@@ -483,10 +525,13 @@ export function AthleteCard({
               className="font-black uppercase truncate text-center"
               style={{
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                fontSize: 28,
-                letterSpacing: "0.08em",
-                color: "#ffffff",
-                textShadow: `0 0 10px ${NEON}, 0 0 22px ${NEON}, 0 2px 4px rgba(0,0,0,0.95)`,
+                fontSize: 30,
+                letterSpacing: "0.1em",
+                background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 25%, ${tier.accent} 55%, #b8860b 85%, #5a3500 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 1px 0 rgba(0,0,0,0.9)) drop-shadow(0 2px 3px rgba(0,0,0,0.6))`,
                 lineHeight: 1,
                 marginBottom: 10,
               }}

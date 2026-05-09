@@ -137,3 +137,31 @@
     background-color: var(--graphite);
   }
 }
+
+@keyframes neon-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px #00ff88) drop-shadow(0 0 14px rgba(0, 255, 136, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #00ff88) drop-shadow(0 0 28px rgba(0, 255, 136, 0.85));
+  }
+}
+.animate-neon-pulse {
+  animation: neon-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lens-flare {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.15);
+  }
+}
+.animate-lens-flare {
+  animation: lens-flare 2.8s ease-in-out infinite;
+}
