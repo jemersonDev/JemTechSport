@@ -160,10 +160,17 @@ export function AthleteCard({
           accent: "#fed7aa",
         };
 
-  // Tenta remover fundo automaticamente quando há foto
+  // Tenta remover fundo automaticamente quando há foto.
+  // Se a URL já é o PNG limpo persistido pelo upload (card-avatar.png),
+  // pula o reprocessamento e usa direto.
   useEffect(() => {
     if (!avatarUrl) {
       setCleanAvatar(null);
+      return;
+    }
+    if (/card-avatar\.png(\?|$)/i.test(avatarUrl)) {
+      setCleanAvatar(avatarUrl);
+      setRemoving(false);
       return;
     }
     let cancelled = false;
