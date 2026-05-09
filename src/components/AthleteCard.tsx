@@ -254,17 +254,38 @@ export function AthleteCard({
         >
         <div
           ref={ref}
-          className="relative w-full h-full"
+          className="relative w-full h-full animate-neon-pulse"
           style={{
             filter: `drop-shadow(0 10px 30px ${tier.glow})`,
           }}
         >
+          {/* Halo neon pulsante atrás do escudo */}
+          <div
+            className="absolute -inset-2 pointer-events-none"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "radial-gradient(ellipse at center, rgba(0,255,136,0.35), transparent 70%)",
+              filter: "blur(8px)",
+            }}
+          />
           {/* Borda externa (anel dourado/neon do escudo) */}
           <div
             className="absolute inset-0"
             style={{
               clipPath: shieldClip,
-              background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo}, ${tier.ringFrom})`,
+              background: `linear-gradient(135deg, ${tier.ringFrom} 0%, #fff7c0 18%, ${tier.ringTo} 50%, #fff7c0 78%, ${tier.ringFrom} 100%)`,
+              boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.4)`,
+            }}
+          />
+          {/* Bevel interno (sombra escura simulando profundidade) */}
+          <div
+            className="absolute inset-[2px] pointer-events-none"
+            style={{
+              clipPath: shieldClip,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.6) 100%)",
+              mixBlendMode: "overlay",
             }}
           />
           {/* Camada interna (1px de espessura da borda) */}
