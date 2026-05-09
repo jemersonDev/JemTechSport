@@ -245,28 +245,52 @@ function PerfilPage() {
     }
 
     setUploadingCard(true);
+    const tId = toast.loading("Gerando seu card lendário…", {
+      description: "Recortando jogador",
+    });
     try {
-      const processed = await processAvatar(file, 768);
-      let finalBlob: Blob = processed;
-      let ext = "jpg";
-      let contentType = "image/jpeg";
+      // 1. Crop quadrado em alta resolução para alimentar o modelo
+      const processed = await processAvatar(file, 1024);
+
+      // 2. Remove fundo (IA roda no browser via @huggingface/transformers)
+      let cleanBlob: Blob = processed;
       try {
-        toast.info("Removendo fundo da foto do card…");
-        const { removeBackgroundFromBlob } = await import("@/utils/removeBackground");
-        finalBlob = await removeBackgroundFromBlob(processed);
-        ext = "png";
-        contentType = "image/png";
+        toast.loading("Gerando seu card lendário…", {
+          id: tId,
+          description: "Removendo fundo da foto",
+        });
+        const { removeBackgroundFromBlob } = await import(
+          "@/utils/removeBackground"
+        );
+        cleanBlob = await removeBackgroundFromBlob(processed);
       } catch (bgErr) {
-        console.warn("bg removal falhou, usando original", bgErr);
+        console.warn("bg removal falhou, seguindo sem transparência", bgErr);
       }
 
-      const path = `${user.id}/card-avatar.${ext}`;
+      // 3. Aplica realce automático (brilho/contraste/saturação + luz suave)
+      let finalBlob: Blob = cleanBlob;
+      try {
+        toast.loading("Gerando seu card lendário…", {
+          id: tId,
+          description: "Aplicando luz cinematográfica",
+        });
+        const { enhanceCardPhoto } = await import("@/utils/enhanceCardPhoto");
+        finalBlob = await enhanceCardPhoto(cleanBlob);
+      } catch (enhErr) {
+        console.warn("enhance falhou, usando recorte cru", enhErr);
+      }
+
+      const path = `${user.id}/card-avatar.png`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(path, finalBlob, { upsert: true, cacheControl: "3600", contentType });
+        .upload(path, finalBlob, {
+          upsert: true,
+          cacheControl: "3600",
+          contentType: "image/png",
+        });
 
       if (uploadError) {
-        toast.error("Erro no upload: " + uploadError.message);
+        toast.error("Erro no upload: " + uploadError.message, { id: tId });
         return;
       }
 
@@ -279,13 +303,15 @@ function PerfilPage() {
         .eq("user_id", user.id);
 
       if (updateError) {
-        toast.error("Erro ao salvar foto do card: " + updateError.message);
+        toast.error("Erro ao salvar foto do card: " + updateError.message, {
+          id: tId,
+        });
         return;
       }
       await refreshProfile();
-      toast.success("Foto do card atualizada!");
+      toast.success("Card lendário pronto! ✨", { id: tId });
     } catch (err) {
-      toast.error("Erro ao processar imagem");
+      toast.error("Erro ao processar imagem", { id: tId });
       console.error(err);
     } finally {
       setUploadingCard(false);
