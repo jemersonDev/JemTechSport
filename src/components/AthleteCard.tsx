@@ -526,8 +526,12 @@ export function AthleteCard({
               >
                 <div className="flex items-center justify-between leading-none">
                   <span
-                    className="text-[20px] font-black tabular-nums"
-                    style={{ textShadow: `0 0 8px ${NEON}, 0 1px 2px rgba(0,0,0,0.95)` }}
+                    className="text-[26px] font-black tabular-nums"
+                    style={{
+                      color: "#ffffff",
+                      textShadow:
+                        "0 0 2px rgba(0,0,0,0.95), 0 1px 2px rgba(0,0,0,0.95), 0 0 10px rgba(0,255,136,0.45)",
+                    }}
                   >
                     {v}
                   </span>
