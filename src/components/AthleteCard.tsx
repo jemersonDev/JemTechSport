@@ -410,18 +410,20 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar — centralizado, sem borda, recorte suave, ocupa só o meio do card */}
+          {/* Avatar — centralizado, fade no topo para não cobrir o título */}
           <div
             className="absolute pointer-events-none z-0"
             style={{
-              top: 70,
+              top: 92,
               left: 60,
               right: 24,
-              height: 200,
+              height: 188,
               WebkitMaskImage:
-                "radial-gradient(ellipse 70% 80% at 50% 45%, #000 55%, transparent 95%)",
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 12%, #000 28%, #000 80%, transparent 100%), radial-gradient(ellipse 70% 80% at 50% 50%, #000 55%, transparent 95%)",
+              WebkitMaskComposite: "source-in",
               maskImage:
-                "radial-gradient(ellipse 70% 80% at 50% 45%, #000 55%, transparent 95%)",
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 12%, #000 28%, #000 80%, transparent 100%), radial-gradient(ellipse 70% 80% at 50% 50%, #000 55%, transparent 95%)",
+              maskComposite: "intersect",
             }}
           >
             {cleanAvatar ? (
