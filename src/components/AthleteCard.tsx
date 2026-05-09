@@ -525,10 +525,13 @@ export function AthleteCard({
               className="font-black uppercase truncate text-center"
               style={{
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                fontSize: 28,
-                letterSpacing: "0.08em",
-                color: "#ffffff",
-                textShadow: `0 0 10px ${NEON}, 0 0 22px ${NEON}, 0 2px 4px rgba(0,0,0,0.95)`,
+                fontSize: 30,
+                letterSpacing: "0.1em",
+                background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 25%, ${tier.accent} 55%, #b8860b 85%, #5a3500 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 1px 0 rgba(0,0,0,0.9)) drop-shadow(0 2px 3px rgba(0,0,0,0.6))`,
                 lineHeight: 1,
                 marginBottom: 10,
               }}
