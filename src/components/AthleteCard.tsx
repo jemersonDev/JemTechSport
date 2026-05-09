@@ -364,32 +364,54 @@ export function AthleteCard({
             }}
           />
 
-          {/* OVR + posição (esquerda topo) */}
+          {/* OVR + posição (esquerda topo) com lens flare */}
           <div
-            className="absolute top-7 left-6 leading-none select-none"
+            className="absolute top-7 left-6 leading-none select-none z-20"
             style={{ color: tier.accent, textShadow: "0 2px 8px rgba(0,0,0,0.6)" }}
           >
-            <div
-              className="font-black tracking-tighter"
-              style={{
-                fontSize: 56,
-                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                letterSpacing: "-0.04em",
-                background: `linear-gradient(180deg, #fff7c0 0%, ${tier.accent} 45%, #7a4a00 100%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.6))`,
-              }}
-            >
-              {ovr}
+            <div className="relative inline-block">
+              {/* Lens flare atrás do número */}
+              <div
+                className="absolute pointer-events-none animate-lens-flare"
+                style={{
+                  top: "50%",
+                  left: "50%",
+                  width: 110,
+                  height: 110,
+                  transform: "translate(-50%, -50%)",
+                  background:
+                    "radial-gradient(circle, rgba(255,247,192,0.85) 0%, rgba(253,224,71,0.45) 25%, transparent 60%)",
+                  mixBlendMode: "screen",
+                  filter: "blur(2px)",
+                }}
+              />
+              <div
+                className="font-black tracking-tighter relative"
+                style={{
+                  fontSize: 60,
+                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  letterSpacing: "-0.04em",
+                  background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 18%, ${tier.accent} 45%, #b8860b 78%, #5a3500 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 6px rgba(0,0,0,0.5))`,
+                  textShadow: "0 1px 0 rgba(255,255,255,0.4)",
+                }}
+              >
+                {ovr}
+              </div>
             </div>
             <div
               className="font-black mt-1 tracking-[0.25em]"
               style={{
                 fontSize: 13,
                 fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                textShadow: `0 0 6px ${NEON}, 0 1px 2px rgba(0,0,0,0.8)`,
+                background: `linear-gradient(180deg, #fff7c0, ${tier.accent}, #7a4a00)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 1px 1px rgba(0,0,0,0.8))`,
               }}
             >
               {pos}
@@ -423,6 +445,7 @@ export function AthleteCard({
                 style={{
                   background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo})`,
                   color: "#0a0a0a",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.4)",
                 }}
                 title="JemTech Sports"
               >
