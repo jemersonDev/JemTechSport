@@ -461,18 +461,31 @@ export function AthleteCard({
             </div>
           </div>
 
-          {/* Avatar — sai ligeiramente da borda do escudo (efeito de profundidade) */}
+          {/* Sombra elíptica no chão (ancora o jogador no card) */}
           <div
-            className="absolute pointer-events-none z-10"
+            className="absolute pointer-events-none z-[9]"
             style={{
-              top: 24,
-              left: 78,
-              right: 28,
-              height: 252,
+              left: "18%",
+              right: "18%",
+              top: 258,
+              height: 22,
+              background:
+                "radial-gradient(ellipse at center, rgba(0,0,0,0.55), transparent 70%)",
+              filter: "blur(4px)",
+            }}
+          />
+          {/* Avatar — centralizado, cabeça acima da linha do nome */}
+          <div
+            className="absolute pointer-events-none z-10 overflow-hidden"
+            style={{
+              top: 38,
+              left: 22,
+              right: 22,
+              height: 250,
               WebkitMaskImage:
-                "radial-gradient(ellipse 78% 85% at 50% 58%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.55) 6%, #000 16%, #000 82%, rgba(0,0,0,0.4) 94%, transparent 100%)",
               maskImage:
-                "radial-gradient(ellipse 78% 85% at 50% 58%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.55) 6%, #000 16%, #000 82%, rgba(0,0,0,0.4) 94%, transparent 100%)",
             }}
           >
             {cleanAvatar ? (
@@ -487,10 +500,11 @@ export function AthleteCard({
                   height: "100%",
                   width: "auto",
                   maxWidth: "none",
-                  transform: "translateX(-50%)",
+                  transform: "translateX(-46%)",
                   objectFit: "contain",
+                  objectPosition: "center top",
                   filter:
-                    "contrast(1.1) saturate(1.15) brightness(1.08) drop-shadow(0 0 18px rgba(255,247,192,0.4)) drop-shadow(0 14px 22px rgba(0,0,0,0.85))",
+                    "contrast(1.08) saturate(1.18) brightness(1.06) drop-shadow(0 0 14px rgba(255,247,192,0.45)) drop-shadow(0 18px 18px rgba(0,0,0,0.7))",
                 }}
               />
             ) : (
