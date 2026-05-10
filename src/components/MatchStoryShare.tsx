@@ -74,37 +74,18 @@ export function MatchStoryShare({
     if (!ref.current) return;
     setBusy(true);
     try {
-      const { default: html2canvas } = await import("html2canvas");
-      const canvas = await html2canvas(ref.current, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
+      const result = await shareOrDownloadImage({
+        node: ref.current,
+        fileName: `racha-${rachaName || "story"}.png`,
+        title: `Resultado: ${rachaName}`,
+        text: `${scoreA} × ${scoreB} — JemTech Sports ⚽`,
+        forceDownload: download,
       });
-      const blob: Blob = await new Promise((res) =>
-        canvas.toBlob((b) => res(b as Blob), "image/png", 1),
-      );
-      const file = new File([blob], `racha-${rachaName}.png`, { type: "image/png" });
-      const navAny = navigator as Navigator & {
-        canShare?: (data: { files: File[] }) => boolean;
-      };
-      if (!download && navAny.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Resultado: ${rachaName}`,
-          text: `${scoreA} × ${scoreB} — JemTech Sports ⚽`,
-        });
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `racha-story.png`;
-        a.click();
-        URL.revokeObjectURL(url);
+      if (result === "downloaded") {
         toast.success("Story baixado! Posta no Insta 🔥");
       }
     } catch (e) {
-      console.error(e);
-      toast.error("Erro ao gerar story");
+      reportShareError(e);
     } finally {
       setBusy(false);
     }
