@@ -688,12 +688,12 @@ export function AthleteCard({
       )}
 
       <div className="flex gap-2 justify-center">
-        <Button onClick={handleShare} disabled={busy} size="sm" className="gap-2">
+        <Button onClick={() => handleShare(false)} disabled={busy} size="sm" className="gap-2">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
           Compartilhar card
         </Button>
         <Button
-          onClick={handleShare}
+          onClick={() => handleShare(true)}
           disabled={busy}
           variant="outline"
           size="sm"
