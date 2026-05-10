@@ -199,41 +199,22 @@ export function AthleteCard({
     .slice(0, 2)
     .toUpperCase();
 
-  const handleShare = async () => {
+  const handleShare = async (download = false) => {
     if (!ref.current) return;
     setBusy(true);
     try {
-      const { default: html2canvas } = await import("html2canvas");
-      const canvas = await html2canvas(ref.current, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
+      const result = await shareOrDownloadImage({
+        node: ref.current,
+        fileName: `${displayName || "card"}-card.png`,
+        title: `Card de ${displayName}`,
+        text: `Meu card no JemTech Sports — OVR ${ovr}`,
+        forceDownload: download,
       });
-      const blob: Blob = await new Promise((res) =>
-        canvas.toBlob((b) => res(b as Blob), "image/png", 1),
-      );
-      const file = new File([blob], `${displayName}-card.png`, { type: "image/png" });
-      const navAny = navigator as Navigator & {
-        canShare?: (data: { files: File[] }) => boolean;
-      };
-      if (navAny.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Card de ${displayName}`,
-          text: `Meu card no JemTech Sports — OVR ${ovr}`,
-        });
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${displayName}-card.png`;
-        a.click();
-        URL.revokeObjectURL(url);
+      if (result === "downloaded") {
         toast.success("Card baixado!");
       }
     } catch (e) {
-      toast.error("Erro ao gerar card");
-      console.error(e);
+      reportShareError(e);
     } finally {
       setBusy(false);
     }
