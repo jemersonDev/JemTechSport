@@ -423,6 +423,9 @@ export type Database = {
           card_avatar_url: string | null
           created_at: string
           display_name: string
+          favorite_team_badge_url: string | null
+          favorite_team_id: string | null
+          favorite_team_name: string | null
           id: string
           preferred_position: Database["public"]["Enums"]["player_position"]
           preferred_position_ext: Database["public"]["Enums"]["preferred_position_ext"]
@@ -436,6 +439,9 @@ export type Database = {
           card_avatar_url?: string | null
           created_at?: string
           display_name?: string
+          favorite_team_badge_url?: string | null
+          favorite_team_id?: string | null
+          favorite_team_name?: string | null
           id?: string
           preferred_position?: Database["public"]["Enums"]["player_position"]
           preferred_position_ext?: Database["public"]["Enums"]["preferred_position_ext"]
@@ -449,6 +455,9 @@ export type Database = {
           card_avatar_url?: string | null
           created_at?: string
           display_name?: string
+          favorite_team_badge_url?: string | null
+          favorite_team_id?: string | null
+          favorite_team_name?: string | null
           id?: string
           preferred_position?: Database["public"]["Enums"]["player_position"]
           preferred_position_ext?: Database["public"]["Enums"]["preferred_position_ext"]
