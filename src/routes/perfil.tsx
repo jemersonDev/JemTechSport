@@ -36,6 +36,8 @@ import { TrofeusShelf } from "@/components/TrofeusShelf";
 import { AthleteCard } from "@/components/AthleteCard";
 import { processAvatar } from "@/utils/processAvatar";
 import { FounderBadge } from "@/components/FounderBadge";
+import { TeamCombobox } from "@/components/TeamCombobox";
+import { findTeamById, type Team } from "@/lib/teams";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -64,6 +66,7 @@ function PerfilPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadingCard, setUploadingCard] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [favoriteTeamId, setFavoriteTeamId] = useState<string | null>(null);
   const [cardStats, setCardStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
 
   useEffect(() => {
@@ -118,14 +121,22 @@ function PerfilPage() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, preferred_position_ext, skill_level, bio")
+        .select("display_name, preferred_position_ext, skill_level, bio, favorite_team_id")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data) {
-        setDisplayName(data.display_name ?? "");
-        setBio((data as { bio: string | null }).bio ?? "");
-        setPosition((data.preferred_position_ext as PositionExt) ?? "meia");
-        setSkill((data.skill_level as SkillLevel) ?? "casual");
+        const d = data as {
+          display_name: string | null;
+          bio: string | null;
+          preferred_position_ext: PositionExt | null;
+          skill_level: SkillLevel | null;
+          favorite_team_id: string | null;
+        };
+        setDisplayName(d.display_name ?? "");
+        setBio(d.bio ?? "");
+        setPosition((d.preferred_position_ext as PositionExt) ?? "meia");
+        setSkill((d.skill_level as SkillLevel) ?? "casual");
+        setFavoriteTeamId(d.favorite_team_id ?? null);
       } else if (profile) {
         setDisplayName(profile.display_name);
       }
@@ -146,6 +157,7 @@ function PerfilPage() {
     setSaving(true);
     // mantém preferred_position legado coerente: goleiro -> goleiro, resto -> linha
     const legacyPos = position === "goleiro" ? "goleiro" : "linha";
+    const team = findTeamById(favoriteTeamId);
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -154,6 +166,9 @@ function PerfilPage() {
         preferred_position_ext: position,
         skill_level: skill,
         bio: bio.trim() || null,
+        favorite_team_id: team?.id ?? null,
+        favorite_team_name: team?.name ?? null,
+        favorite_team_badge_url: team?.badge ?? null,
       } as never)
       .eq("user_id", user.id);
     setSaving(false);
