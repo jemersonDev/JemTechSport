@@ -37,7 +37,7 @@ import { AthleteCard } from "@/components/AthleteCard";
 import { processAvatar } from "@/utils/processAvatar";
 import { FounderBadge } from "@/components/FounderBadge";
 import { TeamCombobox } from "@/components/TeamCombobox";
-import { findTeamById, type Team } from "@/lib/teams";
+import { findTeamById } from "@/lib/teams";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
