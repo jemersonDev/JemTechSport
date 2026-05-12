@@ -506,6 +506,20 @@ function PerfilPage() {
             </p>
           </div>
 
+          {/* Time do coração */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Shield className="w-4 h-4" /> Time do coração
+            </label>
+            <TeamCombobox
+              value={favoriteTeamId}
+              onChange={(t) => setFavoriteTeamId(t?.id ?? null)}
+            />
+            <p className="text-[10px] text-muted-foreground">
+              O escudo aparece no seu card e no perfil público.
+            </p>
+          </div>
+
           <Button onClick={handleSave} disabled={saving} className="w-full h-11">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar perfil"}
           </Button>
@@ -532,6 +546,8 @@ function PerfilPage() {
               avatarUrl={(profile as { card_avatar_url?: string | null }).card_avatar_url ?? profile.avatar_url}
               position={position}
               skillLevel={skill}
+              clubBadgeUrl={findTeamById(favoriteTeamId)?.badge ?? null}
+              clubName={findTeamById(favoriteTeamId)?.name ?? null}
               partidas={cardStats.partidas}
               gols={cardStats.gols}
               assistencias={cardStats.assistencias}
