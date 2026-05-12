@@ -15,6 +15,8 @@ type Props = {
   assistencias: number;
   craqueWins?: number;
   bagreWins?: number;
+  clubBadgeUrl?: string | null;
+  clubName?: string | null;
 };
 
 const POS_SHORT: Record<string, string> = {
@@ -79,6 +81,8 @@ export function AthleteCard({
   assistencias,
   craqueWins = 0,
   bagreWins = 0,
+  clubBadgeUrl = null,
+  clubName = null,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const tiltRef = useRef<HTMLDivElement>(null);
@@ -409,8 +413,8 @@ export function AthleteCard({
               className="mt-1.5 h-px w-9"
               style={{ background: tier.accent, opacity: 0.6 }}
             />
-            {/* "Bandeira" + escudo do clube */}
-            <div className="flex items-center gap-1 mt-2">
+            {/* "Bandeira" + escudo do clube (simétricos) */}
+            <div className="flex items-center gap-1.5 mt-2">
               <div
                 className="w-5 h-3.5 rounded-sm overflow-hidden border"
                 style={{ borderColor: `${tier.accent}55` }}
@@ -429,17 +433,42 @@ export function AthleteCard({
                   </div>
                 </div>
               </div>
-              <div
-                className="w-4 h-4 rounded-sm flex items-center justify-center text-[7px] font-black"
-                style={{
-                  background: `linear-gradient(135deg, ${tier.ringFrom}, ${tier.ringTo})`,
-                  color: "#0a0a0a",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.4)",
-                }}
-                title="JemTech Sports"
-              >
-                JT
-              </div>
+              {clubBadgeUrl ? (
+                <div
+                  className="relative w-5 h-5 flex items-center justify-center"
+                  title={clubName ?? "Time do coração"}
+                >
+                  <div
+                    className="absolute inset-[-3px] rounded-full pointer-events-none"
+                    style={{
+                      background: `radial-gradient(circle, ${tier.accent}66 0%, transparent 70%)`,
+                      filter: "blur(2px)",
+                    }}
+                  />
+                  <img
+                    src={clubBadgeUrl}
+                    alt={clubName ?? ""}
+                    crossOrigin="anonymous"
+                    className="relative w-5 h-5 object-contain"
+                    style={{
+                      filter: `drop-shadow(0 0 3px ${tier.accent}) drop-shadow(0 1px 1px rgba(0,0,0,0.7))`,
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px]"
+                  style={{
+                    background: "rgba(0,0,0,0.35)",
+                    border: `1px dashed ${tier.accent}55`,
+                    color: `${tier.accent}aa`,
+                  }}
+                  title="Sem time escolhido"
+                  aria-label="Sem time escolhido"
+                >
+                  ⚽
+                </div>
+              )}
             </div>
           </div>
 
