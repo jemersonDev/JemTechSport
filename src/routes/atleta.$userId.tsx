@@ -21,6 +21,9 @@ type Profile = {
   avatar_url: string | null;
   preferred_position: string;
   bio: string | null;
+  favorite_team_id: string | null;
+  favorite_team_name: string | null;
+  favorite_team_badge_url: string | null;
 };
 
 function AthleteProfile() {
@@ -41,7 +44,7 @@ function AthleteProfile() {
       const [profRes, postsRes, partidasRes, golsRes, craqueRes, bagreRes] = await Promise.all([
         supabase
           .from("profiles")
-          .select("user_id, display_name, avatar_url, preferred_position, bio")
+          .select("user_id, display_name, avatar_url, preferred_position, bio, favorite_team_id, favorite_team_name, favorite_team_badge_url")
           .eq("user_id", userId)
           .maybeSingle(),
         supabase
@@ -139,13 +142,29 @@ function AthleteProfile() {
 
         {/* Name + bio */}
         <div className="mt-4 space-y-1">
-          <h2 className="text-base font-bold leading-tight">{profile.display_name}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold leading-tight">{profile.display_name}</h2>
+            {profile.favorite_team_badge_url && (
+              <img
+                src={profile.favorite_team_badge_url}
+                alt={profile.favorite_team_name ?? ""}
+                title={profile.favorite_team_name ?? ""}
+                className="h-6 w-6 object-contain drop-shadow"
+                loading="lazy"
+              />
+            )}
+          </div>
           {profile.bio ? (
             <p className="whitespace-pre-line text-sm leading-snug text-foreground/90">
               {profile.bio}
             </p>
           ) : (
             <p className="text-sm capitalize text-muted-foreground">{profile.preferred_position}</p>
+          )}
+          {profile.favorite_team_name && (
+            <p className="text-[11px] text-muted-foreground">
+              Torce pelo <span className="font-semibold text-foreground">{profile.favorite_team_name}</span>
+            </p>
           )}
           <p className="pt-1 text-[11px] text-muted-foreground">
             <span className="font-semibold text-foreground">{followers}</span> seguidores ·{" "}
@@ -199,6 +218,8 @@ function AthleteProfile() {
           displayName={profile.display_name}
           avatarUrl={profile.avatar_url}
           position={profile.preferred_position}
+          clubBadgeUrl={profile.favorite_team_badge_url}
+          clubName={profile.favorite_team_name}
           partidas={stats.partidas}
           gols={stats.gols}
           assistencias={stats.assistencias}
