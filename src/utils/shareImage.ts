@@ -103,25 +103,40 @@ export async function shareOrDownloadImage({
     share?: (data: ShareData & { files?: File[] }) => Promise<void>;
   };
 
+  const hasShare = !forceDownload && typeof navAny.share === "function";
+  // Em alguns browsers Android, canShare existe mas é conservador.
+  // Em outros (in-app webviews), canShare nem existe mas share funciona.
   const canShareFiles =
-    !forceDownload &&
-    typeof navAny.share === "function" &&
-    typeof navAny.canShare === "function" &&
-    navAny.canShare({ files: [file] });
+    hasShare &&
+    (typeof navAny.canShare !== "function" || navAny.canShare({ files: [file] }));
 
-  if (canShareFiles) {
+  if (hasShare && canShareFiles) {
     try {
       await navAny.share!({ files: [file], title, text });
       return "shared";
     } catch (err) {
-      // AbortError = usuário cancelou; não trata como falha
-      if ((err as DOMException)?.name === "AbortError") {
-        return "shared";
-      }
-      console.warn("[shareImage] navigator.share falhou, baixando:", err);
+      const name = (err as DOMException)?.name;
+      if (name === "AbortError") return "shared";
+      console.warn("[shareImage] share com arquivo falhou:", err);
+      // Continua para fallbacks abaixo
     }
   }
 
+  // Fallback 1: tentar share só com texto/título (sem arquivo)
+  if (hasShare && !forceDownload) {
+    try {
+      await navAny.share!({ title, text });
+      // baixa também pra usuário poder anexar manualmente
+      triggerDownload(blob, fileName);
+      return "shared";
+    } catch (err) {
+      const name = (err as DOMException)?.name;
+      if (name === "AbortError") return "shared";
+      console.warn("[shareImage] share sem arquivo falhou:", err);
+    }
+  }
+
+  // Fallback final: download direto
   triggerDownload(blob, fileName);
   return "downloaded";
 }
