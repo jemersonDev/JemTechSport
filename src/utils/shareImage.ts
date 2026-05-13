@@ -93,6 +93,11 @@ async function generateBlob(node: HTMLElement): Promise<Blob> {
   return blob;
 }
 
+/** Gera o Blob da imagem do nó (com pré-carregamento de imgs cross-origin). */
+export async function generateImageBlob(node: HTMLElement): Promise<Blob> {
+  return generateBlob(node);
+}
+
 function triggerDownload(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
