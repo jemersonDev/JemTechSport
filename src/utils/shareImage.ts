@@ -32,43 +32,64 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   });
 }
 
-async function generateBlob(node: HTMLElement): Promise<Blob> {
-  // 1ª tentativa: html-to-image (preserva mask-image, filters, gradients)
+// Converte uma URL de imagem para data URL (evita CORS taint no canvas)
+async function urlToDataUrl(url: string): Promise<string | null> {
   try {
-    const blob = await withTimeout(
-      htiToBlob(node, {
-        pixelRatio: 2,
-        quality: 0.8,
-        cacheBust: true,
-        backgroundColor: undefined,
-        // Ignora imagens cross-origin não decodificáveis em vez de quebrar
-        skipFonts: false,
-      }),
-      GEN_TIMEOUT_MS,
-      "html-to-image",
-    );
-    if (blob && blob.size > 0) return blob;
-    throw new Error("blob vazio");
-  } catch (err) {
-    console.warn("[shareImage] html-to-image falhou, tentando html2canvas:", err);
+    const res = await fetch(url, { mode: "cors", cache: "force-cache" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
   }
+}
 
-  // 2ª tentativa: html2canvas (mais tolerante a alguns casos legacy)
-  const { default: html2canvas } = await import("html2canvas");
-  const canvas = await withTimeout(
-    html2canvas(node, {
-      backgroundColor: null,
-      scale: 2,
-      useCORS: true,
-      logging: false,
+// Pre-carrega todas as <img> do nó como data URL e aguarda decode.
+// Resolve o erro silencioso de html-to-image quando imagens cross-origin falham.
+async function inlineImages(node: HTMLElement): Promise<void> {
+  const imgs = Array.from(node.querySelectorAll("img")) as HTMLImageElement[];
+  await Promise.all(
+    imgs.map(async (img) => {
+      const src = img.currentSrc || img.src;
+      if (!src || src.startsWith("data:")) return;
+      const dataUrl = await urlToDataUrl(src);
+      if (dataUrl) {
+        img.crossOrigin = "anonymous";
+        img.src = dataUrl;
+      }
+      try {
+        await img.decode();
+      } catch {
+        // ignora — html-to-image vai pular se não conseguir
+      }
+    }),
+  );
+}
+
+async function generateBlob(node: HTMLElement): Promise<Blob> {
+  // Pré-processa imagens externas → data URL (evita falha silenciosa do html-to-image)
+  await inlineImages(node);
+
+  const blob = await withTimeout(
+    htiToBlob(node, {
+      pixelRatio: 2,
+      quality: 0.92,
+      cacheBust: false,
+      backgroundColor: undefined,
+      skipFonts: false,
+      // Se uma imagem ainda falhar, substitui por pixel transparente em vez de quebrar
+      imagePlaceholder:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
     }),
     GEN_TIMEOUT_MS,
-    "html2canvas",
+    "html-to-image",
   );
-  const blob: Blob | null = await new Promise((res) =>
-    canvas.toBlob((b) => res(b), "image/png", 0.8),
-  );
-  if (!blob) throw new Error("toBlob retornou null");
+  if (!blob || blob.size === 0) throw new Error("Geração de imagem retornou vazio");
   return blob;
 }
 
