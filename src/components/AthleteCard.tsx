@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Share2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { removeBackgroundFromUrl } from "@/utils/removeBackground";
-import { shareOrDownloadImage, reportShareError } from "@/utils/shareImage";
+import { generateImageBlob, reportShareError } from "@/utils/shareImage";
+import { ShareSheet } from "@/components/ShareSheet";
 
 type Props = {
   displayName: string;
@@ -87,6 +88,8 @@ export function AthleteCard({
   const ref = useRef<HTMLDivElement>(null);
   const tiltRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareBlob, setShareBlob] = useState<Blob | null>(null);
   const [cleanAvatar, setCleanAvatar] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
@@ -203,22 +206,13 @@ export function AthleteCard({
     .slice(0, 2)
     .toUpperCase();
 
-  const handleShare = async (download = false) => {
+  const handleShare = async () => {
     if (!ref.current) return;
     setBusy(true);
     try {
-      const result = await shareOrDownloadImage({
-        node: ref.current,
-        fileName: `${displayName || "card"}-card.png`,
-        title: "Meu Card Lendário - Joga Bola App",
-        text: "Confira meu card oficial no Joga Bola App! ⚽",
-        forceDownload: download,
-      });
-      if (result === "shared") {
-        toast.success("Compartilhado! 🔥");
-      } else {
-        toast.success(download ? "Card baixado!" : "Sem suporte ao compartilhamento — baixei a imagem 📥");
-      }
+      const blob = await generateImageBlob(ref.current);
+      setShareBlob(blob);
+      setShareOpen(true);
     } catch (e) {
       reportShareError(e);
     } finally {
@@ -719,21 +713,20 @@ export function AthleteCard({
       )}
 
       <div className="flex gap-2 justify-center">
-        <Button onClick={() => handleShare(false)} disabled={busy} size="sm" className="gap-2">
+        <Button onClick={handleShare} disabled={busy} size="sm" className="gap-2">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
           Compartilhar card
         </Button>
-        <Button
-          onClick={() => handleShare(true)}
-          disabled={busy}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Baixar
-        </Button>
       </div>
+
+      <ShareSheet
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        blob={shareBlob}
+        fileName={`${displayName || "card"}-card.png`}
+        title="Meu Card Lendário - Joga Bola App"
+        text="Confira meu card oficial no Joga Bola App! ⚽"
+      />
     </div>
   );
 }
