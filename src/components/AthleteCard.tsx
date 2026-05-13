@@ -210,12 +210,14 @@ export function AthleteCard({
       const result = await shareOrDownloadImage({
         node: ref.current,
         fileName: `${displayName || "card"}-card.png`,
-        title: `Card de ${displayName}`,
-        text: `Meu card no JemTech Sports — OVR ${ovr}`,
+        title: "Meu Card Lendário - Joga Bola App",
+        text: "Confira meu card oficial no Joga Bola App! ⚽",
         forceDownload: download,
       });
-      if (result === "downloaded") {
-        toast.success("Card baixado!");
+      if (result === "shared") {
+        toast.success("Compartilhado! 🔥");
+      } else {
+        toast.success(download ? "Card baixado!" : "Sem suporte ao compartilhamento — baixei a imagem 📥");
       }
     } catch (e) {
       reportShareError(e);
