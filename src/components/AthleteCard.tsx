@@ -206,22 +206,13 @@ export function AthleteCard({
     .slice(0, 2)
     .toUpperCase();
 
-  const handleShare = async (download = false) => {
+  const handleShare = async () => {
     if (!ref.current) return;
     setBusy(true);
     try {
-      const result = await shareOrDownloadImage({
-        node: ref.current,
-        fileName: `${displayName || "card"}-card.png`,
-        title: "Meu Card Lendário - Joga Bola App",
-        text: "Confira meu card oficial no Joga Bola App! ⚽",
-        forceDownload: download,
-      });
-      if (result === "shared") {
-        toast.success("Compartilhado! 🔥");
-      } else {
-        toast.success(download ? "Card baixado!" : "Sem suporte ao compartilhamento — baixei a imagem 📥");
-      }
+      const blob = await generateImageBlob(ref.current);
+      setShareBlob(blob);
+      setShareOpen(true);
     } catch (e) {
       reportShareError(e);
     } finally {
