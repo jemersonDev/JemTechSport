@@ -88,6 +88,8 @@ export function AthleteCard({
   const ref = useRef<HTMLDivElement>(null);
   const tiltRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareBlob, setShareBlob] = useState<Blob | null>(null);
   const [cleanAvatar, setCleanAvatar] = useState<string | null>(null);
   const [removing, setRemoving] = useState(false);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, mx: 50, my: 50, active: false });
