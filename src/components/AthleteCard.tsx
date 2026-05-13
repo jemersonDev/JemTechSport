@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Share2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { removeBackgroundFromUrl } from "@/utils/removeBackground";
-import { shareOrDownloadImage, reportShareError } from "@/utils/shareImage";
+import { generateImageBlob, reportShareError } from "@/utils/shareImage";
+import { ShareSheet } from "@/components/ShareSheet";
 
 type Props = {
   displayName: string;
