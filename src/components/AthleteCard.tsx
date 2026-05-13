@@ -713,21 +713,20 @@ export function AthleteCard({
       )}
 
       <div className="flex gap-2 justify-center">
-        <Button onClick={() => handleShare(false)} disabled={busy} size="sm" className="gap-2">
+        <Button onClick={handleShare} disabled={busy} size="sm" className="gap-2">
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
           Compartilhar card
         </Button>
-        <Button
-          onClick={() => handleShare(true)}
-          disabled={busy}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Baixar
-        </Button>
       </div>
+
+      <ShareSheet
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        blob={shareBlob}
+        fileName={`${displayName || "card"}-card.png`}
+        title="Meu Card Lendário - Joga Bola App"
+        text="Confira meu card oficial no Joga Bola App! ⚽"
+      />
     </div>
   );
 }
