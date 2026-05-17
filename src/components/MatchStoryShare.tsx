@@ -257,13 +257,36 @@ export function MatchStoryShare({
               )}
             </div>
 
-            {/* Footer / marca d'água */}
-            <div className="absolute bottom-10 left-0 right-0 text-center">
-              <div className="text-[14px] tracking-[0.5em] text-neon font-black opacity-90">
-                JEMTECH SPORTS
-              </div>
-              <div className="text-[10px] tracking-[0.3em] text-white/50 mt-1">
-                gestão de rachas · @_jemersonlm
+            {/* Footer / marca d'água + convite QR */}
+            <div className="absolute bottom-8 left-0 right-0 px-8">
+              {qrDataUrl && inviteCode ? (
+                <div className="flex items-center gap-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-3">
+                  <img
+                    src={qrDataUrl}
+                    alt="QR convite"
+                    crossOrigin="anonymous"
+                    style={{ width: 80, height: 80, borderRadius: 8 }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[11px] tracking-[0.3em] text-neon font-black">
+                      VEM JOGAR COMIGO
+                    </div>
+                    <div className="text-[20px] font-black text-white leading-none mt-1">
+                      {inviteCode}
+                    </div>
+                    <div className="text-[9px] text-white/60 mt-1 truncate">
+                      escaneie pra entrar no racha
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              <div className="text-center mt-3">
+                <div className="text-[12px] tracking-[0.5em] text-neon font-black opacity-90">
+                  JEMTECH SPORTS
+                </div>
+                <div className="text-[9px] tracking-[0.3em] text-white/50 mt-0.5">
+                  gestão de rachas · @_jemersonlm
+                </div>
               </div>
             </div>
           </div>
