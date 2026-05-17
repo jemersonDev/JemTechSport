@@ -26,12 +26,22 @@ export function PlayerMatchHistory({ userId }: { userId: string }) {
       setLoading(true);
       const { data } = await supabase
         .from("partidas_finalizadas")
-        .select("*, rachas(name)")
+        .select("*")
         .or(`team_a_ids.cs.{${userId}},team_b_ids.cs.{${userId}}`)
         .order("finalizada_em", { ascending: false })
         .limit(10);
+      const rows = (data ?? []) as Omit<Partida, "rachas">[];
+      const rachaIds = Array.from(new Set(rows.map((r) => r.racha_id)));
+      let nameMap = new Map<string, string>();
+      if (rachaIds.length) {
+        const { data: rachas } = await supabase
+          .from("rachas")
+          .select("id, name")
+          .in("id", rachaIds);
+        nameMap = new Map((rachas ?? []).map((r) => [r.id, r.name]));
+      }
       if (active) {
-        setPartidas((data ?? []) as Partida[]);
+        setPartidas(rows.map((r) => ({ ...r, rachas: { name: nameMap.get(r.racha_id) ?? "Racha" } })));
         setLoading(false);
       }
     })();

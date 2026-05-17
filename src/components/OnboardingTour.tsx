@@ -54,7 +54,7 @@ export function OnboardingTour() {
   useEffect(() => {
     if (!user || !profile) return;
     const seen =
-      profile.onboarding_completed === true ||
+      (profile as unknown as { onboarding_completed?: boolean }).onboarding_completed === true ||
       localStorage.getItem(LS_KEY) === "1";
     if (!seen) setOpen(true);
   }, [user, profile]);
