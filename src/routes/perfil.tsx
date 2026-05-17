@@ -586,6 +586,9 @@ function PerfilPage() {
           </Card>
         )}
 
+        {/* Histórico de partidas */}
+        {user && <PlayerMatchHistory userId={user.id} />}
+
         {/* Prateleira de troféus */}
         {user && (
           <Card className="overflow-hidden p-0">
