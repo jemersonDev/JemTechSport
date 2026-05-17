@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Share2, Download, Sparkles } from "lucide-react";
+import QRCode from "qrcode";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { shareOrDownloadImage, reportShareError } from "@/utils/shareImage";
@@ -16,6 +17,7 @@ type Props = {
   teamA: Player[];
   teamB: Player[];
   mvpName?: string | null;
+  inviteCode?: string | null;
 };
 
 export function MatchStoryShare({
@@ -26,11 +28,23 @@ export function MatchStoryShare({
   teamA,
   teamB,
   mvpName,
+  inviteCode,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const [craque, setCraque] = useState<{ name: string; votes: number } | null>(null);
   const [bagre, setBagre] = useState<{ name: string; votes: number } | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const inviteLink = inviteCode ? `${origin}/r/${inviteCode}` : null;
+
+  useEffect(() => {
+    if (!inviteLink) return;
+    QRCode.toDataURL(inviteLink, { width: 180, margin: 1, color: { dark: "#000", light: "#fff" } })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(null));
+  }, [inviteLink]);
 
   // Apura votos craque/bagre
   useEffect(() => {
