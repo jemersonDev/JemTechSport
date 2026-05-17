@@ -250,6 +250,17 @@ function RachasPage() {
                         <Share2 className="w-3.5 h-3.5" />
                         Convidar galera no WhatsApp
                       </div>
+                      {(r as { whatsapp_group_link?: string | null }).whatsapp_group_link && (
+                        <a
+                          href={(r as { whatsapp_group_link?: string }).whatsapp_group_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-2 flex items-center justify-center gap-2 py-2 rounded-lg border border-[#25D366]/40 bg-[#25D366]/5 text-[#25D366] text-xs font-bold hover:bg-[#25D366]/10 transition"
+                        >
+                          💬 Abrir grupo do racha no WhatsApp
+                        </a>
+                      )}
                     </button>
                   );
                 })}

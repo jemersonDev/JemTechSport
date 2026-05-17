@@ -1714,6 +1714,7 @@ function Index() {
                   scoreB={scoreB}
                   teamA={teamA.map((p) => ({ id: p.id, name: p.name }))}
                   teamB={teamB.map((p) => ({ id: p.id, name: p.name }))}
+                  inviteCode={racha?.invite_code ?? null}
                 />
               </>
             )}

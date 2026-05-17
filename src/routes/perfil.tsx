@@ -32,6 +32,7 @@ import {
   type PositionExt,
 } from "@/hooks/useRacha";
 import { PlayerStats } from "@/components/PlayerStats";
+import { PlayerMatchHistory } from "@/components/PlayerMatchHistory";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
 import { AthleteCard } from "@/components/AthleteCard";
 import { processAvatar } from "@/utils/processAvatar";
@@ -584,6 +585,9 @@ function PerfilPage() {
             </div>
           </Card>
         )}
+
+        {/* Histórico de partidas */}
+        {user && <PlayerMatchHistory userId={user.id} />}
 
         {/* Prateleira de troféus */}
         {user && (

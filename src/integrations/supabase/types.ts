@@ -427,6 +427,7 @@ export type Database = {
           favorite_team_id: string | null
           favorite_team_name: string | null
           id: string
+          onboarding_completed: boolean
           preferred_position: Database["public"]["Enums"]["player_position"]
           preferred_position_ext: Database["public"]["Enums"]["preferred_position_ext"]
           skill_level: Database["public"]["Enums"]["skill_level"]
@@ -443,6 +444,7 @@ export type Database = {
           favorite_team_id?: string | null
           favorite_team_name?: string | null
           id?: string
+          onboarding_completed?: boolean
           preferred_position?: Database["public"]["Enums"]["player_position"]
           preferred_position_ext?: Database["public"]["Enums"]["preferred_position_ext"]
           skill_level?: Database["public"]["Enums"]["skill_level"]
@@ -459,6 +461,7 @@ export type Database = {
           favorite_team_id?: string | null
           favorite_team_name?: string | null
           id?: string
+          onboarding_completed?: boolean
           preferred_position?: Database["public"]["Enums"]["player_position"]
           preferred_position_ext?: Database["public"]["Enums"]["preferred_position_ext"]
           skill_level?: Database["public"]["Enums"]["skill_level"]
@@ -527,6 +530,7 @@ export type Database = {
           score_b: number
           total_value: number
           updated_at: string
+          whatsapp_group_link: string | null
         }
         Insert: {
           address?: string | null
@@ -555,6 +559,7 @@ export type Database = {
           score_b?: number
           total_value?: number
           updated_at?: string
+          whatsapp_group_link?: string | null
         }
         Update: {
           address?: string | null
@@ -583,6 +588,7 @@ export type Database = {
           score_b?: number
           total_value?: number
           updated_at?: string
+          whatsapp_group_link?: string | null
         }
         Relationships: []
       }
