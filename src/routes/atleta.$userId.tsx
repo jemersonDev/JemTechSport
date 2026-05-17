@@ -9,6 +9,7 @@ import { useFollow } from "@/hooks/useResenha";
 import { openOrCreateConversa } from "@/hooks/useResenhaDM";
 import { ReelsViewer, type ReelPost, formatCount } from "@/components/ReelsViewer";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
+import { PlayerMatchHistory } from "@/components/PlayerMatchHistory";
 import { AthleteCard } from "@/components/AthleteCard";
 
 export const Route = createFileRoute("/atleta/$userId")({
