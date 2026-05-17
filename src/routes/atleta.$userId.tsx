@@ -229,6 +229,11 @@ function AthleteProfile() {
         />
       </section>
 
+      {/* Histórico de partidas */}
+      <div className="px-3">
+        <PlayerMatchHistory userId={userId} />
+      </div>
+
       {/* Prateleira de troféus */}
       <TrofeusShelf userId={userId} />
 
