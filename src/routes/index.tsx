@@ -813,11 +813,27 @@ function Index() {
             </section>
 
             {/* Reservas — agrupados em times (colunas) */}
+            {/* Regra: os 2 goleiros titulares ficam fixos em campo. A rotação reserva é só de
+                jogadores de linha (size - 2 por coluna). Goleiros excedentes ocupam 1 slot da
+                coluna correspondente, ficando como (size-3) linha + 1 goleiro reserva. */}
             {teamsReady && reserves.length > 0 && (() => {
               const size = TEAM_SIZE[fieldMode];
+              const slotsPerGroup = Math.max(1, size - 2); // rotação de linha por coluna
+              const extraKeepers = reserves.filter((p) => p.isGoalkeeper);
+              const lineReserves = reserves.filter((p) => !p.isGoalkeeper);
               const groups: typeof reserves[] = [];
-              for (let i = 0; i < reserves.length; i += size) {
-                groups.push(reserves.slice(i, i + size));
+              let lineIdx = 0;
+              let keeperIdx = 0;
+              while (lineIdx < lineReserves.length || keeperIdx < extraKeepers.length) {
+                const hasKeeper = keeperIdx < extraKeepers.length;
+                const lineNeeded = hasKeeper ? slotsPerGroup - 1 : slotsPerGroup;
+                const lineSlice = lineReserves.slice(lineIdx, lineIdx + lineNeeded);
+                lineIdx += lineSlice.length;
+                const group: typeof reserves = hasKeeper
+                  ? [extraKeepers[keeperIdx++], ...lineSlice]
+                  : [...lineSlice];
+                if (group.length === 0) break;
+                groups.push(group);
               }
               const teamLabels = ["C", "D", "E", "F", "G", "H", "I", "J"];
               return (
