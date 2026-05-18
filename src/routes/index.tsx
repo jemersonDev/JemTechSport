@@ -872,7 +872,7 @@ function Index() {
                             {isNext && <span className="text-[8px] bg-neon/20 text-neon px-1 py-0.5 rounded">PRÓXIMO</span>}
                           </span>
                           <span className="text-[9px] text-muted-foreground font-semibold">
-                            {group.length}/{size}
+                            {group.length}/{slotsPerGroup}
                           </span>
                         </div>
                         <ul className="space-y-1">
