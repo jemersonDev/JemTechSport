@@ -845,7 +845,8 @@ function Index() {
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground -mt-1">
-                    Próximos times que entram — organizados em colunas de {size}.
+                    Goleiros titulares ficam fixos em campo. Colunas de {slotsPerGroup} jogadores
+                    {extraKeepers.length > 0 ? " (com goleiro reserva quando houver)" : " de linha"}.
                   </p>
                   <div
                     className="grid gap-2"
