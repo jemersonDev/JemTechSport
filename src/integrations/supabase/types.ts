@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      conquistas: {
+        Row: {
+          code: string
+          criterio: Json
+          descricao: string
+          icone: string
+          ordem: number
+          raridade: string
+          titulo: string
+        }
+        Insert: {
+          code: string
+          criterio?: Json
+          descricao: string
+          icone?: string
+          ordem?: number
+          raridade?: string
+          titulo: string
+        }
+        Update: {
+          code?: string
+          criterio?: Json
+          descricao?: string
+          icone?: string
+          ordem?: number
+          raridade?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
+      conquistas_usuario: {
+        Row: {
+          conquista_code: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          conquista_code: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          conquista_code?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conquistas_usuario_conquista_code_fkey"
+            columns: ["conquista_code"]
+            isOneToOne: false
+            referencedRelation: "conquistas"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       devedores: {
         Row: {
           created_at: string
@@ -164,6 +223,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lista_espera: {
+        Row: {
+          created_at: string
+          id: string
+          racha_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          racha_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          racha_id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       mp_contas: {
         Row: {
@@ -510,6 +590,7 @@ export type Database = {
           created_at: string
           field_mode: Database["public"]["Enums"]["field_mode"]
           finalizado_em: string | null
+          formacao: string | null
           id: string
           invite_code: string
           lat: number | null
@@ -539,6 +620,7 @@ export type Database = {
           created_at?: string
           field_mode?: Database["public"]["Enums"]["field_mode"]
           finalizado_em?: string | null
+          formacao?: string | null
           id?: string
           invite_code?: string
           lat?: number | null
@@ -568,6 +650,7 @@ export type Database = {
           created_at?: string
           field_mode?: Database["public"]["Enums"]["field_mode"]
           finalizado_em?: string | null
+          formacao?: string | null
           id?: string
           invite_code?: string
           lat?: number | null
@@ -962,6 +1045,7 @@ export type Database = {
         Args: { _other_user: string }
         Returns: string
       }
+      verificar_conquistas: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "super_admin" | "moderador"

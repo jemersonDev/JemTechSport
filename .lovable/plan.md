@@ -1,57 +1,57 @@
+Vou implementar 6 melhorias grandes em sequência. Por ser muita coisa, divido em fases priorizando o que dá mais impacto.
 
-# Plano: 5 melhorias (#2, #5, #3, #20, #15)
+## Fase 1 — Banco (1 migração só)
 
-## #2 — Onboarding (4 telas)
-- Novo componente `OnboardingTour.tsx` com 4 slides:
-  1. "Monte seu card FIFA" → leva a `/perfil`
-  2. "Entre num racha" → leva a `/rachas`
-  3. "Vote no craque" → explica votação
-  4. "Compartilhe sua resenha" → leva a `/resenha`
-- Salva `onboarding_completed` no `localStorage` + coluna nova `profiles.onboarding_completed boolean`
-- Mostra automaticamente no primeiro login (montado em `__root.tsx` ou `index.tsx`)
-- Botões "Pular" e "Próximo/Começar"
+Novas tabelas/colunas:
+- `conquistas` (catálogo): `code`, `titulo`, `descricao`, `icone`, `criterio jsonb`
+- `conquistas_usuario`: `user_id`, `conquista_code`, `unlocked_at` (unique)
+- `lista_espera`: `racha_id`, `user_id`, `position int`, `created_at`
+- `push_subscriptions`: `user_id`, `endpoint`, `p256dh`, `auth` (Web Push)
+- `rachas`: nova coluna `formacao text` (ex: "4-3-3")
+- Seed inicial de 8 conquistas (10 jogos, 5 MVPs, hat-trick, invicto-3, fominha, craque, primeiro racha, pagador-em-dia)
+- Função `verificar_conquistas(user_id)` chamada após finalizar partida — concede troféus automáticos
+- RLS em todas
 
-## #5 — Histórico de partidas do jogador
-- Nova seção em `/atleta/$userId` (e `/perfil`) usando `partidas_finalizadas`
-- Lista das últimas 10 partidas com: data, racha, placar, time do jogador, vitória/derrota/empate, se foi MVP
-- Componente `PlayerMatchHistory.tsx` que consulta `partidas_finalizadas` filtrando onde o `userId` está em `team_a_ids` ou `team_b_ids`
-- Card visual estilo timeline com badge "✓ Venceu" / "✗ Perdeu" / "= Empate" + "🏆 MVP" quando aplicável
+## Fase 2 — Conquistas/Badges (#1)
+- `src/components/ConquistasGrid.tsx` — grid 4-col com badges desbloqueadas/bloqueadas
+- Integrar em `/perfil` e `/atleta/$userId`
+- Toast animado "🏆 Nova conquista!" via realtime ao desbloquear
+- Trigger SQL chama `verificar_conquistas` após insert em `partidas_finalizadas`
 
-## #3 — Story viral pós-jogo com link /r/CODE
-- Modificar `MatchStoryShare.tsx`:
-  - Adicionar QR code (lib `qrcode`) no rodapé do story com link `https://[dominio]/r/{invite_code}`
-  - Texto "Vem jogar comigo no próximo!" + código do racha visível
-  - Buscar `invite_code` do racha via prop nova
-- Adicionar botão "Convidar pra próxima" no story
-- Atualizar `usePartida` ou rota da partida para passar `invite_code`
+## Fase 3 — Lista de Espera (#3)
+- Em `/rachas`, se racha cheio: botão "Entrar na fila" em vez de bloquear
+- Componente `ListaEsperaCard` mostra posição na fila ("Você é o 2º")
+- Trigger SQL: ao remover inscrição, promove o 1º da fila automaticamente + notificação push
 
-## #15 — Backup automático
-- Server route `src/routes/api/public/hooks/daily-backup.ts`:
-  - Exporta tabelas críticas (`profiles`, `rachas`, `partidas_finalizadas`, `pagamentos`, `trofeus`, `devedores`) em JSON
-  - Salva em bucket `backups` (privado) com nome `backup-YYYY-MM-DD.json`
-- Nova migração: cria bucket `backups` privado + cron job pg_cron diário às 03:00
-- Política RLS: só super_admin lê
+## Fase 4 — Escalação Tática (#4)
+- `src/components/EscalacaoTatica.tsx` — campo SVG com bolinhas posicionadas conforme formação
+- Botão no sorteio: "Ver escalação 4-3-3 / 4-4-2 / 3-2-2"
+- Posiciona automaticamente baseado em `preferred_position_ext` (goleiro/zagueiro/lateral/volante/meia/ataque)
 
-## #20 — Notificações WhatsApp (versão simples, sem API paga)
-- Em vez de WhatsApp Business API (que exige conta verificada/pago), implementar **botão "Avisar grupo no WhatsApp"** no detalhe do racha:
-  - Gera mensagem pronta com nome, data, local, link `/r/CODE`
-  - Abre `https://wa.me/?text=...` (deep link universal)
-- Adicionar campo opcional `rachas.whatsapp_group_link` (text) — se preenchido, mostra botão "Abrir grupo"
-- Para automação real seria preciso UAZAPI/Z-API (pago). Vou deixar a estrutura pronta com server function `notifyWhatsAppGroup` documentada mas não conectada.
+## Fase 5 — Dashboard Organizador (#7)
+- Nova aba em `/organizador`: "Dashboard"
+- Cards: receita 30d, taxa presença, jogadores mais assíduos, devedores, gráfico de crescimento (recharts)
+- Queries agregam `pagamentos`, `inscricoes`, `devedores`
 
-## Arquivos
-**Criar:** `src/components/OnboardingTour.tsx`, `src/components/PlayerMatchHistory.tsx`, `src/routes/api/public/hooks/daily-backup.ts`, `src/components/WhatsAppRachaShare.tsx`
-**Editar:** `src/routes/__root.tsx` (mount onboarding), `src/routes/perfil.tsx` + `src/routes/atleta.$userId.tsx` (histórico), `src/components/MatchStoryShare.tsx` (QR + invite_code), `src/routes/rachas.tsx` (botão WhatsApp)
-**Migrações:** adicionar `profiles.onboarding_completed`, `rachas.whatsapp_group_link`, bucket `backups`, cron job
+## Fase 6 — Gráficos de Evolução (#9)
+- `src/components/PlayerEvolutionChart.tsx` — line chart (recharts) em `/perfil` e `/atleta/$userId`
+- Eixo X: últimas 10 partidas; Y: gols, vitórias acumuladas
+- Usa `partidas_finalizadas` + `gols_jogador`
 
-## Dependências
-- `bun add qrcode @types/qrcode` para QR code do story
+## Fase 7 — Push Notifications (#2)
+- Service worker `public/sw.js` para receber push
+- Server fn `subscribeToPush` salva subscription do usuário
+- Server fn `sendPush(userId, msg)` usa lib `web-push` com VAPID
+- Cron `pg_cron` chama endpoint `/api/public/hooks/push-lembretes` (3h antes do racha)
+- Botão "Ativar notificações" no perfil
+- **Requer**: gerar par de chaves VAPID e adicionar como secrets `VAPID_PUBLIC_KEY` e `VAPID_PRIVATE_KEY` (vou pedir após Fase 1-6)
 
-## Como vai funcionar (resumo final)
-1. Novo usuário entra → vê tour de 4 telas explicando o app
-2. Em qualquer perfil → seção "Últimas partidas" mostra histórico com vitórias e MVPs
-3. Após finalizar racha → story automático tem QR code + link convite "Vem jogar comigo"
-4. Banco faz backup diário automático em bucket privado às 03:00
-5. Organizador clica "Compartilhar racha no WhatsApp" → abre conversa com mensagem pronta + link de convite
+## Como vai funcionar (resumo)
+1. Jogador completa critério → badge desbloqueada → notificação no app
+2. Racha cheio → entra na fila → quando alguém sai, próximo da fila é promovido
+3. Após sorteio → vê escalação tática 4-3-3 no campo
+4. Organizador vê dashboard com receita, presença, devedores
+5. Perfil mostra gráfico de evolução das últimas partidas
+6. (Push) Lembretes 3h antes chegam direto no celular
 
-Posso prosseguir?
+Posso prosseguir com todas as 7 fases?
