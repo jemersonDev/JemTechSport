@@ -34,6 +34,8 @@ import {
 import { PlayerStats } from "@/components/PlayerStats";
 import { PlayerMatchHistory } from "@/components/PlayerMatchHistory";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
+import { ConquistasGrid } from "@/components/ConquistasGrid";
+import { PlayerEvolutionChart } from "@/components/PlayerEvolutionChart";
 import { AthleteCard } from "@/components/AthleteCard";
 import { processAvatar } from "@/utils/processAvatar";
 import { FounderBadge } from "@/components/FounderBadge";
@@ -588,6 +590,20 @@ function PerfilPage() {
 
         {/* Histórico de partidas */}
         {user && <PlayerMatchHistory userId={user.id} />}
+
+        {/* Evolução */}
+        {user && (
+          <Card className="overflow-hidden p-0">
+            <PlayerEvolutionChart userId={user.id} />
+          </Card>
+        )}
+
+        {/* Conquistas */}
+        {user && (
+          <Card className="overflow-hidden p-0">
+            <ConquistasGrid userId={user.id} />
+          </Card>
+        )}
 
         {/* Prateleira de troféus */}
         {user && (

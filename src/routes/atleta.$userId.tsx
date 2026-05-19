@@ -10,6 +10,8 @@ import { openOrCreateConversa } from "@/hooks/useResenhaDM";
 import { ReelsViewer, type ReelPost, formatCount } from "@/components/ReelsViewer";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
 import { PlayerMatchHistory } from "@/components/PlayerMatchHistory";
+import { ConquistasGrid } from "@/components/ConquistasGrid";
+import { PlayerEvolutionChart } from "@/components/PlayerEvolutionChart";
 import { AthleteCard } from "@/components/AthleteCard";
 
 export const Route = createFileRoute("/atleta/$userId")({
@@ -233,6 +235,12 @@ function AthleteProfile() {
       <div className="px-3">
         <PlayerMatchHistory userId={userId} />
       </div>
+
+      {/* Evolução */}
+      <PlayerEvolutionChart userId={userId} />
+
+      {/* Conquistas */}
+      <ConquistasGrid userId={userId} />
 
       {/* Prateleira de troféus */}
       <TrofeusShelf userId={userId} />
