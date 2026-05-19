@@ -3,6 +3,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/BottomNav";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { ConquistasListener } from "@/components/ConquistasListener";
 
 import appCss from "../styles.css?url";
 
@@ -86,6 +87,7 @@ function RootComponent() {
       </div>
       {!hideNav && <BottomNav />}
       {!HIDE_NAV_ON.has(location.pathname) && <OnboardingTour />}
+      <ConquistasListener />
       <Toaster />
     </AuthProvider>
   );

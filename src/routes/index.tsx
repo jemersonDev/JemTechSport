@@ -39,6 +39,8 @@ import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { ManualPlayersEditor } from "@/components/ManualPlayersEditor";
 import { CraqueBagreVote } from "@/components/CraqueBagreVote";
 import { MatchStoryShare } from "@/components/MatchStoryShare";
+import { ListaEsperaCard } from "@/components/ListaEsperaCard";
+import { EscalacaoTatica } from "@/components/EscalacaoTatica";
 import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
@@ -1078,6 +1080,16 @@ function Index() {
                           🧤 Goleiro
                         </button>
                       </div>
+                      {user && racha && inscricoes.length >= racha.max_players && (
+                        <div className="mt-3">
+                          <ListaEsperaCard
+                            rachaId={racha.id}
+                            userId={user.id}
+                            isFull={true}
+                            isInscrito={false}
+                          />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-2">
