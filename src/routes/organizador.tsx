@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, DollarSign, TrendingUp, Wallet, Loader2 } from "lucide-react";
 import { DevedoresPanel } from "@/components/DevedoresPanel";
 import { RelatorioMensal } from "@/components/RelatorioMensal";
+import { OrganizadorDashboard } from "@/components/OrganizadorDashboard";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -159,6 +160,9 @@ function OrganizadorPage() {
             (acima) acumula como saldo devido.
           </p>
         </Card>
+
+        {/* Dashboard */}
+        <OrganizadorDashboard organizadorId={user!.id} />
 
         {/* Relatório Mensal com export PDF */}
         <RelatorioMensal />
