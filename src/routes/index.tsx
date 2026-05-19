@@ -39,6 +39,8 @@ import { PixPaymentDialog } from "@/components/PixPaymentDialog";
 import { ManualPlayersEditor } from "@/components/ManualPlayersEditor";
 import { CraqueBagreVote } from "@/components/CraqueBagreVote";
 import { MatchStoryShare } from "@/components/MatchStoryShare";
+import { ListaEsperaCard } from "@/components/ListaEsperaCard";
+import { EscalacaoTatica } from "@/components/EscalacaoTatica";
 import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
