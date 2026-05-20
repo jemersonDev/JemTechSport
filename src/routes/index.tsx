@@ -919,28 +919,48 @@ function Index() {
                           {group.map((p, i) => (
                             <li
                               key={p.id}
-                              className="flex items-center gap-1.5 rounded-md bg-black/30 px-1.5 py-1"
+                              className={`flex items-center gap-1.5 rounded-md px-1.5 py-1 ${
+                                p.isGoalkeeper
+                                  ? "bg-keeper/15 ring-1 ring-keeper/50"
+                                  : "bg-black/30"
+                              }`}
                             >
-                              <span className="w-4 h-4 rounded-full bg-neon/20 text-neon text-[9px] font-black flex items-center justify-center shrink-0">
+                              <span
+                                className={`w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center shrink-0 ${
+                                  p.isGoalkeeper
+                                    ? "bg-keeper/30 text-keeper"
+                                    : "bg-neon/20 text-neon"
+                                }`}
+                              >
                                 {i + 1}
                               </span>
-                              <div className="w-5 h-5 rounded-full overflow-hidden bg-black/40 flex items-center justify-center shrink-0 ring-1 ring-border">
-                                {p.photo ? (
-                                  <img
-                                    src={p.photo}
-                                    alt={p.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <UserIcon className="w-3 h-3 text-muted-foreground" />
-                                )}
-                              </div>
-                              <span className="text-[11px] font-semibold text-foreground truncate flex-1 min-w-0">
-                                {p.name.split(" ")[0]}
-                              </span>
-                              {p.isGoalkeeper && (
-                                <Shield className="w-2.5 h-2.5 text-keeper shrink-0" strokeWidth={3} />
+                              {p.isGoalkeeper ? (
+                                <div className="w-5 h-5 rounded-full bg-keeper/25 flex items-center justify-center shrink-0 ring-1 ring-keeper/60">
+                                  <Shield className="w-3 h-3 text-keeper" strokeWidth={3} />
+                                </div>
+                              ) : (
+                                <div className="w-5 h-5 rounded-full overflow-hidden bg-black/40 flex items-center justify-center shrink-0 ring-1 ring-border">
+                                  {p.photo ? (
+                                    <img
+                                      src={p.photo}
+                                      alt={p.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <UserIcon className="w-3 h-3 text-muted-foreground" />
+                                  )}
+                                </div>
                               )}
+                              <span
+                                className={`text-[11px] font-semibold truncate flex-1 min-w-0 ${
+                                  p.isGoalkeeper ? "text-keeper" : "text-foreground"
+                                }`}
+                              >
+                                {p.name.split(" ")[0]}
+                                {p.isGoalkeeper && (
+                                  <span className="ml-1 text-[8px] uppercase opacity-70">GK</span>
+                                )}
+                              </span>
                             </li>
                           ))}
                         </ul>
