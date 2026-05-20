@@ -814,6 +814,44 @@ function Index() {
               )}
             </section>
 
+            {teamsReady && (
+              <section className="rounded-2xl bg-graphite border border-border p-4 shadow-card space-y-3">
+                <SectionTitle icon={LayoutGrid} title="Escalação tática" />
+                <p className="text-[11px] text-muted-foreground -mt-1">
+                  Posicionamento sugerido por formação. Toque nos botões pra alternar 4-3-3, 4-4-2, etc.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {teamA.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[10px] uppercase font-bold text-team-a">Time A</p>
+                      <EscalacaoTatica
+                        jogadores={teamA.map((p) => ({
+                          id: p.id,
+                          nome: p.name,
+                          posicao: p.isGoalkeeper ? "goleiro" : undefined,
+                        }))}
+                        corTime="var(--team-a)"
+                      />
+                    </div>
+                  )}
+                  {teamB.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[10px] uppercase font-bold text-team-b">Time B</p>
+                      <EscalacaoTatica
+                        jogadores={teamB.map((p) => ({
+                          id: p.id,
+                          nome: p.name,
+                          posicao: p.isGoalkeeper ? "goleiro" : undefined,
+                        }))}
+                        corTime="var(--team-b)"
+                      />
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+
             {/* Reservas — agrupados em times (colunas) */}
             {/* Regra: os 2 goleiros titulares ficam fixos em campo. A rotação reserva é só de
                 jogadores de linha (size - 2 por coluna). Goleiros excedentes ocupam 1 slot da
