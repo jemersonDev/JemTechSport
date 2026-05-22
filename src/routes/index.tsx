@@ -875,11 +875,11 @@ function Index() {
                             {isNext && <span className="text-[8px] bg-neon/20 text-neon px-1 py-0.5 rounded">PRÓXIMO</span>}
                           </span>
                           <span className="text-[9px] text-muted-foreground font-semibold">
-                            {group.length}/{slotsPerGroup}
+                            {group.players.length}/{group.slots}
                           </span>
                         </div>
                         <ul className="space-y-1">
-                          {group.map((p, i) => (
+                          {group.players.map((p, i) => (
                             <li
                               key={p.id}
                               className={`flex items-center gap-1.5 rounded-md px-1.5 py-1 ${
