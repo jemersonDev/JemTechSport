@@ -131,7 +131,6 @@ function Index() {
   const [teamA, setTeamA] = useState<Player[]>([]);
   const [teamB, setTeamB] = useState<Player[]>([]);
   const [reserves, setReserves] = useState<Player[]>([]);
-  const [tacticTeam, setTacticTeam] = useState<"A" | "B">("A");
   const {
     scoreA,
     scoreB,
@@ -815,53 +814,6 @@ function Index() {
               )}
             </section>
 
-            {teamsReady && (teamA.length > 0 || teamB.length > 0) && (() => {
-              const jogadoresAtivos = tacticTeam === "A" ? teamA : teamB;
-              const corAtiva = tacticTeam === "A" ? "var(--team-a)" : "var(--team-b)";
-              return (
-                <section className="rounded-2xl bg-graphite border border-border p-4 shadow-card space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <SectionTitle icon={LayoutGrid} title="Escalação tática" />
-                    <div className="inline-flex rounded-lg border border-border bg-secondary p-0.5">
-                      <button
-                        type="button"
-                        onClick={() => setTacticTeam("A")}
-                        className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md transition ${
-                          tacticTeam === "A"
-                            ? "bg-[var(--team-a)] text-black"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        Time A
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTacticTeam("B")}
-                        className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md transition ${
-                          tacticTeam === "B"
-                            ? "bg-[var(--team-b)] text-black"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        Time B
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground -mt-1">
-                    Posicionamento sugerido por formação. Toque nos botões pra alternar 4-3-3, 4-4-2, etc.
-                  </p>
-                  <EscalacaoTatica
-                    key={tacticTeam}
-                    jogadores={jogadoresAtivos.map((p) => ({
-                      id: p.id,
-                      nome: p.name,
-                      posicao: p.isGoalkeeper ? "goleiro" : undefined,
-                    }))}
-                    corTime={corAtiva}
-                  />
-                </section>
-              );
-            })()}
 
 
 
