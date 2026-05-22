@@ -823,22 +823,21 @@ function Index() {
                 coluna correspondente, ficando como (size-3) linha + 1 goleiro reserva. */}
             {teamsReady && reserves.length > 0 && (() => {
               const size = TEAM_SIZE[fieldMode];
-              const slotsPerGroup = Math.max(1, size - 1); // 4 jogadores de linha que entram no próximo jogo
+              const lineSlots = Math.max(1, size - 1); // 4 jogadores de linha por time
               const extraKeepers = reserves.filter((p) => p.isGoalkeeper);
               const lineReserves = reserves.filter((p) => !p.isGoalkeeper);
-              const groups: typeof reserves[] = [];
+              const groups: { players: typeof reserves; slots: number }[] = [];
               let lineIdx = 0;
               let keeperIdx = 0;
               while (lineIdx < lineReserves.length || keeperIdx < extraKeepers.length) {
                 const hasKeeper = keeperIdx < extraKeepers.length;
-                const lineNeeded = hasKeeper ? slotsPerGroup - 1 : slotsPerGroup;
-                const lineSlice = lineReserves.slice(lineIdx, lineIdx + lineNeeded);
+                const lineSlice = lineReserves.slice(lineIdx, lineIdx + lineSlots);
                 lineIdx += lineSlice.length;
-                const group: typeof reserves = hasKeeper
+                const players: typeof reserves = hasKeeper
                   ? [extraKeepers[keeperIdx++], ...lineSlice]
                   : [...lineSlice];
-                if (group.length === 0) break;
-                groups.push(group);
+                if (players.length === 0) break;
+                groups.push({ players, slots: hasKeeper ? lineSlots + 1 : lineSlots });
               }
               const teamLabels = ["C", "D", "E", "F", "G", "H", "I", "J"];
               return (
@@ -850,8 +849,7 @@ function Index() {
                     </span>
                   </div>
                   <p className="text-[11px] text-muted-foreground -mt-1">
-                    Goleiros titulares ficam fixos em campo. Colunas de {slotsPerGroup} jogadores
-                    {extraKeepers.length > 0 ? " (com goleiro reserva quando houver)" : " de linha"}.
+                    Goleiros titulares ficam fixos em campo. Quando houver goleiro reserva, o time entra completo (1 goleiro + {lineSlots} de linha).
                   </p>
                   <div
                     className="grid gap-2"
@@ -877,11 +875,11 @@ function Index() {
                             {isNext && <span className="text-[8px] bg-neon/20 text-neon px-1 py-0.5 rounded">PRÓXIMO</span>}
                           </span>
                           <span className="text-[9px] text-muted-foreground font-semibold">
-                            {group.length}/{slotsPerGroup}
+                            {group.players.length}/{group.slots}
                           </span>
                         </div>
                         <ul className="space-y-1">
-                          {group.map((p, i) => (
+                          {group.players.map((p, i) => (
                             <li
                               key={p.id}
                               className={`flex items-center gap-1.5 rounded-md px-1.5 py-1 ${
