@@ -823,7 +823,7 @@ function Index() {
                 coluna correspondente, ficando como (size-3) linha + 1 goleiro reserva. */}
             {teamsReady && reserves.length > 0 && (() => {
               const size = TEAM_SIZE[fieldMode];
-              const slotsPerGroup = Math.max(1, size - 2); // rotação de linha por coluna
+              const slotsPerGroup = Math.max(1, size - 1); // 4 jogadores de linha que entram no próximo jogo
               const extraKeepers = reserves.filter((p) => p.isGoalkeeper);
               const lineReserves = reserves.filter((p) => !p.isGoalkeeper);
               const groups: typeof reserves[] = [];
