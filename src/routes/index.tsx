@@ -131,6 +131,7 @@ function Index() {
   const [teamA, setTeamA] = useState<Player[]>([]);
   const [teamB, setTeamB] = useState<Player[]>([]);
   const [reserves, setReserves] = useState<Player[]>([]);
+  const [tacticTeam, setTacticTeam] = useState<"A" | "B">("A");
   const {
     scoreA,
     scoreB,
