@@ -786,12 +786,35 @@ export function AthleteCard({
         </p>
       )}
 
+      {!avatarUrl && (
+        <p className="text-[11px] text-center text-muted-foreground px-6">
+          💡 Para melhor resultado, envie uma foto de <strong className="text-foreground">busto ou corpo inteiro</strong> (não só rosto) com fundo neutro.
+        </p>
+      )}
+
       <div className="flex gap-2 justify-center">
-        <Button onClick={handleShare} disabled={busy} size="sm" className="gap-2">
+        <button
+          onClick={(e) => {
+            const el = e.currentTarget;
+            el.classList.remove("animate-share-pulse");
+            void el.offsetWidth;
+            el.classList.add("animate-share-pulse");
+            handleShare();
+          }}
+          disabled={busy}
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider disabled:opacity-60 transition-transform"
+          style={{
+            background: "linear-gradient(135deg, #f5c842 0%, #c8860a 100%)",
+            color: "#0a0a0a",
+            boxShadow:
+              "0 4px 14px rgba(245,200,66,0.4), inset 0 1px 0 rgba(255,255,255,0.4)",
+          }}
+        >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
-          Compartilhar card
-        </Button>
+          Compartilhar cartão
+        </button>
       </div>
+
 
       <ShareSheet
         open={shareOpen}
