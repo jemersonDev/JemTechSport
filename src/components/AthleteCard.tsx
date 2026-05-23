@@ -388,36 +388,46 @@ export function AthleteCard({
                 }}
               />
               <div
-                className="font-black tracking-tighter relative"
+                className="font-black tracking-tighter relative flex items-center gap-1"
                 style={{
                   fontSize: 60,
-                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  fontFamily: '"Oswald", "Anton", "Bebas Neue", Impact, sans-serif',
+                  fontWeight: 900,
                   letterSpacing: "-0.04em",
-                  background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 18%, ${tier.accent} 45%, #b8860b 78%, #5a3500 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 6px rgba(0,0,0,0.5))`,
-                  textShadow: "0 1px 0 rgba(255,255,255,0.4)",
+                  color: "#ffffff",
+                  textShadow:
+                    "0 0 10px #fff, 0 0 20px #f5c842, 0 0 40px #c8860a, 0 0 60px rgba(200,134,10,0.5)",
+                  lineHeight: 1,
                 }}
               >
                 {ovr}
+                {ovr >= 99 && (
+                  <span
+                    style={{
+                      fontSize: 22,
+                      filter: "drop-shadow(0 0 8px #f5c842)",
+                      marginLeft: 2,
+                    }}
+                  >
+                    ⭐
+                  </span>
+                )}
               </div>
             </div>
             <div
-              className="font-black mt-1 tracking-[0.25em]"
+              className="mt-1"
               style={{
-                fontSize: 13,
-                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                background: `linear-gradient(180deg, #fff7c0, ${tier.accent}, #7a4a00)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 1px 1px rgba(0,0,0,0.8))`,
+                fontSize: 12,
+                fontFamily: '"Oswald", "Rajdhani", sans-serif',
+                fontWeight: 600,
+                letterSpacing: "0.3em",
+                color: "rgba(255,240,180,0.85)",
+                textShadow: "0 1px 2px rgba(0,0,0,0.8)",
               }}
             >
               {pos}
             </div>
+
             <div
               className="mt-1.5 h-px w-9"
               style={{ background: tier.accent, opacity: 0.6 }}
