@@ -241,7 +241,38 @@ export function AthleteCard({
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-center" style={{ perspective: 1200 }}>
+      <div
+        className="relative flex justify-center overflow-hidden rounded-2xl py-8"
+        style={{
+          perspective: 1200,
+          background:
+            "radial-gradient(ellipse at center, #1a1200 0%, #0a0a14 60%, #000000 100%)",
+        }}
+      >
+        {/* Partículas douradas flutuantes */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {Array.from({ length: 14 }).map((_, i) => {
+            const left = (i * 37) % 100;
+            const delay = (i * 0.7) % 6;
+            const size = 1.5 + ((i * 7) % 3);
+            return (
+              <span
+                key={i}
+                className="absolute rounded-full animate-gold-particle"
+                style={{
+                  left: `${left}%`,
+                  bottom: `${(i * 11) % 40}%`,
+                  width: size,
+                  height: size,
+                  background: "#f5c842",
+                  boxShadow: "0 0 6px #f5c842, 0 0 12px rgba(245,200,66,0.5)",
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            );
+          })}
+        </div>
+
         <div
           ref={tiltRef}
           onPointerMove={handlePointerMove}
