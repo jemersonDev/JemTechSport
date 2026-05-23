@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import { Download, Share2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { removeBackgroundFromUrl } from "@/utils/removeBackground";
@@ -134,12 +134,15 @@ export function AthleteCard({
   const tier =
     ovr >= 90
       ? {
-          label: "ICON",
-          ringFrom: "#fde68a",
-          ringTo: "#b45309",
-          base: "from-amber-900 via-yellow-700 to-amber-950",
-          glow: "rgba(251,191,36,0.55)",
-          accent: "#fde047",
+          label: ovr >= 99 ? "PERFECT" : "ICON",
+          ringFrom: "#fff7c0",
+          ringTo: "#6b4400",
+          base: "from-[#2a1a00] via-[#6b4400] to-[#3a2200]",
+          cardGradient:
+            "linear-gradient(145deg, #2a1a00 0%, #6b4400 30%, #c8860a 55%, #f5c842 70%, #c8860a 85%, #3a2200 100%)",
+          glow: "rgba(245,200,66,0.55)",
+          accent: "#f5c842",
+          animated: true,
         }
       : ovr >= 80
       ? {
@@ -147,8 +150,11 @@ export function AthleteCard({
           ringFrom: "#fcd34d",
           ringTo: "#92400e",
           base: "from-yellow-900 via-amber-700 to-yellow-950",
+          cardGradient:
+            "linear-gradient(145deg, #3a2a00 0%, #7a5400 30%, #c8860a 60%, #7a5400 90%, #3a2200 100%)",
           glow: "rgba(250,204,21,0.45)",
           accent: "#fde047",
+          animated: false,
         }
       : ovr >= 70
       ? {
@@ -156,17 +162,24 @@ export function AthleteCard({
           ringFrom: "#e5e7eb",
           ringTo: "#52525b",
           base: "from-slate-700 via-zinc-600 to-slate-900",
+          cardGradient:
+            "linear-gradient(145deg, #1f2937 0%, #4b5563 35%, #cbd5e1 60%, #6b7280 85%, #1f2937 100%)",
           glow: "rgba(226,232,240,0.35)",
           accent: "#e2e8f0",
+          animated: false,
         }
       : {
           label: "BRONZE",
           ringFrom: "#fdba74",
           ringTo: "#7c2d12",
           base: "from-orange-900 via-amber-800 to-orange-950",
+          cardGradient:
+            "linear-gradient(145deg, #3a1a00 0%, #7c2d12 35%, #c2410c 60%, #7c2d12 85%, #2a1000 100%)",
           glow: "rgba(251,146,60,0.4)",
           accent: "#fed7aa",
+          animated: false,
         };
+
 
   // Tenta remover fundo automaticamente quando há foto.
   // Se a URL já é o PNG limpo persistido pelo upload (card-avatar.png),
@@ -228,7 +241,38 @@ export function AthleteCard({
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-center" style={{ perspective: 1200 }}>
+      <div
+        className="relative flex justify-center overflow-hidden rounded-2xl py-8"
+        style={{
+          perspective: 1200,
+          background:
+            "radial-gradient(ellipse at center, #1a1200 0%, #0a0a14 60%, #000000 100%)",
+        }}
+      >
+        {/* Partículas douradas flutuantes */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {Array.from({ length: 14 }).map((_, i) => {
+            const left = (i * 37) % 100;
+            const delay = (i * 0.7) % 6;
+            const size = 1.5 + ((i * 7) % 3);
+            return (
+              <span
+                key={i}
+                className="absolute rounded-full animate-gold-particle"
+                style={{
+                  left: `${left}%`,
+                  bottom: `${(i * 11) % 40}%`,
+                  width: size,
+                  height: size,
+                  background: "#f5c842",
+                  boxShadow: "0 0 6px #f5c842, 0 0 12px rgba(245,200,66,0.5)",
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            );
+          })}
+        </div>
+
         <div
           ref={tiltRef}
           onPointerMove={handlePointerMove}
@@ -279,9 +323,14 @@ export function AthleteCard({
           />
           {/* Camada interna (1px de espessura da borda) */}
           <div
-            className={`absolute inset-[3px] bg-gradient-to-br ${tier.base}`}
-            style={{ clipPath: shieldClip }}
+            className={`absolute inset-[3px] ${tier.animated ? "animate-border-glow" : ""}`}
+            style={{
+              clipPath: shieldClip,
+              background: tier.cardGradient,
+              border: tier.animated ? "1.5px solid rgba(245,200,66,0.6)" : undefined,
+            }}
           />
+
 
           {/* Texturas: raios de luz */}
           <div
@@ -375,36 +424,46 @@ export function AthleteCard({
                 }}
               />
               <div
-                className="font-black tracking-tighter relative"
+                className="font-black tracking-tighter relative flex items-center gap-1"
                 style={{
                   fontSize: 60,
-                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  fontFamily: '"Oswald", "Anton", "Bebas Neue", Impact, sans-serif',
+                  fontWeight: 900,
                   letterSpacing: "-0.04em",
-                  background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 18%, ${tier.accent} 45%, #b8860b 78%, #5a3500 100%)`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 2px 0 rgba(0,0,0,0.7)) drop-shadow(0 4px 6px rgba(0,0,0,0.5))`,
-                  textShadow: "0 1px 0 rgba(255,255,255,0.4)",
+                  color: "#ffffff",
+                  textShadow:
+                    "0 0 10px #fff, 0 0 20px #f5c842, 0 0 40px #c8860a, 0 0 60px rgba(200,134,10,0.5)",
+                  lineHeight: 1,
                 }}
               >
                 {ovr}
+                {ovr >= 99 && (
+                  <span
+                    style={{
+                      fontSize: 22,
+                      filter: "drop-shadow(0 0 8px #f5c842)",
+                      marginLeft: 2,
+                    }}
+                  >
+                    ⭐
+                  </span>
+                )}
               </div>
             </div>
             <div
-              className="font-black mt-1 tracking-[0.25em]"
+              className="mt-1"
               style={{
-                fontSize: 13,
-                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                background: `linear-gradient(180deg, #fff7c0, ${tier.accent}, #7a4a00)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: `drop-shadow(0 0 6px ${NEON}) drop-shadow(0 1px 1px rgba(0,0,0,0.8))`,
+                fontSize: 12,
+                fontFamily: '"Oswald", "Rajdhani", sans-serif',
+                fontWeight: 600,
+                letterSpacing: "0.3em",
+                color: "rgba(255,240,180,0.85)",
+                textShadow: "0 1px 2px rgba(0,0,0,0.8)",
               }}
             >
               {pos}
             </div>
+
             <div
               className="mt-1.5 h-px w-9"
               style={{ background: tier.accent, opacity: 0.6 }}
@@ -550,22 +609,22 @@ export function AthleteCard({
             />
             {/* Nome */}
             <div
-              className="font-black uppercase truncate text-center"
+              className="uppercase truncate text-center"
               style={{
-                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                fontSize: 30,
-                letterSpacing: "0.1em",
-                background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 25%, ${tier.accent} 55%, #b8860b 85%, #5a3500 100%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 1px 0 rgba(0,0,0,0.9)) drop-shadow(0 2px 3px rgba(0,0,0,0.6))`,
-                lineHeight: 1,
+                fontFamily: '"Oswald", "Rajdhani", "Bebas Neue", sans-serif',
+                fontWeight: 700,
+                fontSize: 20,
+                letterSpacing: "0.18em",
+                color: "#ffffff",
+                textShadow:
+                  "0 0 6px rgba(245,200,66,0.7), 0 0 14px rgba(200,134,10,0.45), 0 2px 3px rgba(0,0,0,0.8)",
+                lineHeight: 1.1,
                 marginBottom: 10,
               }}
             >
               {displayName}
             </div>
+
 
             {/* Atributos 3x2 com barra de progresso neon */}
             <div
@@ -588,12 +647,26 @@ export function AthleteCard({
               ] as const
             ).map(([k, v]) => {
               const pct = Math.max(10, Math.min(100, ((v - 50) / 49) * 100));
+              const barGradient =
+                v >= 90
+                  ? "linear-gradient(90deg, #f5c842, #ffffff)"
+                  : v >= 80
+                  ? "linear-gradient(90deg, #c8860a, #f5c842)"
+                  : v < 70
+                  ? "linear-gradient(90deg, #e05050, #f08080)"
+                  : "linear-gradient(90deg, #94a3b8, #e2e8f0)";
+              const barGlow =
+                v >= 90
+                  ? "0 0 8px rgba(245,200,66,0.8)"
+                  : v < 70
+                  ? "0 0 6px rgba(224,80,80,0.6)"
+                  : "0 0 4px rgba(255,255,255,0.3)";
               return (
               <div
                 key={k}
                 className="flex flex-col"
                 style={{
-                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  fontFamily: '"Oswald", "Bebas Neue", Impact, sans-serif',
                   color: "#ffffff",
                 }}
               >
@@ -603,32 +676,33 @@ export function AthleteCard({
                     style={{
                       color: "#ffffff",
                       textShadow:
-                        "0 0 2px rgba(0,0,0,0.95), 0 1px 2px rgba(0,0,0,0.95), 0 0 10px rgba(0,255,136,0.45)",
+                        "0 0 2px rgba(0,0,0,0.95), 0 1px 2px rgba(0,0,0,0.95), 0 0 10px rgba(245,200,66,0.45)",
                     }}
                   >
                     {v}
                   </span>
                   <span
                     className="text-[11px] font-bold tracking-[0.22em]"
-                    style={{ color: NEON, textShadow: `0 0 6px ${NEON}` }}
+                    style={{ color: tier.accent, textShadow: `0 0 6px ${tier.accent}` }}
                   >
                     {k}
                   </span>
                 </div>
                 <div
                   className="mt-1 h-[3px] rounded-full overflow-hidden"
-                  style={{ background: "rgba(0,0,0,0.6)" }}
+                  style={{ background: "rgba(0,0,0,0.6)", width: 40 }}
                 >
                   <div
                     style={{
                       width: `${pct}%`,
                       height: "100%",
-                      background: `linear-gradient(90deg, ${NEON}, #b6ff7a)`,
-                      boxShadow: `0 0 6px ${NEON}`,
+                      background: barGradient,
+                      boxShadow: barGlow,
                     }}
                   />
                 </div>
               </div>
+
               );
             })}
             </div>
@@ -712,12 +786,35 @@ export function AthleteCard({
         </p>
       )}
 
+      {!avatarUrl && (
+        <p className="text-[11px] text-center text-muted-foreground px-6">
+          💡 Para melhor resultado, envie uma foto de <strong className="text-foreground">busto ou corpo inteiro</strong> (não só rosto) com fundo neutro.
+        </p>
+      )}
+
       <div className="flex gap-2 justify-center">
-        <Button onClick={handleShare} disabled={busy} size="sm" className="gap-2">
+        <button
+          onClick={(e) => {
+            const el = e.currentTarget;
+            el.classList.remove("animate-share-pulse");
+            void el.offsetWidth;
+            el.classList.add("animate-share-pulse");
+            handleShare();
+          }}
+          disabled={busy}
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider disabled:opacity-60 transition-transform"
+          style={{
+            background: "linear-gradient(135deg, #f5c842 0%, #c8860a 100%)",
+            color: "#0a0a0a",
+            boxShadow:
+              "0 4px 14px rgba(245,200,66,0.4), inset 0 1px 0 rgba(255,255,255,0.4)",
+          }}
+        >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
-          Compartilhar card
-        </Button>
+          Compartilhar cartão
+        </button>
       </div>
+
 
       <ShareSheet
         open={shareOpen}
