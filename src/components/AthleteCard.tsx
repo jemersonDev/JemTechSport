@@ -616,12 +616,26 @@ export function AthleteCard({
               ] as const
             ).map(([k, v]) => {
               const pct = Math.max(10, Math.min(100, ((v - 50) / 49) * 100));
+              const barGradient =
+                v >= 90
+                  ? "linear-gradient(90deg, #f5c842, #ffffff)"
+                  : v >= 80
+                  ? "linear-gradient(90deg, #c8860a, #f5c842)"
+                  : v < 70
+                  ? "linear-gradient(90deg, #e05050, #f08080)"
+                  : "linear-gradient(90deg, #94a3b8, #e2e8f0)";
+              const barGlow =
+                v >= 90
+                  ? "0 0 8px rgba(245,200,66,0.8)"
+                  : v < 70
+                  ? "0 0 6px rgba(224,80,80,0.6)"
+                  : "0 0 4px rgba(255,255,255,0.3)";
               return (
               <div
                 key={k}
                 className="flex flex-col"
                 style={{
-                  fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
+                  fontFamily: '"Oswald", "Bebas Neue", Impact, sans-serif',
                   color: "#ffffff",
                 }}
               >
@@ -631,32 +645,33 @@ export function AthleteCard({
                     style={{
                       color: "#ffffff",
                       textShadow:
-                        "0 0 2px rgba(0,0,0,0.95), 0 1px 2px rgba(0,0,0,0.95), 0 0 10px rgba(0,255,136,0.45)",
+                        "0 0 2px rgba(0,0,0,0.95), 0 1px 2px rgba(0,0,0,0.95), 0 0 10px rgba(245,200,66,0.45)",
                     }}
                   >
                     {v}
                   </span>
                   <span
                     className="text-[11px] font-bold tracking-[0.22em]"
-                    style={{ color: NEON, textShadow: `0 0 6px ${NEON}` }}
+                    style={{ color: tier.accent, textShadow: `0 0 6px ${tier.accent}` }}
                   >
                     {k}
                   </span>
                 </div>
                 <div
                   className="mt-1 h-[3px] rounded-full overflow-hidden"
-                  style={{ background: "rgba(0,0,0,0.6)" }}
+                  style={{ background: "rgba(0,0,0,0.6)", width: 40 }}
                 >
                   <div
                     style={{
                       width: `${pct}%`,
                       height: "100%",
-                      background: `linear-gradient(90deg, ${NEON}, #b6ff7a)`,
-                      boxShadow: `0 0 6px ${NEON}`,
+                      background: barGradient,
+                      boxShadow: barGlow,
                     }}
                   />
                 </div>
               </div>
+
               );
             })}
             </div>
