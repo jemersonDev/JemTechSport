@@ -578,22 +578,22 @@ export function AthleteCard({
             />
             {/* Nome */}
             <div
-              className="font-black uppercase truncate text-center"
+              className="uppercase truncate text-center"
               style={{
-                fontFamily: '"Bebas Neue", "Oswald", Impact, sans-serif',
-                fontSize: 30,
-                letterSpacing: "0.1em",
-                background: `linear-gradient(180deg, #ffffff 0%, #fff7c0 25%, ${tier.accent} 55%, #b8860b 85%, #5a3500 100%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: `drop-shadow(0 0 8px ${NEON}) drop-shadow(0 1px 0 rgba(0,0,0,0.9)) drop-shadow(0 2px 3px rgba(0,0,0,0.6))`,
-                lineHeight: 1,
+                fontFamily: '"Oswald", "Rajdhani", "Bebas Neue", sans-serif',
+                fontWeight: 700,
+                fontSize: 20,
+                letterSpacing: "0.18em",
+                color: "#ffffff",
+                textShadow:
+                  "0 0 6px rgba(245,200,66,0.7), 0 0 14px rgba(200,134,10,0.45), 0 2px 3px rgba(0,0,0,0.8)",
+                lineHeight: 1.1,
                 marginBottom: 10,
               }}
             >
               {displayName}
             </div>
+
 
             {/* Atributos 3x2 com barra de progresso neon */}
             <div
