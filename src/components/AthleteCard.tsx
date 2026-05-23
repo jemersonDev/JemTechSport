@@ -292,9 +292,14 @@ export function AthleteCard({
           />
           {/* Camada interna (1px de espessura da borda) */}
           <div
-            className={`absolute inset-[3px] bg-gradient-to-br ${tier.base}`}
-            style={{ clipPath: shieldClip }}
+            className={`absolute inset-[3px] ${tier.animated ? "animate-border-glow" : ""}`}
+            style={{
+              clipPath: shieldClip,
+              background: tier.cardGradient,
+              border: tier.animated ? "1.5px solid rgba(245,200,66,0.6)" : undefined,
+            }}
           />
+
 
           {/* Texturas: raios de luz */}
           <div
