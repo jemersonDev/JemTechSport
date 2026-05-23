@@ -134,12 +134,15 @@ export function AthleteCard({
   const tier =
     ovr >= 90
       ? {
-          label: "ICON",
-          ringFrom: "#fde68a",
-          ringTo: "#b45309",
-          base: "from-amber-900 via-yellow-700 to-amber-950",
-          glow: "rgba(251,191,36,0.55)",
-          accent: "#fde047",
+          label: ovr >= 99 ? "PERFECT" : "ICON",
+          ringFrom: "#fff7c0",
+          ringTo: "#6b4400",
+          base: "from-[#2a1a00] via-[#6b4400] to-[#3a2200]",
+          cardGradient:
+            "linear-gradient(145deg, #2a1a00 0%, #6b4400 30%, #c8860a 55%, #f5c842 70%, #c8860a 85%, #3a2200 100%)",
+          glow: "rgba(245,200,66,0.55)",
+          accent: "#f5c842",
+          animated: true,
         }
       : ovr >= 80
       ? {
@@ -147,8 +150,11 @@ export function AthleteCard({
           ringFrom: "#fcd34d",
           ringTo: "#92400e",
           base: "from-yellow-900 via-amber-700 to-yellow-950",
+          cardGradient:
+            "linear-gradient(145deg, #3a2a00 0%, #7a5400 30%, #c8860a 60%, #7a5400 90%, #3a2200 100%)",
           glow: "rgba(250,204,21,0.45)",
           accent: "#fde047",
+          animated: false,
         }
       : ovr >= 70
       ? {
@@ -156,17 +162,24 @@ export function AthleteCard({
           ringFrom: "#e5e7eb",
           ringTo: "#52525b",
           base: "from-slate-700 via-zinc-600 to-slate-900",
+          cardGradient:
+            "linear-gradient(145deg, #1f2937 0%, #4b5563 35%, #cbd5e1 60%, #6b7280 85%, #1f2937 100%)",
           glow: "rgba(226,232,240,0.35)",
           accent: "#e2e8f0",
+          animated: false,
         }
       : {
           label: "BRONZE",
           ringFrom: "#fdba74",
           ringTo: "#7c2d12",
           base: "from-orange-900 via-amber-800 to-orange-950",
+          cardGradient:
+            "linear-gradient(145deg, #3a1a00 0%, #7c2d12 35%, #c2410c 60%, #7c2d12 85%, #2a1000 100%)",
           glow: "rgba(251,146,60,0.4)",
           accent: "#fed7aa",
+          animated: false,
         };
+
 
   // Tenta remover fundo automaticamente quando há foto.
   // Se a URL já é o PNG limpo persistido pelo upload (card-avatar.png),
