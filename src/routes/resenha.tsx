@@ -169,14 +169,14 @@ function EmptyFeed({ onPost, isLogged }: { onPost: () => void; isLogged: boolean
       {isLogged ? (
         <button
           onClick={onPost}
-          className="mt-2 rounded-full bg-primary px-6 py-2.5 font-semibold text-primary-foreground"
+          className="mt-2 rounded-full bg-[#22c55e] px-6 py-2.5 font-bold text-black shadow-[0_0_20px_rgba(34,197,94,0.5)]"
         >
           Postar agora
         </button>
       ) : (
         <Link
           to="/login"
-          className="mt-2 rounded-full bg-primary px-6 py-2.5 font-semibold text-primary-foreground"
+          className="mt-2 rounded-full bg-[#22c55e] px-6 py-2.5 font-bold text-black shadow-[0_0_20px_rgba(34,197,94,0.5)]"
         >
           Entrar
         </Link>
