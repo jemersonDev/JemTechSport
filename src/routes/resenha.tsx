@@ -283,9 +283,9 @@ function VideoSlide({
           }}
           className="shrink-0"
         >
-          <Avatar className="h-10 w-10 ring-2 ring-white">
+          <Avatar className="h-10 w-10 ring-2 ring-[#22c55e] shadow-[0_0_10px_rgba(34,197,94,0.5)]">
             <AvatarImage src={post.author?.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
+            <AvatarFallback className="bg-[#22c55e] text-black">
               {(post.author?.display_name ?? "?").charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
