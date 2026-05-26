@@ -1023,6 +1023,19 @@ export type Database = {
         }[]
       }
       gen_invite_code: { Args: never; Returns: string }
+      get_racha_by_invite: {
+        Args: { _code: string }
+        Returns: {
+          address: string
+          field_mode: Database["public"]["Enums"]["field_mode"]
+          id: string
+          invite_code: string
+          location: string
+          max_players: number
+          name: string
+          scheduled_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
