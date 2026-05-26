@@ -1,15 +1,17 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, Trophy, Video, User as UserIcon, MessageSquare } from "lucide-react";
+import { Home, Users, Trophy, Video, User as UserIcon, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotificacoes } from "@/hooks/useNotificacoes";
 
 const tabs = [
   { to: "/" as const, icon: Home, label: "Racha" },
-  { to: "/rachas" as const, icon: Trophy, label: "Meus" },
+  { to: "/rachas" as const, icon: Users, label: "Meus" },
   { to: "/resenha" as const, icon: Video, label: "Resenha", center: true },
+  { to: "/ranking" as const, icon: Trophy, label: "Ranking" },
   { to: "/inbox" as const, icon: MessageSquare, label: "Inbox" },
   { to: "/perfil" as const, icon: UserIcon, label: "Perfil" },
 ];
+
 
 export function BottomNav() {
   const location = useLocation();
