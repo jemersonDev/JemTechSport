@@ -94,7 +94,7 @@ function ResenhaPage() {
               }
               setUploadOpen(true);
             }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#22c55e] text-black shadow-[0_0_18px_rgba(34,197,94,0.55)] ring-1 ring-[#22c55e]"
             aria-label="Postar vídeo"
           >
             <Plus className="h-5 w-5" />
@@ -169,14 +169,14 @@ function EmptyFeed({ onPost, isLogged }: { onPost: () => void; isLogged: boolean
       {isLogged ? (
         <button
           onClick={onPost}
-          className="mt-2 rounded-full bg-primary px-6 py-2.5 font-semibold text-primary-foreground"
+          className="mt-2 rounded-full bg-[#22c55e] px-6 py-2.5 font-bold text-black shadow-[0_0_20px_rgba(34,197,94,0.5)]"
         >
           Postar agora
         </button>
       ) : (
         <Link
           to="/login"
-          className="mt-2 rounded-full bg-primary px-6 py-2.5 font-semibold text-primary-foreground"
+          className="mt-2 rounded-full bg-[#22c55e] px-6 py-2.5 font-bold text-black shadow-[0_0_20px_rgba(34,197,94,0.5)]"
         >
           Entrar
         </Link>
@@ -283,9 +283,9 @@ function VideoSlide({
           }}
           className="shrink-0"
         >
-          <Avatar className="h-10 w-10 ring-2 ring-white">
+          <Avatar className="h-10 w-10 ring-2 ring-[#22c55e] shadow-[0_0_10px_rgba(34,197,94,0.5)]">
             <AvatarImage src={post.author?.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
+            <AvatarFallback className="bg-[#22c55e] text-black">
               {(post.author?.display_name ?? "?").charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
