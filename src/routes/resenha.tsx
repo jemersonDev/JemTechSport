@@ -94,7 +94,7 @@ function ResenhaPage() {
               }
               setUploadOpen(true);
             }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#22c55e] text-black shadow-[0_0_18px_rgba(34,197,94,0.55)] ring-1 ring-[#22c55e]"
             aria-label="Postar vídeo"
           >
             <Plus className="h-5 w-5" />
