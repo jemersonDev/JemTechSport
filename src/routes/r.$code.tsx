@@ -42,17 +42,16 @@ function SharedRachaPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: r } = await supabase
-        .from("rachas")
-        .select("id,name,scheduled_at,location,address,max_players,field_mode,invite_code")
-        .eq("invite_code", code.toUpperCase())
-        .maybeSingle();
+      const { data: rows } = await supabase
+        .rpc("get_racha_by_invite", { _code: code });
+      const r = Array.isArray(rows) ? rows[0] : rows;
 
       if (!r) {
         setLoading(false);
         return;
       }
       setRacha(r as SharedRacha);
+
 
       const { count } = await supabase
         .from("racha_membros")
