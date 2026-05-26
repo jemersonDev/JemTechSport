@@ -164,11 +164,6 @@ function AthleteProfile() {
           ) : (
             <p className="text-sm capitalize text-muted-foreground">{profile.preferred_position}</p>
           )}
-          {profile.favorite_team_name && (
-            <p className="text-[11px] text-muted-foreground">
-              Torce pelo <span className="font-semibold text-foreground">{profile.favorite_team_name}</span>
-            </p>
-          )}
           <p className="pt-1 text-[11px] text-muted-foreground">
             <span className="font-semibold text-foreground">{followers}</span> seguidores ·{" "}
             <span className="font-semibold text-foreground">{following}</span> seguindo
