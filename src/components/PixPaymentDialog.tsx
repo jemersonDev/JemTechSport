@@ -80,31 +80,41 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm bg-[#1a1a2a] border border-[#22c55e]/30 text-white shadow-[0_0_40px_rgba(34,197,94,0.15)]">
         <DialogHeader>
-          <DialogTitle>Pagar com PIX</DialogTitle>
-          <DialogDescription>
-            {valor > 0
-              ? `Valor: R$ ${valor.toFixed(2).replace(".", ",")}`
-              : "Gerando código PIX…"}
+          <DialogTitle className="flex items-center gap-2 text-white">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#22c55e] text-black font-extrabold text-xs shadow-[0_0_12px_rgba(34,197,94,0.6)]">
+              PIX
+            </span>
+            Pagar com PIX
+          </DialogTitle>
+          <DialogDescription className="text-white/60">
+            {valor > 0 ? (
+              <span className="text-base font-bold text-[#22c55e]">
+                R$ {valor.toFixed(2).replace(".", ",")}
+              </span>
+            ) : (
+              "Gerando código PIX…"
+            )}
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#22c55e]" />
           </div>
         ) : paid ? (
           <div className="flex flex-col items-center gap-3 py-8">
-            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
-              <Check className="w-8 h-8 text-green-500" strokeWidth={3} />
+            <div className="w-20 h-20 rounded-full bg-[#22c55e]/15 ring-2 ring-[#22c55e] flex items-center justify-center shadow-[0_0_30px_rgba(34,197,94,0.5)] animate-pulse">
+              <Check className="w-10 h-10 text-[#22c55e]" strokeWidth={3} />
             </div>
-            <p className="font-bold text-green-500">Pagamento confirmado!</p>
+            <p className="font-extrabold text-[#22c55e] text-lg">Pagamento confirmado!</p>
+            <p className="text-xs text-white/60">Sua vaga está garantida ⚡</p>
           </div>
         ) : (
           <div className="space-y-4">
             {qrCodeBase64 && (
-              <div className="bg-white p-3 rounded-md flex justify-center">
+              <div className="bg-white p-3 rounded-xl flex justify-center ring-1 ring-[#22c55e]/40 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
                 <img
                   src={`data:image/png;base64,${qrCodeBase64}`}
                   alt="QR code PIX"
@@ -114,16 +124,20 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
             )}
             {qrCode && (
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-xs font-semibold text-white/70 uppercase tracking-wider">
                   Código PIX (copia e cola)
                 </label>
                 <div className="flex gap-1.5">
                   <input
                     readOnly
                     value={qrCode}
-                    className="flex-1 text-xs px-2 py-2 rounded-md border border-border bg-muted/30 truncate"
+                    className="flex-1 text-xs px-3 py-2.5 rounded-lg border border-white/10 bg-[#2a2a3a] text-white/80 truncate"
                   />
-                  <Button size="sm" variant="outline" onClick={copyCode}>
+                  <Button
+                    size="sm"
+                    onClick={copyCode}
+                    className="bg-[#22c55e] text-black hover:bg-[#16a34a] shadow-[0_0_12px_rgba(34,197,94,0.5)]"
+                  >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>
@@ -132,7 +146,7 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
             {ticketUrl && (
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full bg-transparent border-[#22c55e]/40 text-[#22c55e] hover:bg-[#22c55e]/10 hover:text-[#22c55e]"
                 asChild
               >
                 <a href={ticketUrl} target="_blank" rel="noopener noreferrer">
@@ -140,7 +154,8 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
                 </a>
               </Button>
             )}
-            <p className="text-[10px] text-center text-muted-foreground">
+            <p className="flex items-center justify-center gap-2 text-[11px] text-white/50">
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
               Aguardando confirmação automática…
             </p>
           </div>
