@@ -40,6 +40,7 @@ Regras úteis:
 Responda sempre em português, curto, com bullets quando útil. Se não souber, diga "Não tenho essa info ainda — manda mensagem pro fundador @_jemersonlm no Instagram".`;
 
 export const askAjuda = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
