@@ -42,11 +42,28 @@ Responda sempre em português, curto, com bullets quando útil. Se não souber, 
 export const askAjuda = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => InputSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) {
       return { ok: false as const, error: "AI não configurada" };
     }
+
+    // Rate limit: 20 perguntas por hora por usuário
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count } = await supabaseAdmin
+      .from("ai_usage_log")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", context.userId)
+      .eq("endpoint", "askAjuda")
+      .gte("created_at", since);
+    if ((count ?? 0) >= 20) {
+      return { ok: false as const, error: "Limite de 20 perguntas/hora atingido. Volta mais tarde." };
+    }
+    await supabaseAdmin.from("ai_usage_log").insert({
+      user_id: context.userId,
+      endpoint: "askAjuda",
+    });
 
     try {
       const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
