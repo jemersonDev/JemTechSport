@@ -16,6 +16,7 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OrganizadorRouteImport } from './routes/organizador'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MercadoRouteImport } from './routes/mercado'
+import { Route as LpRouteImport } from './routes/lp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as AjudaRouteImport } from './routes/ajuda'
@@ -60,6 +61,11 @@ const NotificacoesRoute = NotificacoesRouteImport.update({
 const MercadoRoute = MercadoRouteImport.update({
   id: '/mercado',
   path: '/mercado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpRoute = LpRouteImport.update({
+  id: '/lp',
+  path: '/lp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/lp': typeof LpRoute
   '/mercado': typeof MercadoRoute
   '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/lp': typeof LpRoute
   '/mercado': typeof MercadoRoute
   '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
+  '/lp': typeof LpRoute
   '/mercado': typeof MercadoRoute
   '/notificacoes': typeof NotificacoesRoute
   '/organizador': typeof OrganizadorRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/inbox'
     | '/login'
+    | '/lp'
     | '/mercado'
     | '/notificacoes'
     | '/organizador'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/inbox'
     | '/login'
+    | '/lp'
     | '/mercado'
     | '/notificacoes'
     | '/organizador'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/ajuda'
     | '/inbox'
     | '/login'
+    | '/lp'
     | '/mercado'
     | '/notificacoes'
     | '/organizador'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   AjudaRoute: typeof AjudaRoute
   InboxRoute: typeof InboxRoute
   LoginRoute: typeof LoginRoute
+  LpRoute: typeof LpRoute
   MercadoRoute: typeof MercadoRoute
   NotificacoesRoute: typeof NotificacoesRoute
   OrganizadorRoute: typeof OrganizadorRoute
@@ -301,6 +314,13 @@ declare module '@tanstack/react-router' {
       path: '/mercado'
       fullPath: '/mercado'
       preLoaderRoute: typeof MercadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp': {
+      id: '/lp'
+      path: '/lp'
+      fullPath: '/lp'
+      preLoaderRoute: typeof LpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   AjudaRoute: AjudaRoute,
   InboxRoute: InboxRoute,
   LoginRoute: LoginRoute,
+  LpRoute: LpRoute,
   MercadoRoute: MercadoRoute,
   NotificacoesRoute: NotificacoesRoute,
   OrganizadorRoute: OrganizadorRoute,
@@ -398,12 +419,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
