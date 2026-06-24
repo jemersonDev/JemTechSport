@@ -18,8 +18,22 @@ export const Route = createFileRoute("/api/public/hooks/daily-backup")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const authHeader = request.headers.get("apikey") || request.headers.get("authorization");
-        if (!authHeader) {
+        const expected = process.env.BACKUP_HOOK_SECRET;
+        if (!expected) {
+          console.error("BACKUP_HOOK_SECRET not configured");
+          return new Response("Server misconfigured", { status: 500 });
+        }
+        const provided =
+          request.headers.get("x-backup-secret") ||
+          request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ||
+          "";
+        const a = Buffer.from(provided);
+        const b = Buffer.from(expected);
+        if (a.length !== b.length) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        const { timingSafeEqual } = await import("crypto");
+        if (!timingSafeEqual(a, b)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
