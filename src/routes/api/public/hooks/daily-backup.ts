@@ -14,10 +14,11 @@ const TABLES = [
   "user_roles",
 ] as const;
 
-export const Route = createFileRoute("/api/public/hooks/daily-backup")({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Route = (createFileRoute as any)("/api/public/hooks/daily-backup")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         const expected = process.env.BACKUP_HOOK_SECRET;
         if (!expected) {
           console.error("BACKUP_HOOK_SECRET not configured");
