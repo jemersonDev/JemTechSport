@@ -14,12 +14,12 @@ import { createFileRoute } from '@tanstack/react-router';
  * A chave HMAC é o "Secret" gerado no painel do Mercado Pago e
  * armazenado em MERCADOPAGO_WEBHOOK_SECRET.
  */
-function verifyMpSignature(opts: {
+async function verifyMpSignature(opts: {
   secret: string;
   signatureHeader: string | null;
   requestId: string | null;
   dataId: string | null;
-}): boolean {
+}): Promise<boolean> {
   if (!opts.signatureHeader || !opts.dataId) return false;
 
   // Parse "ts=...,v1=..."
@@ -33,6 +33,7 @@ function verifyMpSignature(opts: {
   const v1 = map['v1'];
   if (!ts || !v1) return false;
 
+  const { createHmac, timingSafeEqual } = await import('node:crypto');
   const manifest = `id:${opts.dataId};request-id:${opts.requestId ?? ''};ts:${ts};`;
   const expected = createHmac('sha256', opts.secret).update(manifest).digest('hex');
 
