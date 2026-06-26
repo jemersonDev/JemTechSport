@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
 
 const TABLES = [
   "profiles",
@@ -33,12 +33,13 @@ export const Route = (createFileRoute as any)("/api/public/hooks/daily-backup")(
         if (a.length !== b.length) {
           return new Response("Unauthorized", { status: 401 });
         }
-        const { timingSafeEqual } = await import("crypto");
+        const { timingSafeEqual } = await import("node:crypto");
         if (!timingSafeEqual(a, b)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
         try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const snapshot: Record<string, unknown> = {
             generated_at: new Date().toISOString(),
           };

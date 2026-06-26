@@ -1,7 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { createHmac, timingSafeEqual } from 'crypto';
-import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 /**
  * Webhook do Mercado Pago.
@@ -16,12 +14,12 @@ import { supabaseAdmin } from '@/integrations/supabase/client.server';
  * A chave HMAC é o "Secret" gerado no painel do Mercado Pago e
  * armazenado em MERCADOPAGO_WEBHOOK_SECRET.
  */
-function verifyMpSignature(opts: {
+async function verifyMpSignature(opts: {
   secret: string;
   signatureHeader: string | null;
   requestId: string | null;
   dataId: string | null;
-}): boolean {
+}): Promise<boolean> {
   if (!opts.signatureHeader || !opts.dataId) return false;
 
   // Parse "ts=...,v1=..."
@@ -35,6 +33,7 @@ function verifyMpSignature(opts: {
   const v1 = map['v1'];
   if (!ts || !v1) return false;
 
+  const { createHmac, timingSafeEqual } = await import('node:crypto');
   const manifest = `id:${opts.dataId};request-id:${opts.requestId ?? ''};ts:${ts};`;
   const expected = createHmac('sha256', opts.secret).update(manifest).digest('hex');
 
@@ -110,7 +109,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
           url.searchParams.get('id');
         const eventType = payload?.type ?? url.searchParams.get('type');
 
-        if (!verifyMpSignature({ secret, signatureHeader, requestId, dataId })) {
+        if (!(await verifyMpSignature({ secret, signatureHeader, requestId, dataId }))) {
           console.warn('mp-webhook: invalid signature', { dataId, requestId });
           return new Response('Invalid signature', { status: 401 });
         }
@@ -127,6 +126,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
           const mp = await fetchMpPayment(dataId, accessToken);
           const novoStatus = mapMpStatus(mp.status);
 
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
           const { error } = await supabaseAdmin
             .from('pagamentos')
             .update({
