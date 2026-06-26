@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import '@tanstack/start-client-core/dist/esm/serverRoute.js';
+import '@tanstack/react-start';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
