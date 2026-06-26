@@ -74,7 +74,8 @@ function mapMpStatus(s: string): 'pendente' | 'aprovado' | 'recusado' | 'reembol
   }
 }
 
-export const Route = createFileRoute('/api/public/mp-webhook')({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
   server: {
     handlers: {
       GET: async () =>
