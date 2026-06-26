@@ -126,6 +126,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
           const mp = await fetchMpPayment(dataId, accessToken);
           const novoStatus = mapMpStatus(mp.status);
 
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
           const { error } = await supabaseAdmin
             .from('pagamentos')
             .update({
