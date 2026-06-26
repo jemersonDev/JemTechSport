@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+
 import { createHmac, timingSafeEqual } from 'crypto';
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
@@ -73,7 +74,8 @@ function mapMpStatus(s: string): 'pendente' | 'aprovado' | 'recusado' | 'reembol
   }
 }
 
-export const Route = createFileRoute('/api/public/mp-webhook')({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
   server: {
     handlers: {
       GET: async () =>
@@ -82,7 +84,7 @@ export const Route = createFileRoute('/api/public/mp-webhook')({
           headers: { 'Content-Type': 'application/json' },
         }),
 
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
         const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
         if (!secret || !accessToken) {
