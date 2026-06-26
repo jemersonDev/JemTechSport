@@ -33,7 +33,7 @@ export const Route = (createFileRoute as any)("/api/public/hooks/daily-backup")(
         if (a.length !== b.length) {
           return new Response("Unauthorized", { status: 401 });
         }
-        const { timingSafeEqual } = await import("crypto");
+        const { timingSafeEqual } = await import("node:crypto");
         if (!timingSafeEqual(a, b)) {
           return new Response("Unauthorized", { status: 401 });
         }
