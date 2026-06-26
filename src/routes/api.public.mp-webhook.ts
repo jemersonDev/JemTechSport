@@ -109,7 +109,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
           url.searchParams.get('id');
         const eventType = payload?.type ?? url.searchParams.get('type');
 
-        if (!verifyMpSignature({ secret, signatureHeader, requestId, dataId })) {
+        if (!(await verifyMpSignature({ secret, signatureHeader, requestId, dataId }))) {
           console.warn('mp-webhook: invalid signature', { dataId, requestId });
           return new Response('Invalid signature', { status: 401 });
         }
