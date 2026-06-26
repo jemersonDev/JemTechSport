@@ -83,7 +83,7 @@ export const Route = createFileRoute('/api/public/mp-webhook')({
           headers: { 'Content-Type': 'application/json' },
         }),
 
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
         const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
         if (!secret || !accessToken) {
