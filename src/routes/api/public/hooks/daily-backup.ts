@@ -39,6 +39,7 @@ export const Route = (createFileRoute as any)("/api/public/hooks/daily-backup")(
         }
 
         try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const snapshot: Record<string, unknown> = {
             generated_at: new Date().toISOString(),
           };
