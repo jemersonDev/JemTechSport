@@ -154,6 +154,14 @@ function RachasPage() {
                   const c = counts[r.id] ?? { total: 0, paid: 0 };
                   const pct = r.max_players > 0 ? (c.total / r.max_players) * 100 : 0;
                   const isActive = activeRachaId === r.id;
+                  const isAdmin = user?.id === r.admin_id;
+                  const finalizado = !!(r as { finalizado_em?: string | null }).finalizado_em;
+                  const scheduledMs = r.scheduled_at ? new Date(r.scheduled_at).getTime() : null;
+                  const emAndamento =
+                    !finalizado &&
+                    scheduledMs !== null &&
+                    Date.now() >= scheduledMs - 30 * 60_000 &&
+                    Date.now() <= scheduledMs + 3 * 60 * 60_000;
                   return (
                     <button
                       key={r.id}
@@ -164,6 +172,26 @@ function RachasPage() {
                           : "border-border bg-graphite hover:border-neon/40"
                       }`}
                     >
+                      <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                        {finalizado ? (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border uppercase tracking-wider">
+                            ✓ Finalizada
+                          </span>
+                        ) : emAndamento ? (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/40 uppercase tracking-wider animate-pulse">
+                            🔴 Em andamento
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-neon/10 text-neon border border-neon/30 uppercase tracking-wider">
+                            Aberto
+                          </span>
+                        )}
+                        {isAdmin && (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-yellow-500/15 text-yellow-400 border border-yellow-500/40 uppercase tracking-wider">
+                            👑 Administrador
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2">
