@@ -58,17 +58,17 @@
   --popover: oklch(0.16 0.005 240);
   --popover-foreground: oklch(0.98 0 0);
 
-  /* Neon green primary - matches #25D366 (WhatsApp green) */
-  --neon: oklch(0.78 0.21 145);
+  /* Neon green primary — JemTech #00FF41 (mais vibrante que #25D366) */
+  --neon: oklch(0.88 0.28 142);
   --neon-foreground: oklch(0.1 0 0);
-  --primary: oklch(0.78 0.21 145);
+  --primary: oklch(0.88 0.28 142);
   --primary-foreground: oklch(0.1 0 0);
 
   --secondary: oklch(0.22 0.005 240);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.2 0.005 240);
   --muted-foreground: oklch(0.65 0.01 240);
-  --accent: oklch(0.78 0.21 145);
+  --accent: oklch(0.88 0.28 142);
   --accent-foreground: oklch(0.1 0 0);
 
   --destructive: oklch(0.65 0.24 25);
