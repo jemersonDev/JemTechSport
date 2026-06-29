@@ -77,12 +77,20 @@ export function MatchStoryShare({
     };
   }, [partidaId, teamA, teamB]);
 
-  const winner =
-    scoreA > scoreB
-      ? "Time A venceu! 🏆"
-      : scoreB > scoreA
-      ? "Time B venceu! 🏆"
-      : "Empate épico! ⚖️";
+  const diff = Math.abs(scoreA - scoreB);
+  const total = scoreA + scoreB;
+  const winnerTeam = scoreA > scoreB ? "Time A" : "Time B";
+  const winner = (() => {
+    if (scoreA === scoreB) {
+      if (total === 0) return "Jogo travado! 0 a 0 🧱";
+      if (total >= 6) return "Empate de loucos! 🤯";
+      return "Empate épico! ⚖️";
+    }
+    if (diff >= 5) return `Goleada histórica do ${winnerTeam}! 💥`;
+    if (diff >= 3) return `${winnerTeam} atropelou! 🚜`;
+    if (diff === 1) return `${winnerTeam} levou no detalhe! ⚡`;
+    return `${winnerTeam} venceu! 🏆`;
+  })();
 
   const handleShare = async (download = false) => {
     if (!ref.current) return;

@@ -160,6 +160,16 @@ export function AddressMap({
     };
   }, []);
 
+  const q = encodeURIComponent(address ?? coords?.displayName ?? "");
+  const mapsUrl = coords
+    ? `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`
+    : q
+    ? `https://www.google.com/maps/search/?api=1&query=${q}`
+    : null;
+  const uberUrl = coords
+    ? `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${coords.lat}&dropoff[longitude]=${coords.lng}&dropoff[nickname]=${q}`
+    : null;
+
   return (
     <div className={className}>
       {coords ? (
@@ -185,6 +195,30 @@ export function AddressMap({
             <span className="flex items-center gap-2">
               <MapPin className="w-3 h-3" /> Escreve o endereço para ver o mapa
             </span>
+          )}
+        </div>
+      )}
+      {(mapsUrl || uberUrl) && (
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-1.5 py-2 rounded-lg border border-neon/30 bg-neon/5 text-neon text-xs font-bold hover:bg-neon/10 transition"
+            >
+              <MapPin className="w-3.5 h-3.5" /> Abrir no Maps
+            </a>
+          )}
+          {uberUrl && (
+            <a
+              href={uberUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-1.5 py-2 rounded-lg border border-white/20 bg-black text-white text-xs font-bold hover:bg-white/5 transition"
+            >
+              🚗 Chamar Uber
+            </a>
           )}
         </div>
       )}
