@@ -76,20 +76,20 @@
 
   --border: oklch(0.25 0.005 240);
   --input: oklch(0.22 0.005 240);
-  --ring: oklch(0.78 0.21 145);
+  --ring: oklch(0.88 0.28 142);
 
   /* Soccer field */
   --field: oklch(0.32 0.09 145);
   --field-line: oklch(0.95 0 0);
 
   /* Team colors */
-  --team-a: oklch(0.78 0.21 145);
+  --team-a: oklch(0.88 0.28 142);
   --team-b: oklch(0.7 0.18 250);
 
   /* Goalkeeper accent (amber) */
   --keeper: oklch(0.82 0.17 80);
 
-  --chart-1: oklch(0.78 0.21 145);
+  --chart-1: oklch(0.88 0.28 142);
   --chart-2: oklch(0.7 0.18 250);
   --chart-3: oklch(0.65 0.24 25);
   --chart-4: oklch(0.8 0.18 85);
@@ -97,12 +97,12 @@
 
   --sidebar: oklch(0.16 0.005 240);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.78 0.21 145);
+  --sidebar-primary: oklch(0.88 0.28 142);
   --sidebar-primary-foreground: oklch(0.1 0 0);
   --sidebar-accent: oklch(0.22 0.005 240);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(0.25 0.005 240);
-  --sidebar-ring: oklch(0.78 0.21 145);
+  --sidebar-ring: oklch(0.88 0.28 142);
 }
 
 .dark {
