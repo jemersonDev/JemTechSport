@@ -192,6 +192,7 @@ function Index() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("roster");
+  const [posFilter, setPosFilter] = useState<"todos" | PositionExt>("todos");
   const [shareCopied, setShareCopied] = useState(false);
   const [partidaFinalizadaId, setPartidaFinalizadaId] = useState<string | null>(null);
 
