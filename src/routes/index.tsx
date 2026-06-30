@@ -27,7 +27,7 @@ import { SoccerField, type Player, type FieldMode } from "@/components/SoccerFie
 import { MatchTimer } from "@/components/MatchTimer";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useRacha, useActiveRachaId, SKILL_WEIGHT, type JogadorManual } from "@/hooks/useRacha";
+import { useRacha, useActiveRachaId, SKILL_WEIGHT, POSITION_LABEL, POSITION_EMOJI, type JogadorManual, type PositionExt } from "@/hooks/useRacha";
 import {
   useLivePlacar,
   finalizarRacha,
@@ -192,6 +192,7 @@ function Index() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("roster");
+  const [posFilter, setPosFilter] = useState<"todos" | PositionExt>("todos");
   const [shareCopied, setShareCopied] = useState(false);
   const [partidaFinalizadaId, setPartidaFinalizadaId] = useState<string | null>(null);
 
@@ -1174,58 +1175,113 @@ function Index() {
                       </div>
                     ) : (
                       <>
+                        {(() => {
+                          const counts: Record<"todos" | PositionExt, number> = {
+                            todos: inscricoes.length,
+                            goleiro: inscricoes.filter((i) => i.position === "goleiro").length,
+                            zagueiro: inscricoes.filter((i) => i.position === "linha" && i.preferred_position_ext === "zagueiro").length,
+                            meia: inscricoes.filter((i) => i.position === "linha" && i.preferred_position_ext === "meia").length,
+                            atacante: inscricoes.filter((i) => i.position === "linha" && i.preferred_position_ext === "atacante").length,
+                          };
+                          const pills: { id: "todos" | PositionExt; label: string; emoji: string }[] = [
+                            { id: "todos", label: "Todos", emoji: "👥" },
+                            { id: "goleiro", label: POSITION_LABEL.goleiro, emoji: POSITION_EMOJI.goleiro },
+                            { id: "zagueiro", label: POSITION_LABEL.zagueiro, emoji: POSITION_EMOJI.zagueiro },
+                            { id: "meia", label: POSITION_LABEL.meia, emoji: POSITION_EMOJI.meia },
+                            { id: "atacante", label: POSITION_LABEL.atacante, emoji: POSITION_EMOJI.atacante },
+                          ];
+                          return (
+                            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+                              {pills.map((p) => {
+                                const active = posFilter === p.id;
+                                return (
+                                  <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => setPosFilter(p.id)}
+                                    className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 text-[11px] font-bold uppercase tracking-wider transition ${
+                                      active
+                                        ? "border-neon bg-neon text-black shadow-neon"
+                                        : "border-border bg-background text-foreground hover:border-neon/40"
+                                    }`}
+                                  >
+                                    <span>{p.emoji}</span>
+                                    <span>{p.label}</span>
+                                    <span className={`min-w-[18px] text-center px-1 rounded-full text-[10px] font-black ${active ? "bg-black/20 text-black" : "bg-neon/15 text-neon"}`}>
+                                      {counts[p.id]}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
+
                         {/* Goleiros */}
-                        {inscricoes.filter((i) => i.position === "goleiro").length > 0 && (
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-keeper px-1">
-                              🧤 Goleiros
-                            </p>
-                            {inscricoes
-                              .filter((i) => i.position === "goleiro")
-                              .map((i, idx) => (
-                                <RachaListItem
-                                  key={i.id}
-                                  index={idx + 1}
-                                  inscricao={i}
-                                  isMe={i.user_id === user?.id}
-                                  isAdmin={isAdmin}
-                                  showPosition="goleiro"
-                                  onRemove={async () => {
-                                    if (!confirm(`Remover ${i.display_name} do racha?`)) return;
-                                    const { error } = await removeInscricao(i.user_id);
-                                    if (error) toast.error(error);
-                                  }}
-                                />
-                              ))}
-                          </div>
-                        )}
+                        {(posFilter === "todos" || posFilter === "goleiro") &&
+                          inscricoes.filter((i) => i.position === "goleiro").length > 0 && (
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-keeper px-1">
+                                🧤 Goleiros
+                              </p>
+                              {inscricoes
+                                .filter((i) => i.position === "goleiro")
+                                .map((i, idx) => (
+                                  <RachaListItem
+                                    key={i.id}
+                                    index={idx + 1}
+                                    inscricao={i}
+                                    isMe={i.user_id === user?.id}
+                                    isAdmin={isAdmin}
+                                    showPosition="goleiro"
+                                    onRemove={async () => {
+                                      if (!confirm(`Remover ${i.display_name} do racha?`)) return;
+                                      const { error } = await removeInscricao(i.user_id);
+                                      if (error) toast.error(error);
+                                    }}
+                                  />
+                                ))}
+                            </div>
+                          )}
 
                         {/* Linha */}
-                        {inscricoes.filter((i) => i.position === "linha").length > 0 && (
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-neon px-1">
-                              ⚽ Jogadores
-                            </p>
-                            {inscricoes
-                              .filter((i) => i.position === "linha")
-                              .map((i, idx) => (
-                                <RachaListItem
-                                  key={i.id}
-                                  index={idx + 1}
-                                  inscricao={i}
-                                  isMe={i.user_id === user?.id}
-                                  isAdmin={isAdmin}
-                                  showPosition="linha"
-                                  onRemove={async () => {
-                                    if (!confirm(`Remover ${i.display_name} do racha?`)) return;
-                                    const { error } = await removeInscricao(i.user_id);
-                                    if (error) toast.error(error);
-                                  }}
-                                />
-                              ))}
-                          </div>
-                        )}
+                        {posFilter !== "goleiro" &&
+                          (() => {
+                            const linhaList = inscricoes.filter(
+                              (i) =>
+                                i.position === "linha" &&
+                                (posFilter === "todos" || i.preferred_position_ext === posFilter),
+                            );
+                            if (linhaList.length === 0) return null;
+                            const label =
+                              posFilter === "todos"
+                                ? "⚽ Jogadores"
+                                : `${POSITION_EMOJI[posFilter]} ${POSITION_LABEL[posFilter]}s`;
+                            return (
+                              <div className="space-y-1.5">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-neon px-1">
+                                  {label}
+                                </p>
+                                {linhaList.map((i, idx) => (
+                                  <RachaListItem
+                                    key={i.id}
+                                    index={idx + 1}
+                                    inscricao={i}
+                                    isMe={i.user_id === user?.id}
+                                    isAdmin={isAdmin}
+                                    showPosition="linha"
+                                    onRemove={async () => {
+                                      if (!confirm(`Remover ${i.display_name} do racha?`)) return;
+                                      const { error } = await removeInscricao(i.user_id);
+                                      if (error) toast.error(error);
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            );
+                          })()}
                       </>
+
                     )}
                   </div>
 
