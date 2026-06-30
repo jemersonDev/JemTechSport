@@ -27,7 +27,7 @@ import { SoccerField, type Player, type FieldMode } from "@/components/SoccerFie
 import { MatchTimer } from "@/components/MatchTimer";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useRacha, useActiveRachaId, SKILL_WEIGHT, type JogadorManual } from "@/hooks/useRacha";
+import { useRacha, useActiveRachaId, SKILL_WEIGHT, POSITION_LABEL, POSITION_EMOJI, type JogadorManual, type PositionExt } from "@/hooks/useRacha";
 import {
   useLivePlacar,
   finalizarRacha,
