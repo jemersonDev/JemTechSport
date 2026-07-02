@@ -813,6 +813,32 @@ function Index() {
                   Adicione jogadores e sorteie pra ver a formação aqui.
                 </p>
               )}
+              {teamsReady && (
+                <details className="rounded-xl bg-secondary/40 border border-border">
+                  <summary className="cursor-pointer select-none px-3 py-2 text-xs font-bold uppercase tracking-wider text-neon flex items-center justify-between">
+                    <span>🎯 Painel Tático (formações)</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">toque para abrir</span>
+                  </summary>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-2">
+                    <EscalacaoTatica
+                      jogadores={teamA.map((p) => ({
+                        id: p.id,
+                        nome: p.name,
+                        posicao: p.isGoalkeeper ? "goleiro" : undefined,
+                      }))}
+                      corTime="var(--team-a)"
+                    />
+                    <EscalacaoTatica
+                      jogadores={teamB.map((p) => ({
+                        id: p.id,
+                        nome: p.name,
+                        posicao: p.isGoalkeeper ? "goleiro" : undefined,
+                      }))}
+                      corTime="var(--team-b)"
+                    />
+                  </div>
+                </details>
+              )}
             </section>
 
 
