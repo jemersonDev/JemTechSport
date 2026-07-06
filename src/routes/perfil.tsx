@@ -35,6 +35,7 @@ import { PlayerStats } from "@/components/PlayerStats";
 import { PlayerMatchHistory } from "@/components/PlayerMatchHistory";
 import { TrofeusShelf } from "@/components/TrofeusShelf";
 import { ConquistasGrid } from "@/components/ConquistasGrid";
+import { PushToggle } from "@/components/PushToggle";
 import { PlayerEvolutionChart } from "@/components/PlayerEvolutionChart";
 import { AthleteCard } from "@/components/AthleteCard";
 import { processAvatar } from "@/utils/processAvatar";
@@ -611,6 +612,9 @@ function PerfilPage() {
             <TrofeusShelf userId={user.id} />
           </Card>
         )}
+
+        {/* Push notifications */}
+        {user && <PushToggle />}
 
         <Card className="p-2 divide-y divide-border">
           <Link
