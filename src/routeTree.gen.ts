@@ -26,6 +26,8 @@ import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
 import { Route as ApiPublicMpWebhookRouteImport } from './routes/api.public.mp-webhook'
+import { Route as ApiPublicHooksRachaLembretesRouteImport } from './routes/api/public/hooks/racha-lembretes'
+import { Route as ApiPublicHooksPushDeliverRouteImport } from './routes/api/public/hooks/push-deliver'
 import { Route as ApiPublicHooksDailyBackupRouteImport } from './routes/api/public/hooks/daily-backup'
 
 const ResenhaRoute = ResenhaRouteImport.update({
@@ -113,6 +115,18 @@ const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
   path: '/api/public/mp-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksRachaLembretesRoute =
+  ApiPublicHooksRachaLembretesRouteImport.update({
+    id: '/api/public/hooks/racha-lembretes',
+    path: '/api/public/hooks/racha-lembretes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksPushDeliverRoute =
+  ApiPublicHooksPushDeliverRouteImport.update({
+    id: '/api/public/hooks/push-deliver',
+    path: '/api/public/hooks/push-deliver',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDailyBackupRoute =
   ApiPublicHooksDailyBackupRouteImport.update({
     id: '/api/public/hooks/daily-backup',
@@ -139,6 +153,8 @@ export interface FileRoutesByFullPath {
   '/r/$code': typeof RCodeRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
+  '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
+  '/api/public/hooks/racha-lembretes': typeof ApiPublicHooksRachaLembretesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -159,6 +175,8 @@ export interface FileRoutesByTo {
   '/r/$code': typeof RCodeRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
+  '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
+  '/api/public/hooks/racha-lembretes': typeof ApiPublicHooksRachaLembretesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -180,6 +198,8 @@ export interface FileRoutesById {
   '/r/$code': typeof RCodeRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
+  '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
+  '/api/public/hooks/racha-lembretes': typeof ApiPublicHooksRachaLembretesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,6 +222,8 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
+    | '/api/public/hooks/push-deliver'
+    | '/api/public/hooks/racha-lembretes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -222,6 +244,8 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
+    | '/api/public/hooks/push-deliver'
+    | '/api/public/hooks/racha-lembretes'
   id:
     | '__root__'
     | '/'
@@ -242,6 +266,8 @@ export interface FileRouteTypes {
     | '/r/$code'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
+    | '/api/public/hooks/push-deliver'
+    | '/api/public/hooks/racha-lembretes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -263,6 +289,8 @@ export interface RootRouteChildren {
   RCodeRoute: typeof RCodeRoute
   ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
   ApiPublicHooksDailyBackupRoute: typeof ApiPublicHooksDailyBackupRoute
+  ApiPublicHooksPushDeliverRoute: typeof ApiPublicHooksPushDeliverRoute
+  ApiPublicHooksRachaLembretesRoute: typeof ApiPublicHooksRachaLembretesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -386,6 +414,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/racha-lembretes': {
+      id: '/api/public/hooks/racha-lembretes'
+      path: '/api/public/hooks/racha-lembretes'
+      fullPath: '/api/public/hooks/racha-lembretes'
+      preLoaderRoute: typeof ApiPublicHooksRachaLembretesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/push-deliver': {
+      id: '/api/public/hooks/push-deliver'
+      path: '/api/public/hooks/push-deliver'
+      fullPath: '/api/public/hooks/push-deliver'
+      preLoaderRoute: typeof ApiPublicHooksPushDeliverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/daily-backup': {
       id: '/api/public/hooks/daily-backup'
       path: '/api/public/hooks/daily-backup'
@@ -415,6 +457,8 @@ const rootRouteChildren: RootRouteChildren = {
   RCodeRoute: RCodeRoute,
   ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
   ApiPublicHooksDailyBackupRoute: ApiPublicHooksDailyBackupRoute,
+  ApiPublicHooksPushDeliverRoute: ApiPublicHooksPushDeliverRoute,
+  ApiPublicHooksRachaLembretesRoute: ApiPublicHooksRachaLembretesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
