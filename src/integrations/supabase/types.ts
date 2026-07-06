@@ -312,6 +312,7 @@ export type Database = {
           id: string
           link: string | null
           message: string
+          pushed_at: string | null
           read: boolean
           tipo: Database["public"]["Enums"]["notif_tipo"]
           user_id: string
@@ -322,6 +323,7 @@ export type Database = {
           id?: string
           link?: string | null
           message: string
+          pushed_at?: string | null
           read?: boolean
           tipo: Database["public"]["Enums"]["notif_tipo"]
           user_id: string
@@ -332,6 +334,7 @@ export type Database = {
           id?: string
           link?: string | null
           message?: string
+          pushed_at?: string | null
           read?: boolean
           tipo?: Database["public"]["Enums"]["notif_tipo"]
           user_id?: string
