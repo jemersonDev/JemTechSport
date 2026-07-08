@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.gen_invite_code() FROM anon, PUBLIC;
