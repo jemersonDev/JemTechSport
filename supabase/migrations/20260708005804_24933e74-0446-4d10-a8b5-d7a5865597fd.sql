@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.gen_invite_code() TO authenticated, anon, service_role;
