@@ -27,6 +27,7 @@ import {
   Clock,
   LayoutGrid,
   Share2,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -112,6 +113,21 @@ function RachasPage() {
     setActiveRachaId(r.id);
     toast.success(`Racha "${r.name}" selecionado`);
     navigate({ to: "/" });
+  };
+
+  const handleDelete = async (r: Racha) => {
+    const ok = window.confirm(
+      `Remover o racha "${r.name}"?\n\nIsso apaga inscrições, pagamentos e histórico. Não dá pra desfazer.`,
+    );
+    if (!ok) return;
+    const { error } = await supabase.from("rachas").delete().eq("id", r.id);
+    if (error) {
+      toast.error("Erro ao remover: " + error.message);
+      return;
+    }
+    if (activeRachaId === r.id) setActiveRachaId(null);
+    toast.success("Racha removido");
+    await reload();
   };
 
   if (authLoading || loading) {
@@ -288,6 +304,20 @@ function RachasPage() {
                         >
                           💬 Abrir grupo do racha no WhatsApp
                         </a>
+                      )}
+                      {isAdmin && (
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(r);
+                          }}
+                          className="mt-2 flex items-center justify-center gap-2 py-2 rounded-lg border border-red-500/40 bg-red-500/5 text-red-400 text-xs font-bold hover:bg-red-500/10 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Remover este racha
+                        </div>
                       )}
                     </button>
                   );
