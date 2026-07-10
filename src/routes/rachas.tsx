@@ -115,6 +115,21 @@ function RachasPage() {
     navigate({ to: "/" });
   };
 
+  const handleDelete = async (r: Racha) => {
+    const ok = window.confirm(
+      `Remover o racha "${r.name}"?\n\nIsso apaga inscrições, pagamentos e histórico. Não dá pra desfazer.`,
+    );
+    if (!ok) return;
+    const { error } = await supabase.from("rachas").delete().eq("id", r.id);
+    if (error) {
+      toast.error("Erro ao remover: " + error.message);
+      return;
+    }
+    if (activeRachaId === r.id) setActiveRachaId(null);
+    toast.success("Racha removido");
+    await reload();
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
