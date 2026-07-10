@@ -305,6 +305,20 @@ function RachasPage() {
                           💬 Abrir grupo do racha no WhatsApp
                         </a>
                       )}
+                      {isAdmin && (
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(r);
+                          }}
+                          className="mt-2 flex items-center justify-center gap-2 py-2 rounded-lg border border-red-500/40 bg-red-500/5 text-red-400 text-xs font-bold hover:bg-red-500/10 transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Remover este racha
+                        </div>
+                      )}
                     </button>
                   );
                 })}
