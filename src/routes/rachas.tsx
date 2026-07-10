@@ -27,6 +27,7 @@ import {
   Clock,
   LayoutGrid,
   Share2,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
