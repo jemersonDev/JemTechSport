@@ -18,6 +18,7 @@ import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as LpRouteImport } from './routes/lp'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as InstaRouteImport } from './routes/insta'
 import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -73,6 +74,11 @@ const LpRoute = LpRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstaRoute = InstaRouteImport.update({
+  id: '/insta',
+  path: '/insta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InboxRoute = InboxRouteImport.update({
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
+  '/insta': typeof InstaRoute
   '/login': typeof LoginRoute
   '/lp': typeof LpRoute
   '/mercado': typeof MercadoRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
+  '/insta': typeof InstaRoute
   '/login': typeof LoginRoute
   '/lp': typeof LpRoute
   '/mercado': typeof MercadoRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/ajuda': typeof AjudaRoute
   '/inbox': typeof InboxRoute
+  '/insta': typeof InstaRoute
   '/login': typeof LoginRoute
   '/lp': typeof LpRoute
   '/mercado': typeof MercadoRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda'
     | '/inbox'
+    | '/insta'
     | '/login'
     | '/lp'
     | '/mercado'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda'
     | '/inbox'
+    | '/insta'
     | '/login'
     | '/lp'
     | '/mercado'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/ajuda'
     | '/inbox'
+    | '/insta'
     | '/login'
     | '/lp'
     | '/mercado'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AjudaRoute: typeof AjudaRoute
   InboxRoute: typeof InboxRoute
+  InstaRoute: typeof InstaRoute
   LoginRoute: typeof LoginRoute
   LpRoute: typeof LpRoute
   MercadoRoute: typeof MercadoRoute
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insta': {
+      id: '/insta'
+      path: '/insta'
+      fullPath: '/insta'
+      preLoaderRoute: typeof InstaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inbox': {
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AjudaRoute: AjudaRoute,
   InboxRoute: InboxRoute,
+  InstaRoute: InstaRoute,
   LoginRoute: LoginRoute,
   LpRoute: LpRoute,
   MercadoRoute: MercadoRoute,
