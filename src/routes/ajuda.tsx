@@ -131,6 +131,30 @@ function AjudaPage() {
       </header>
 
       <main className="max-w-2xl mx-auto p-4 space-y-4">
+        {/* Growth Instagram CTA */}
+        <Link to="/insta">
+          <Card
+            className="p-4 border-[#00FF00]/40 bg-gradient-to-r from-[#00FF00]/10 via-transparent to-[#00FF00]/10 hover:border-[#00FF00]/70 transition cursor-pointer flex items-center gap-3"
+            style={{ boxShadow: "0 0 20px rgba(0,255,0,0.1)" }}
+          >
+            <div className="w-10 h-10 rounded-full bg-[#00FF00]/15 border border-[#00FF00]/40 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5 text-[#00FF00]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold flex items-center gap-2">
+                Growth Instagram
+                <span className="text-[9px] uppercase tracking-wider text-[#00FF00] font-bold border border-[#00FF00]/40 rounded px-1.5 py-0.5">
+                  IA
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground truncate">
+                Roteiros de Reels, legendas AIDA, hashtags e análise de alcance
+              </div>
+            </div>
+            <ArrowLeft className="w-4 h-4 rotate-180 text-muted-foreground" />
+          </Card>
+        </Link>
+
         {/* Chatbot IA */}
         <Card className="overflow-hidden border-[#00FF00]/30">
           <div
