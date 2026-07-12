@@ -211,27 +211,54 @@ function VideoSlide({
   const isOwn = currentUserId === post.user_id;
   const { isFollowing, toggle: toggleFollow } = useFollow(isOwn ? null : post.user_id);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const trimStart = Number(post.trim_start ?? 0);
+  const trimEnd = Number(post.trim_end ?? 0);
+  const hasTrim = trimEnd > trimStart + 0.1;
+  const hasMusic = !!post.music_url;
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     if (isActive) {
-      v.currentTime = 0;
+      v.currentTime = trimStart;
       setPaused(false);
       v.play().catch(() => {});
+      if (hasMusic && !audioRef.current) {
+        const a = new Audio(post.music_url!);
+        a.loop = true;
+        a.currentTime = Number(post.music_start ?? 0);
+        a.volume = 0.85;
+        audioRef.current = a;
+      }
+      if (hasMusic) {
+        audioRef.current!.muted = muted;
+        audioRef.current!.play().catch(() => {});
+      }
     } else {
       v.pause();
+      audioRef.current?.pause();
     }
-  }, [isActive]);
+    return () => {
+      audioRef.current?.pause();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive, muted]);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     const onTime = () => {
-      if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+      if (hasTrim && v.currentTime >= trimEnd) {
+        v.currentTime = trimStart;
+      }
+      const dur = hasTrim ? trimEnd - trimStart : v.duration;
+      const cur = hasTrim ? v.currentTime - trimStart : v.currentTime;
+      if (dur) setProgress((cur / dur) * 100);
     };
     v.addEventListener("timeupdate", onTime);
     return () => v.removeEventListener("timeupdate", onTime);
-  }, []);
+  }, [hasTrim, trimStart, trimEnd]);
 
   const share = async () => {
     const url = post.video_url;
