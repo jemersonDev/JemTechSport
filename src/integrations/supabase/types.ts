@@ -916,10 +916,17 @@ export type Database = {
           is_hidden: boolean
           likes_count: number
           murcha_count: number
+          music_artist: string | null
+          music_cover: string | null
+          music_start: number | null
+          music_title: string | null
+          music_url: string | null
           overlays: Json
           region: string | null
           reports_count: number
           thumb_url: string | null
+          trim_end: number | null
+          trim_start: number | null
           updated_at: string
           user_id: string
           video_url: string
@@ -935,10 +942,17 @@ export type Database = {
           is_hidden?: boolean
           likes_count?: number
           murcha_count?: number
+          music_artist?: string | null
+          music_cover?: string | null
+          music_start?: number | null
+          music_title?: string | null
+          music_url?: string | null
           overlays?: Json
           region?: string | null
           reports_count?: number
           thumb_url?: string | null
+          trim_end?: number | null
+          trim_start?: number | null
           updated_at?: string
           user_id: string
           video_url: string
@@ -954,10 +968,17 @@ export type Database = {
           is_hidden?: boolean
           likes_count?: number
           murcha_count?: number
+          music_artist?: string | null
+          music_cover?: string | null
+          music_start?: number | null
+          music_title?: string | null
+          music_url?: string | null
           overlays?: Json
           region?: string | null
           reports_count?: number
           thumb_url?: string | null
+          trim_end?: number | null
+          trim_start?: number | null
           updated_at?: string
           user_id?: string
           video_url?: string
