@@ -398,6 +398,15 @@ function VideoSlide({
           </div>
         )}
 
+        {hasMusic && (
+          <div className="flex items-center gap-1.5 text-xs text-white/90" onClick={(e) => e.stopPropagation()}>
+            <Music2 className="h-3 w-3 animate-spin [animation-duration:4s]" />
+            <span className="truncate">
+              {post.music_title} · {post.music_artist}
+            </span>
+          </div>
+        )}
+
         <div onClick={(e) => e.stopPropagation()}>
           <PostVoteButtons
             postId={post.id}
