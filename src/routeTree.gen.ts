@@ -27,6 +27,7 @@ import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
 import { Route as ApiPublicMpWebhookRouteImport } from './routes/api.public.mp-webhook'
+import { Route as ApiPublicDeezerSearchRouteImport } from './routes/api/public/deezer-search'
 import { Route as ApiPublicHooksRachaLembretesRouteImport } from './routes/api/public/hooks/racha-lembretes'
 import { Route as ApiPublicHooksPushDeliverRouteImport } from './routes/api/public/hooks/push-deliver'
 import { Route as ApiPublicHooksDailyBackupRouteImport } from './routes/api/public/hooks/daily-backup'
@@ -121,6 +122,11 @@ const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
   path: '/api/public/mp-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDeezerSearchRoute = ApiPublicDeezerSearchRouteImport.update({
+  id: '/api/public/deezer-search',
+  path: '/api/public/deezer-search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksRachaLembretesRoute =
   ApiPublicHooksRachaLembretesRouteImport.update({
     id: '/api/public/hooks/racha-lembretes',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/atleta/$userId': typeof AtletaUserIdRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
+  '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
   '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/atleta/$userId': typeof AtletaUserIdRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
+  '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
   '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/atleta/$userId': typeof AtletaUserIdRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
+  '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
   '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/atleta/$userId'
     | '/chat/$conversaId'
     | '/r/$code'
+    | '/api/public/deezer-search'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
     | '/api/public/hooks/push-deliver'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/atleta/$userId'
     | '/chat/$conversaId'
     | '/r/$code'
+    | '/api/public/deezer-search'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
     | '/api/public/hooks/push-deliver'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/atleta/$userId'
     | '/chat/$conversaId'
     | '/r/$code'
+    | '/api/public/deezer-search'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
     | '/api/public/hooks/push-deliver'
@@ -300,6 +312,7 @@ export interface RootRouteChildren {
   AtletaUserIdRoute: typeof AtletaUserIdRoute
   ChatConversaIdRoute: typeof ChatConversaIdRoute
   RCodeRoute: typeof RCodeRoute
+  ApiPublicDeezerSearchRoute: typeof ApiPublicDeezerSearchRoute
   ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
   ApiPublicHooksDailyBackupRoute: typeof ApiPublicHooksDailyBackupRoute
   ApiPublicHooksPushDeliverRoute: typeof ApiPublicHooksPushDeliverRoute
@@ -434,6 +447,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/deezer-search': {
+      id: '/api/public/deezer-search'
+      path: '/api/public/deezer-search'
+      fullPath: '/api/public/deezer-search'
+      preLoaderRoute: typeof ApiPublicDeezerSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/racha-lembretes': {
       id: '/api/public/hooks/racha-lembretes'
       path: '/api/public/hooks/racha-lembretes'
@@ -476,6 +496,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaUserIdRoute: AtletaUserIdRoute,
   ChatConversaIdRoute: ChatConversaIdRoute,
   RCodeRoute: RCodeRoute,
+  ApiPublicDeezerSearchRoute: ApiPublicDeezerSearchRoute,
   ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
   ApiPublicHooksDailyBackupRoute: ApiPublicHooksDailyBackupRoute,
   ApiPublicHooksPushDeliverRoute: ApiPublicHooksPushDeliverRoute,
