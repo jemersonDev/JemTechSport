@@ -16,6 +16,13 @@ export type ResenhaPost = {
   cheia_count?: number;
   murcha_count?: number;
   overlays?: unknown;
+  trim_start?: number | null;
+  trim_end?: number | null;
+  music_url?: string | null;
+  music_title?: string | null;
+  music_artist?: string | null;
+  music_cover?: string | null;
+  music_start?: number | null;
   author?: {
     display_name: string;
     avatar_url: string | null;
