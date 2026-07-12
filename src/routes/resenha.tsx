@@ -322,7 +322,7 @@ function VideoSlide({
         ref={videoRef}
         src={post.video_url}
         poster={post.thumb_url ?? undefined}
-        muted={muted}
+        muted={hasMusic ? true : muted}
         loop
         playsInline
         className="h-full w-full object-cover"
