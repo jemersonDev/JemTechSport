@@ -14,6 +14,7 @@ import {
   Camera,
   Bookmark,
   Play,
+  Music2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
