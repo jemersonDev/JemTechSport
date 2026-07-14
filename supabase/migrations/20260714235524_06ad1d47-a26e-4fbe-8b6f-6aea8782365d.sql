@@ -1,0 +1,1 @@
+ALTER TABLE public.rachas ADD COLUMN IF NOT EXISTS team_names jsonb NOT NULL DEFAULT '{}'::jsonb;
