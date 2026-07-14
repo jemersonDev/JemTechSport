@@ -41,6 +41,8 @@ import { CraqueBagreVote } from "@/components/CraqueBagreVote";
 import { MatchStoryShare } from "@/components/MatchStoryShare";
 import { ListaEsperaCard } from "@/components/ListaEsperaCard";
 import { EscalacaoTatica } from "@/components/EscalacaoTatica";
+import { TeamNameEditorDialog } from "@/components/TeamNameEditorDialog";
+import { getTeamMeta, type TeamMeta, type TeamNamesMap, type TeamSlot } from "@/lib/teamMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
