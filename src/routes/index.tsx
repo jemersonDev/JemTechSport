@@ -2117,18 +2117,38 @@ function LivePlacarBlock({
   score,
   onMinus,
   onPlus,
+  emoji,
+  badge,
+  onEdit,
 }: {
   label: string;
   color: string;
   score: number;
   onMinus?: () => void;
   onPlus?: () => void;
+  emoji?: string | null;
+  badge?: string | null;
+  onEdit?: () => void;
 }) {
   return (
     <div className="text-center">
-      <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color }}>
-        {label}
-      </p>
+      <div className="flex items-center justify-center gap-1 mb-1 min-h-[20px]">
+        {badge && <img src={badge} alt="" crossOrigin="anonymous" className="w-5 h-5 object-contain" />}
+        {emoji && <span className="text-base leading-none">{emoji}</span>}
+        <p className="text-[10px] font-black uppercase tracking-widest truncate max-w-[80px]" style={{ color }}>
+          {label}
+        </p>
+        {onEdit && (
+          <button
+            onClick={onEdit}
+            className="text-[10px] opacity-70 hover:opacity-100"
+            aria-label={`Editar ${label}`}
+            type="button"
+          >
+            ✏️
+          </button>
+        )}
+      </div>
       <p className="text-5xl font-black text-foreground tabular-nums leading-none mb-2">{score}</p>
       {(onMinus || onPlus) && (
         <div className="flex items-center justify-center gap-1.5">
@@ -2170,15 +2190,18 @@ function TeamSummary({
 }) {
   return (
     <div className="rounded-xl bg-secondary/40 border border-border p-3 space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span
-          className="text-[10px] font-bold uppercase tracking-widest"
+          className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 min-w-0"
           style={{ color }}
         >
-          {label}
+          {badge && <img src={badge} alt="" crossOrigin="anonymous" className="w-4 h-4 object-contain shrink-0" />}
+          {emoji && <span className="text-sm leading-none">{emoji}</span>}
+          <span className="truncate">{label}</span>
         </span>
-        <span className="text-xl font-black tabular-nums">{score}</span>
+        <span className="text-xl font-black tabular-nums shrink-0">{score}</span>
       </div>
+
       <ul className="space-y-1">
         {players.map((p) => (
           <li
