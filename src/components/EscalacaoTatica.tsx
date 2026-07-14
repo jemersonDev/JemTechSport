@@ -48,10 +48,18 @@ export function EscalacaoTatica({
   jogadores,
   formacaoInicial = "4-3-3",
   corTime = "#10b981",
+  teamLabel,
+  teamEmoji,
+  teamBadge,
+  onEditTeam,
 }: {
   jogadores: Jogador[];
   formacaoInicial?: string;
   corTime?: string;
+  teamLabel?: string;
+  teamEmoji?: string | null;
+  teamBadge?: string | null;
+  onEditTeam?: () => void;
 }) {
   const [formacao, setFormacao] = useState(formacaoInicial);
   const f = FORMACOES[formacao] ?? FORMACOES["4-3-3"];
@@ -71,9 +79,27 @@ export function EscalacaoTatica({
 
   return (
     <div className="rounded-xl bg-gradient-to-b from-emerald-900/40 to-emerald-950/60 border border-emerald-500/20 p-3">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs uppercase tracking-wider font-bold text-emerald-300">Escalação tática</p>
-        <div className="flex gap-1">
+      <div className="flex items-center justify-between mb-2 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {teamBadge && (
+            <img src={teamBadge} alt="" crossOrigin="anonymous" className="w-5 h-5 object-contain shrink-0" />
+          )}
+          {teamEmoji && <span className="text-base leading-none">{teamEmoji}</span>}
+          <p className="text-xs uppercase tracking-wider font-bold text-emerald-300 truncate">
+            {teamLabel ?? "Escalação tática"}
+          </p>
+          {onEditTeam && (
+            <button
+              onClick={onEditTeam}
+              className="text-[10px] text-emerald-400/70 hover:text-emerald-300 shrink-0"
+              aria-label="Editar time"
+              type="button"
+            >
+              ✏️
+            </button>
+          )}
+        </div>
+        <div className="flex gap-1 shrink-0">
           {Object.keys(FORMACOES).map((k) => (
             <Button
               key={k}
@@ -87,6 +113,7 @@ export function EscalacaoTatica({
           ))}
         </div>
       </div>
+
 
       <div className="relative w-full aspect-[2/3] bg-emerald-700/30 rounded-md overflow-hidden border border-emerald-400/30">
         {/* field lines */}

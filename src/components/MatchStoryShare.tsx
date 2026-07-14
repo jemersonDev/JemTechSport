@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { shareOrDownloadImage, reportShareError } from "@/utils/shareImage";
 
 type Player = { id: string; name: string };
+type TeamMeta = { label: string; emoji?: string | null; badge?: string | null };
 
 type Props = {
   partidaId: string;
@@ -18,6 +19,8 @@ type Props = {
   teamB: Player[];
   mvpName?: string | null;
   inviteCode?: string | null;
+  teamAMeta?: TeamMeta;
+  teamBMeta?: TeamMeta;
 };
 
 export function MatchStoryShare({
@@ -29,7 +32,10 @@ export function MatchStoryShare({
   teamB,
   mvpName,
   inviteCode,
+  teamAMeta,
+  teamBMeta,
 }: Props) {
+
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const [craque, setCraque] = useState<{ name: string; votes: number } | null>(null);
