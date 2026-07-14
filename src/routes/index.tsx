@@ -1924,6 +1924,17 @@ function Index() {
         open={pixOpen}
         onOpenChange={setPixOpen}
       />
+
+      <TeamNameEditorDialog
+        open={teamEditorSlot !== null}
+        onOpenChange={(o) => !o && setTeamEditorSlot(null)}
+        slot={teamEditorSlot ?? "A"}
+        current={teamEditorSlot ? teamNamesMap[teamEditorSlot] ?? null : null}
+        onSave={async (meta) => {
+          if (teamEditorSlot) await saveTeamMeta(teamEditorSlot, meta);
+          setTeamEditorSlot(null);
+        }}
+      />
     </div>
   );
 }
