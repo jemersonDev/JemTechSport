@@ -1927,12 +1927,11 @@ function Index() {
 
       <TeamNameEditorDialog
         open={teamEditorSlot !== null}
-        onOpenChange={(o) => !o && setTeamEditorSlot(null)}
+        onClose={() => setTeamEditorSlot(null)}
         slot={teamEditorSlot ?? "A"}
-        current={teamEditorSlot ? teamNamesMap[teamEditorSlot] ?? null : null}
+        initial={teamEditorSlot ? teamNamesMap[teamEditorSlot] ?? null : null}
         onSave={async (meta) => {
           if (teamEditorSlot) await saveTeamMeta(teamEditorSlot, meta);
-          setTeamEditorSlot(null);
         }}
       />
     </div>
