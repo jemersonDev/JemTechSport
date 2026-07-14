@@ -2182,11 +2182,15 @@ function TeamSummary({
   color,
   players,
   score,
+  emoji,
+  badge,
 }: {
   label: string;
   color: string;
   players: Player[];
   score: number;
+  emoji?: string | null;
+  badge?: string | null;
 }) {
   return (
     <div className="rounded-xl bg-secondary/40 border border-border p-3 space-y-2">
