@@ -741,13 +741,13 @@ function Index() {
                 </div>
                 <div className="grid grid-cols-3 items-center gap-2">
                   <LivePlacarBlock
-                    label={metaA.name || "TIME A"}
+                    label={metaA.label}
                     color="var(--team-a)"
                     score={scoreA}
                     onMinus={isAdmin ? decA : undefined}
                     onPlus={isAdmin ? incA : undefined}
                     emoji={metaA.emoji}
-                    badge={metaA.badge_url}
+                    badge={metaA.badge}
                     onEdit={isAdmin ? () => setTeamEditorSlot("A") : undefined}
                   />
                   <MatchTimer
@@ -760,13 +760,13 @@ function Index() {
                     onReset={resetTimer}
                   />
                   <LivePlacarBlock
-                    label={metaB.name || "TIME B"}
+                    label={metaB.label}
                     color="var(--team-b)"
                     score={scoreB}
                     onMinus={isAdmin ? decB : undefined}
                     onPlus={isAdmin ? incB : undefined}
                     emoji={metaB.emoji}
-                    badge={metaB.badge_url}
+                    badge={metaB.badge}
                     onEdit={isAdmin ? () => setTeamEditorSlot("B") : undefined}
                   />
                 </div>
