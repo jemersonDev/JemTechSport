@@ -1670,16 +1670,20 @@ function Index() {
               {teamsReady ? (
                 <div className="grid grid-cols-2 gap-3">
                   <TeamSummary
-                    label="TIME A"
+                    label={metaA.label}
                     color="var(--team-a)"
                     players={teamA}
                     score={scoreA}
+                    emoji={metaA.emoji}
+                    badge={metaA.badge}
                   />
                   <TeamSummary
-                    label="Time B"
+                    label={metaB.label}
                     color="var(--team-b)"
                     players={teamB}
                     score={scoreB}
+                    emoji={metaB.emoji}
+                    badge={metaB.badge}
                   />
                 </div>
               ) : (
