@@ -727,7 +727,7 @@ function Index() {
                 </div>
                 <div className="grid grid-cols-3 items-center gap-2">
                   <LivePlacarBlock
-                    label="Time A"
+                    label="TIME A"
                     color="var(--team-a)"
                     score={scoreA}
                     onMinus={isAdmin ? decA : undefined}
@@ -1642,7 +1642,7 @@ function Index() {
               {teamsReady ? (
                 <div className="grid grid-cols-2 gap-3">
                   <TeamSummary
-                    label="Time A"
+                    label="TIME A"
                     color="var(--team-a)"
                     players={teamA}
                     score={scoreA}
