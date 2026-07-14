@@ -847,6 +847,10 @@ function Index() {
                         posicao: p.isGoalkeeper ? "goleiro" : undefined,
                       }))}
                       corTime="var(--team-a)"
+                      teamLabel={metaA.label}
+                      teamEmoji={metaA.emoji}
+                      teamBadge={metaA.badge}
+                      onEditTeam={isAdmin ? () => setTeamEditorSlot("A") : undefined}
                     />
                     <EscalacaoTatica
                       jogadores={teamB.map((p) => ({
@@ -855,6 +859,10 @@ function Index() {
                         posicao: p.isGoalkeeper ? "goleiro" : undefined,
                       }))}
                       corTime="var(--team-b)"
+                      teamLabel={metaB.label}
+                      teamEmoji={metaB.emoji}
+                      teamBadge={metaB.badge}
+                      onEditTeam={isAdmin ? () => setTeamEditorSlot("B") : undefined}
                     />
                   </div>
                 </details>
