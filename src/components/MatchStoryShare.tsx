@@ -85,7 +85,9 @@ export function MatchStoryShare({
 
   const diff = Math.abs(scoreA - scoreB);
   const total = scoreA + scoreB;
-  const winnerTeam = scoreA > scoreB ? "Time A" : "Time B";
+  const labelA = teamAMeta?.label || "Time A";
+  const labelB = teamBMeta?.label || "Time B";
+  const winnerTeam = scoreA > scoreB ? labelA : labelB;
   const winner = (() => {
     if (scoreA === scoreB) {
       if (total === 0) return "Jogo travado! 0 a 0 🧱";
@@ -186,8 +188,14 @@ export function MatchStoryShare({
             <div className="relative mt-12 px-6">
               <div className="flex items-center justify-center gap-6">
                 <div className="text-center flex-1">
-                  <div className="text-[16px] tracking-[0.3em] text-white/70 font-bold">
-                    TIME A
+                  <div className="flex items-center justify-center gap-1 min-h-[44px]">
+                    {teamAMeta?.badge && (
+                      <img src={teamAMeta.badge} alt="" crossOrigin="anonymous" style={{ width: 40, height: 40, objectFit: "contain" }} />
+                    )}
+                    {teamAMeta?.emoji && <span style={{ fontSize: 32 }}>{teamAMeta.emoji}</span>}
+                  </div>
+                  <div className="text-[15px] tracking-[0.2em] text-white/80 font-bold uppercase truncate mt-1 px-1">
+                    {labelA}
                   </div>
                   <div
                     className="text-[140px] leading-none font-black text-neon"
@@ -201,8 +209,14 @@ export function MatchStoryShare({
                 </div>
                 <div className="text-[60px] font-black text-white/40">×</div>
                 <div className="text-center flex-1">
-                  <div className="text-[16px] tracking-[0.3em] text-white/70 font-bold">
-                    TIME B
+                  <div className="flex items-center justify-center gap-1 min-h-[44px]">
+                    {teamBMeta?.badge && (
+                      <img src={teamBMeta.badge} alt="" crossOrigin="anonymous" style={{ width: 40, height: 40, objectFit: "contain" }} />
+                    )}
+                    {teamBMeta?.emoji && <span style={{ fontSize: 32 }}>{teamBMeta.emoji}</span>}
+                  </div>
+                  <div className="text-[15px] tracking-[0.2em] text-white/80 font-bold uppercase truncate mt-1 px-1">
+                    {labelB}
                   </div>
                   <div
                     className="text-[140px] leading-none font-black"
@@ -220,6 +234,7 @@ export function MatchStoryShare({
                 {winner}
               </div>
             </div>
+
 
             {/* Destaques */}
             <div className="relative mt-10 mx-8 space-y-3">
