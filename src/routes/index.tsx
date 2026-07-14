@@ -126,6 +126,18 @@ function Index() {
   }, [user, authLoading, navigate]);
 
   const [pixOpen, setPixOpen] = useState(false);
+  const [teamEditorSlot, setTeamEditorSlot] = useState<TeamSlot | null>(null);
+  const teamNamesMap: TeamNamesMap = ((racha as any)?.team_names ?? {}) as TeamNamesMap;
+  const metaA = getTeamMeta(teamNamesMap, "A");
+  const metaB = getTeamMeta(teamNamesMap, "B");
+  const saveTeamMeta = async (slot: TeamSlot, meta: TeamMeta | null) => {
+    const next = { ...teamNamesMap };
+    if (meta === null) delete next[slot];
+    else next[slot] = meta;
+    const { error } = await updateRacha({ team_names: next } as any);
+    if (error) toast.error(error);
+    else toast.success("Time atualizado");
+  };
   const [players, setPlayers] = useState<Player[]>([]);
   const [newName, setNewName] = useState("");
   const [totalValue, setTotalValue] = useState<string>("140");
