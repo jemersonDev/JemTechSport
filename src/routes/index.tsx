@@ -1879,6 +1879,8 @@ function Index() {
                   teamA={teamA.map((p) => ({ id: p.id, name: p.name }))}
                   teamB={teamB.map((p) => ({ id: p.id, name: p.name }))}
                   inviteCode={racha?.invite_code ?? null}
+                  teamAMeta={{ label: metaA.label, emoji: metaA.emoji, badge: metaA.badge }}
+                  teamBMeta={{ label: metaB.label, emoji: metaB.emoji, badge: metaB.badge }}
                 />
               </>
             )}
