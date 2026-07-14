@@ -41,6 +41,8 @@ import { CraqueBagreVote } from "@/components/CraqueBagreVote";
 import { MatchStoryShare } from "@/components/MatchStoryShare";
 import { ListaEsperaCard } from "@/components/ListaEsperaCard";
 import { EscalacaoTatica } from "@/components/EscalacaoTatica";
+import { TeamNameEditorDialog } from "@/components/TeamNameEditorDialog";
+import { getTeamMeta, type TeamMeta, type TeamNamesMap, type TeamSlot } from "@/lib/teamMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
 import { toast } from "sonner";
@@ -124,6 +126,18 @@ function Index() {
   }, [user, authLoading, navigate]);
 
   const [pixOpen, setPixOpen] = useState(false);
+  const [teamEditorSlot, setTeamEditorSlot] = useState<TeamSlot | null>(null);
+  const teamNamesMap: TeamNamesMap = ((racha as any)?.team_names ?? {}) as TeamNamesMap;
+  const metaA = getTeamMeta(teamNamesMap, "A");
+  const metaB = getTeamMeta(teamNamesMap, "B");
+  const saveTeamMeta = async (slot: TeamSlot, meta: TeamMeta | null) => {
+    const next = { ...teamNamesMap };
+    if (meta === null) delete next[slot];
+    else next[slot] = meta;
+    const { error } = await updateRacha({ team_names: next } as any);
+    if (error) toast.error(error);
+    else toast.success("Time atualizado");
+  };
   const [players, setPlayers] = useState<Player[]>([]);
   const [newName, setNewName] = useState("");
   const [totalValue, setTotalValue] = useState<string>("140");
@@ -727,11 +741,14 @@ function Index() {
                 </div>
                 <div className="grid grid-cols-3 items-center gap-2">
                   <LivePlacarBlock
-                    label="TIME A"
+                    label={metaA.label}
                     color="var(--team-a)"
                     score={scoreA}
                     onMinus={isAdmin ? decA : undefined}
                     onPlus={isAdmin ? incA : undefined}
+                    emoji={metaA.emoji}
+                    badge={metaA.badge}
+                    onEdit={isAdmin ? () => setTeamEditorSlot("A") : undefined}
                   />
                   <MatchTimer
                     startedAt={matchStartedAt}
@@ -743,11 +760,14 @@ function Index() {
                     onReset={resetTimer}
                   />
                   <LivePlacarBlock
-                    label="Time B"
+                    label={metaB.label}
                     color="var(--team-b)"
                     score={scoreB}
                     onMinus={isAdmin ? decB : undefined}
                     onPlus={isAdmin ? incB : undefined}
+                    emoji={metaB.emoji}
+                    badge={metaB.badge}
+                    onEdit={isAdmin ? () => setTeamEditorSlot("B") : undefined}
                   />
                 </div>
                 {!isAdmin && (
@@ -827,6 +847,10 @@ function Index() {
                         posicao: p.isGoalkeeper ? "goleiro" : undefined,
                       }))}
                       corTime="var(--team-a)"
+                      teamLabel={metaA.label}
+                      teamEmoji={metaA.emoji}
+                      teamBadge={metaA.badge}
+                      onEditTeam={isAdmin ? () => setTeamEditorSlot("A") : undefined}
                     />
                     <EscalacaoTatica
                       jogadores={teamB.map((p) => ({
@@ -835,6 +859,10 @@ function Index() {
                         posicao: p.isGoalkeeper ? "goleiro" : undefined,
                       }))}
                       corTime="var(--team-b)"
+                      teamLabel={metaB.label}
+                      teamEmoji={metaB.emoji}
+                      teamBadge={metaB.badge}
+                      onEditTeam={isAdmin ? () => setTeamEditorSlot("B") : undefined}
                     />
                   </div>
                 </details>
@@ -1642,16 +1670,20 @@ function Index() {
               {teamsReady ? (
                 <div className="grid grid-cols-2 gap-3">
                   <TeamSummary
-                    label="TIME A"
+                    label={metaA.label}
                     color="var(--team-a)"
                     players={teamA}
                     score={scoreA}
+                    emoji={metaA.emoji}
+                    badge={metaA.badge}
                   />
                   <TeamSummary
-                    label="Time B"
+                    label={metaB.label}
                     color="var(--team-b)"
                     players={teamB}
                     score={scoreB}
+                    emoji={metaB.emoji}
+                    badge={metaB.badge}
                   />
                 </div>
               ) : (
@@ -1847,6 +1879,8 @@ function Index() {
                   teamA={teamA.map((p) => ({ id: p.id, name: p.name }))}
                   teamB={teamB.map((p) => ({ id: p.id, name: p.name }))}
                   inviteCode={racha?.invite_code ?? null}
+                  teamAMeta={{ label: metaA.label, emoji: metaA.emoji, badge: metaA.badge }}
+                  teamBMeta={{ label: metaB.label, emoji: metaB.emoji, badge: metaB.badge }}
                 />
               </>
             )}
@@ -1889,6 +1923,16 @@ function Index() {
         inscricaoId={myInscricao?.id ?? null}
         open={pixOpen}
         onOpenChange={setPixOpen}
+      />
+
+      <TeamNameEditorDialog
+        open={teamEditorSlot !== null}
+        onClose={() => setTeamEditorSlot(null)}
+        slot={teamEditorSlot ?? "A"}
+        initial={teamEditorSlot ? teamNamesMap[teamEditorSlot] ?? null : null}
+        onSave={async (meta) => {
+          if (teamEditorSlot) await saveTeamMeta(teamEditorSlot, meta);
+        }}
       />
     </div>
   );
@@ -2117,18 +2161,38 @@ function LivePlacarBlock({
   score,
   onMinus,
   onPlus,
+  emoji,
+  badge,
+  onEdit,
 }: {
   label: string;
   color: string;
   score: number;
   onMinus?: () => void;
   onPlus?: () => void;
+  emoji?: string | null;
+  badge?: string | null;
+  onEdit?: () => void;
 }) {
   return (
     <div className="text-center">
-      <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color }}>
-        {label}
-      </p>
+      <div className="flex items-center justify-center gap-1 mb-1 min-h-[20px]">
+        {badge && <img src={badge} alt="" crossOrigin="anonymous" className="w-5 h-5 object-contain" />}
+        {emoji && <span className="text-base leading-none">{emoji}</span>}
+        <p className="text-[10px] font-black uppercase tracking-widest truncate max-w-[80px]" style={{ color }}>
+          {label}
+        </p>
+        {onEdit && (
+          <button
+            onClick={onEdit}
+            className="text-[10px] opacity-70 hover:opacity-100"
+            aria-label={`Editar ${label}`}
+            type="button"
+          >
+            ✏️
+          </button>
+        )}
+      </div>
       <p className="text-5xl font-black text-foreground tabular-nums leading-none mb-2">{score}</p>
       {(onMinus || onPlus) && (
         <div className="flex items-center justify-center gap-1.5">
@@ -2162,23 +2226,30 @@ function TeamSummary({
   color,
   players,
   score,
+  emoji,
+  badge,
 }: {
   label: string;
   color: string;
   players: Player[];
   score: number;
+  emoji?: string | null;
+  badge?: string | null;
 }) {
   return (
     <div className="rounded-xl bg-secondary/40 border border-border p-3 space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span
-          className="text-[10px] font-bold uppercase tracking-widest"
+          className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 min-w-0"
           style={{ color }}
         >
-          {label}
+          {badge && <img src={badge} alt="" crossOrigin="anonymous" className="w-4 h-4 object-contain shrink-0" />}
+          {emoji && <span className="text-sm leading-none">{emoji}</span>}
+          <span className="truncate">{label}</span>
         </span>
-        <span className="text-xl font-black tabular-nums">{score}</span>
+        <span className="text-xl font-black tabular-nums shrink-0">{score}</span>
       </div>
+
       <ul className="space-y-1">
         {players.map((p) => (
           <li

@@ -663,6 +663,7 @@ export type Database = {
           scheduled_at: string | null
           score_a: number
           score_b: number
+          team_names: Json
           total_value: number
           updated_at: string
           whatsapp_group_link: string | null
@@ -693,6 +694,7 @@ export type Database = {
           scheduled_at?: string | null
           score_a?: number
           score_b?: number
+          team_names?: Json
           total_value?: number
           updated_at?: string
           whatsapp_group_link?: string | null
@@ -723,6 +725,7 @@ export type Database = {
           scheduled_at?: string | null
           score_a?: number
           score_b?: number
+          team_names?: Json
           total_value?: number
           updated_at?: string
           whatsapp_group_link?: string | null
