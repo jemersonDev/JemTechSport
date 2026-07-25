@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
@@ -18,7 +18,7 @@ export function PlayerStats({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
   const isOwner = user?.id === userId;
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
 
     const { data: membros } = await supabase
@@ -65,11 +65,11 @@ export function PlayerStats({ userId }: { userId: string }) {
       ultimosRachas: ultimos,
     });
     setLoading(false);
-  };
+  }, [userId]);
 
   useEffect(() => {
     load();
-  }, [userId]);
+  }, [load]);
 
   const registrar = async (rachaId: string, gols: number, assist: number) => {
     if (!isOwner) return;

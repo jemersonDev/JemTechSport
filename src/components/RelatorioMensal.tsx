@@ -9,6 +9,8 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "sonner";
 
+type JsPDFWithAutoTable = jsPDF & { lastAutoTable: { finalY: number } };
+
 type Pagamento = {
   id: string;
   status: string;
@@ -95,10 +97,10 @@ export function RelatorioMensal() {
       const [{ data: profs }, { data: rachas }] = await Promise.all([
         userIds.length
           ? supabase.from("profiles").select("user_id,display_name").in("user_id", userIds)
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { user_id: string; display_name: string }[] }),
         rachaIds.length
           ? supabase.from("rachas").select("id,name").in("id", rachaIds)
-          : Promise.resolve({ data: [] as any[] }),
+          : Promise.resolve({ data: [] as { id: string; name: string }[] }),
       ]);
       setProfMap(new Map((profs ?? []).map((p) => [p.user_id, p.display_name])));
       setRachaMap(new Map((rachas ?? []).map((r) => [r.id, r.name])));
@@ -115,7 +117,7 @@ export function RelatorioMensal() {
   const exportarPDF = async () => {
     setExporting(true);
     try {
-      const doc = new jsPDF();
+      const doc = new jsPDF() as JsPDFWithAutoTable;
       const pageWidth = doc.internal.pageSize.getWidth();
 
       // Header
@@ -150,7 +152,7 @@ export function RelatorioMensal() {
       });
 
       // Pagamentos
-      const lastY = (doc as any).lastAutoTable.finalY + 10;
+      const lastY = doc.lastAutoTable.finalY + 10;
       doc.setFontSize(13);
       doc.setFont("helvetica", "bold");
       doc.text("Pagamentos do mes", 14, lastY);
@@ -173,7 +175,7 @@ export function RelatorioMensal() {
 
       // Devedores
       if (devedores.length > 0) {
-        const y2 = (doc as any).lastAutoTable.finalY + 10;
+        const y2 = doc.lastAutoTable.finalY + 10;
         if (y2 > 250) doc.addPage();
         const startY = y2 > 250 ? 20 : y2;
         doc.setFontSize(13);
@@ -208,8 +210,8 @@ export function RelatorioMensal() {
 
       doc.save(`relatorio-${label.replace(/\s/g, "-")}.pdf`);
       toast.success("Relatório exportado!");
-    } catch (e: any) {
-      toast.error("Erro ao exportar: " + e.message);
+    } catch (e) {
+      toast.error("Erro ao exportar: " + (e instanceof Error ? e.message : String(e)));
     } finally {
       setExporting(false);
     }

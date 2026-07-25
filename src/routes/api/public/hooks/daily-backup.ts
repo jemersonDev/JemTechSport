@@ -14,8 +14,7 @@ const TABLES = [
   "user_roles",
 ] as const;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Route = (createFileRoute as any)("/api/public/hooks/daily-backup")({
+export const Route = createFileRoute("/api/public/hooks/daily-backup")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
@@ -45,8 +44,7 @@ export const Route = (createFileRoute as any)("/api/public/hooks/daily-backup")(
           };
 
           for (const table of TABLES) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error } = await (supabaseAdmin as any).from(table).select("*");
+            const { data, error } = await supabaseAdmin.from(table).select("*");
             if (error) {
               console.error(`backup ${table} error:`, error);
               snapshot[table] = { error: error.message };

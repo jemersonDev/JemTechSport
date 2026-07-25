@@ -129,8 +129,8 @@ export function useRankingSemanal() {
         .from("profiles")
         .select("user_id, display_name, avatar_url")
         .in("user_id", userIds);
-      const profMap = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
-      const postMap = new Map((posts ?? []).map((p: any) => [p.id, p]));
+      const profMap = new Map((profs ?? []).map((p) => [p.user_id, p] as const));
+      const postMap = new Map((posts ?? []).map((p) => [p.id, p] as const));
 
       const ranking: RankingItem[] = top
         .map(([id, cheia]) => {
@@ -143,7 +143,7 @@ export function useRankingSemanal() {
             thumb_url: p.thumb_url,
             caption: p.caption,
             user_id: p.user_id,
-            author: profMap.get(p.user_id) as any,
+            author: profMap.get(p.user_id),
           };
         })
         .filter(Boolean) as RankingItem[];

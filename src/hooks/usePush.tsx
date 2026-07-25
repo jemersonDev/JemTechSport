@@ -64,7 +64,7 @@ export function usePush() {
           applicationServerKey: urlBase64ToUint8Array(publicKey),
         });
       }
-      const json = sub.toJSON() as any;
+      const json = sub.toJSON();
       await subFn({
         data: {
           endpoint: sub.endpoint,
@@ -75,8 +75,8 @@ export function usePush() {
       });
       setSubscribed(true);
       return { error: null };
-    } catch (e: any) {
-      return { error: e?.message ?? "Erro ao ativar" };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "Erro ao ativar" };
     } finally {
       setBusy(false);
     }
@@ -93,8 +93,8 @@ export function usePush() {
       }
       setSubscribed(false);
       return { error: null };
-    } catch (e: any) {
-      return { error: e?.message ?? "Erro" };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "Erro" };
     } finally {
       setBusy(false);
     }

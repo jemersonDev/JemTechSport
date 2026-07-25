@@ -18,7 +18,7 @@ export const subscribeToPush = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => SubSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context;
     const { error } = await supabase
       .from("push_subscriptions")
       .upsert(
@@ -39,7 +39,7 @@ export const unsubscribeFromPush = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ endpoint: z.string().url() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context;
     await supabase
       .from("push_subscriptions")
       .delete()
@@ -85,16 +85,17 @@ export const sendPush = createServerFn({ method: "POST" })
     let failed = 0;
     const stale: string[] = [];
     await Promise.all(
-      (subs ?? []).map(async (s: any) => {
+      (subs ?? []).map(async (s) => {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
             payload,
           );
           sent++;
-        } catch (err: any) {
+        } catch (err) {
           failed++;
-          if (err?.statusCode === 404 || err?.statusCode === 410) stale.push(s.id);
+          const statusCode = (err as { statusCode?: number })?.statusCode;
+          if (statusCode === 404 || statusCode === 410) stale.push(s.id);
         }
       }),
     );

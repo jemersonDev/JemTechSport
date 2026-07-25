@@ -14,6 +14,7 @@ import {
   Hash,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { OverlayEditor, type Overlay } from "@/components/OverlayEditor";
@@ -141,7 +142,7 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
         thumb_url: thumbUrl,
         caption: caption.trim() || null,
         duration_seconds: duration,
-        overlays: overlays as any,
+        overlays: overlays as unknown as Json,
         trim_start: trimStart,
         trim_end: trimEnd,
         music_url: music?.preview ?? null,
@@ -156,9 +157,9 @@ export function ResenhaUpload({ open, onClose, onUploaded }: Props) {
       reset();
       onClose();
       onUploaded();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message ?? "Erro ao subir vídeo");
+      toast.error(err instanceof Error ? err.message : "Erro ao subir vídeo");
     } finally {
       setUploading(false);
     }

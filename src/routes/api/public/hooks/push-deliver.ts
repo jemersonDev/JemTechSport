@@ -6,8 +6,23 @@ import { createFileRoute } from "@tanstack/react-router";
 //   curl -X POST -H "x-push-secret: $PUSH_HOOK_SECRET" \
 //     https://<projeto>.lovable.app/api/public/hooks/push-deliver
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Route = (createFileRoute as any)("/api/public/hooks/push-deliver")({
+interface PendingNotificacao {
+  id: string;
+  user_id: string;
+  tipo: string;
+  message: string;
+  link: string | null;
+}
+
+interface PushSubRow {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  user_id: string;
+}
+
+export const Route = createFileRoute("/api/public/hooks/push-deliver")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
@@ -33,25 +48,24 @@ export const Route = (createFileRoute as any)("/api/public/hooks/push-deliver")(
         const webpush = (await import("web-push")).default;
         webpush.setVapidDetails(subject, pub, priv);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: pend } = await (supabaseAdmin as any)
+        const { data: pend } = await supabaseAdmin
           .from("notificacoes")
           .select("id, user_id, tipo, message, link")
           .is("pushed_at", null)
           .gte("created_at", new Date(Date.now() - 24 * 3600_000).toISOString())
           .limit(200);
 
-        if (!pend?.length) return Response.json({ delivered: 0 });
+        const pendList = (pend ?? []) as PendingNotificacao[];
+        if (!pendList.length) return Response.json({ delivered: 0 });
 
-        const userIds = [...new Set(pend.map((n: any) => n.user_id))];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: subs } = await (supabaseAdmin as any)
+        const userIds = [...new Set(pendList.map((n) => n.user_id))];
+        const { data: subs } = await supabaseAdmin
           .from("push_subscriptions")
           .select("id, endpoint, p256dh, auth, user_id")
           .in("user_id", userIds);
 
-        const byUser = new Map<string, any[]>();
-        (subs ?? []).forEach((s: any) => {
+        const byUser = new Map<string, PushSubRow[]>();
+        ((subs ?? []) as PushSubRow[]).forEach((s) => {
           const arr = byUser.get(s.user_id) || [];
           arr.push(s);
           byUser.set(s.user_id, arr);
@@ -71,7 +85,7 @@ export const Route = (createFileRoute as any)("/api/public/hooks/push-deliver")(
         let sent = 0;
 
         await Promise.all(
-          pend.map(async (n: any) => {
+          pendList.map(async (n) => {
             const targets = byUser.get(n.user_id) || [];
             if (!targets.length) {
               pushed.push(n.id);
@@ -91,8 +105,9 @@ export const Route = (createFileRoute as any)("/api/public/hooks/push-deliver")(
                     payload,
                   );
                   sent++;
-                } catch (err: any) {
-                  if (err?.statusCode === 404 || err?.statusCode === 410) stale.push(s.id);
+                } catch (err) {
+                  const statusCode = (err as { statusCode?: number })?.statusCode;
+                  if (statusCode === 404 || statusCode === 410) stale.push(s.id);
                 }
               }),
             );
@@ -101,13 +116,13 @@ export const Route = (createFileRoute as any)("/api/public/hooks/push-deliver")(
         );
 
         if (pushed.length) {
-          await (supabaseAdmin as any)
+          await supabaseAdmin
             .from("notificacoes")
             .update({ pushed_at: new Date().toISOString() })
             .in("id", pushed);
         }
         if (stale.length) {
-          await (supabaseAdmin as any).from("push_subscriptions").delete().in("id", stale);
+          await supabaseAdmin.from("push_subscriptions").delete().in("id", stale);
         }
 
         return Response.json({ delivered: sent, notifications: pushed.length, cleaned: stale.length });

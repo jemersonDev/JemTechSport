@@ -30,6 +30,12 @@ export type ResenhaPost = {
   liked_by_me?: boolean;
 };
 
+type MiniProfile = {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+};
+
 export type ResenhaComment = {
   id: string;
   post_id: string;
@@ -68,23 +74,25 @@ export function useResenhaFeed() {
     const [profilesRes, likesRes] = await Promise.all([
       userIds.length
         ? supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", userIds)
-        : Promise.resolve({ data: [] as any[] }),
+        : Promise.resolve({ data: [] as MiniProfile[] }),
       user && postIds.length
         ? supabase
             .from("resenha_likes")
             .select("post_id")
             .eq("user_id", user.id)
             .in("post_id", postIds)
-        : Promise.resolve({ data: [] as any[] }),
+        : Promise.resolve({ data: [] as { post_id: string }[] }),
     ]);
 
-    const profileMap = new Map((profilesRes.data ?? []).map((p: any) => [p.user_id, p]));
-    const likedSet = new Set((likesRes.data ?? []).map((l: any) => l.post_id));
+    const profileMap = new Map(
+      (profilesRes.data ?? []).map((p: MiniProfile) => [p.user_id, p] as const),
+    );
+    const likedSet = new Set((likesRes.data ?? []).map((l) => l.post_id));
 
     setPosts(
       (postsData ?? []).map((p) => ({
         ...p,
-        author: profileMap.get(p.user_id) as any,
+        author: profileMap.get(p.user_id),
         liked_by_me: likedSet.has(p.id),
       })),
     );
@@ -178,13 +186,13 @@ export function usePostComments(postId: string | null) {
             .from("profiles")
             .select("user_id, display_name, avatar_url")
             .in("user_id", userIds)
-        : { data: [] as any[] };
-      const profileMap = new Map((profilesRes.data ?? []).map((p: any) => [p.user_id, p]));
+        : { data: [] as MiniProfile[] };
+      const profileMap = new Map(
+        (profilesRes.data ?? []).map((p: MiniProfile) => [p.user_id, p] as const),
+      );
 
       if (!active) return;
-      setComments(
-        (data ?? []).map((c) => ({ ...c, author: profileMap.get(c.user_id) as any })),
-      );
+      setComments((data ?? []).map((c) => ({ ...c, author: profileMap.get(c.user_id) })));
       setLoading(false);
     };
 
@@ -203,7 +211,7 @@ export function usePostComments(postId: string | null) {
             .eq("user_id", row.user_id)
             .maybeSingle();
           if (!active) return;
-          setComments((prev) => [{ ...row, author: prof as any }, ...prev]);
+          setComments((prev) => [{ ...row, author: (prof ?? undefined) as MiniProfile | undefined }, ...prev]);
         },
       )
       .subscribe();

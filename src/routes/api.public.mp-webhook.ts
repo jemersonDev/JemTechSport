@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import type { Json } from '@/integrations/supabase/types';
 
 
 /**
@@ -47,14 +48,20 @@ async function verifyMpSignature(opts: {
   }
 }
 
-async function fetchMpPayment(paymentId: string, accessToken: string) {
+interface MpPaymentResponse {
+  id: number | string;
+  status: string;
+  date_approved: string | null;
+}
+
+async function fetchMpPayment(paymentId: string, accessToken: string): Promise<MpPaymentResponse> {
   const res = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   if (!res.ok) {
     throw new Error(`MP API ${res.status}: ${await res.text()}`);
   }
-  return res.json();
+  return res.json() as Promise<MpPaymentResponse>;
 }
 
 function mapMpStatus(s: string): 'pendente' | 'aprovado' | 'recusado' | 'reembolsado' | 'cancelado' {
@@ -73,8 +80,12 @@ function mapMpStatus(s: string): 'pendente' | 'aprovado' | 'recusado' | 'reembol
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
+interface MpWebhookPayload {
+  data?: { id?: string | number };
+  type?: string;
+}
+
+export const Route = createFileRoute('/api/public/mp-webhook')({
   server: {
     handlers: {
       GET: async () =>
@@ -97,7 +108,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
         const requestId = request.headers.get('x-request-id');
 
         // data.id pode vir no body OU como query param (?data.id=...&type=payment)
-        let payload: any = {};
+        let payload: MpWebhookPayload = {};
         try {
           payload = rawBody ? JSON.parse(rawBody) : {};
         } catch {
@@ -133,7 +144,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
               status: novoStatus,
               mp_payment_id: String(mp.id),
               paid_at: mp.date_approved ?? null,
-              raw: mp,
+              raw: mp as unknown as Json,
               updated_at: new Date().toISOString(),
             })
             .eq('mp_payment_id', String(mp.id));
@@ -147,7 +158,7 @@ export const Route = (createFileRoute as any)('/api/public/mp-webhook')({
             status: 200,
             headers: { 'Content-Type': 'application/json' },
           });
-        } catch (err: any) {
+        } catch (err) {
           console.error('mp-webhook: handler error', err);
           return new Response('handler error', { status: 500 });
         }

@@ -75,6 +75,12 @@ const FIELD_MODES: { id: FieldMode; label: string; sub: string }[] = [
   { id: "campo", label: "Campo", sub: "11x11" },
 ];
 
+const TEAM_SIZE: Record<FieldMode, number> = {
+  futsal: 5,
+  society: 7,
+  campo: 11,
+};
+
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
@@ -127,14 +133,14 @@ function Index() {
 
   const [pixOpen, setPixOpen] = useState(false);
   const [teamEditorSlot, setTeamEditorSlot] = useState<TeamSlot | null>(null);
-  const teamNamesMap: TeamNamesMap = ((racha as any)?.team_names ?? {}) as TeamNamesMap;
+  const teamNamesMap: TeamNamesMap = racha?.team_names ?? {};
   const metaA = getTeamMeta(teamNamesMap, "A");
   const metaB = getTeamMeta(teamNamesMap, "B");
   const saveTeamMeta = async (slot: TeamSlot, meta: TeamMeta | null) => {
     const next = { ...teamNamesMap };
     if (meta === null) delete next[slot];
     else next[slot] = meta;
-    const { error } = await updateRacha({ team_names: next } as any);
+    const { error } = await updateRacha({ team_names: next });
     if (error) toast.error(error);
     else toast.success("Time atualizado");
   };
@@ -196,12 +202,6 @@ function Index() {
     if (racha.field_mode) setFieldMode(racha.field_mode);
   }, [racha]);
 
-
-  const TEAM_SIZE: Record<FieldMode, number> = {
-    futsal: 5,
-    society: 7,
-    campo: 11,
-  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photoTargetId, setPhotoTargetId] = useState<string | null>(null);
@@ -351,8 +351,9 @@ function Index() {
   }
 
   // Auto-escalação: sempre que jogadores ou modalidade mudam, monta times automaticamente
-  // (goleiros fixos + linha pelo tamanho da modalidade).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // (goleiros fixos + linha pelo tamanho da modalidade). O guard de comparação de ids abaixo
+  // torna seguro incluir teamA/teamB/reserves nas deps: quando o efeito já ajustou os times,
+  // a próxima execução casa os ids e sai sem re-sortear (sem loop).
   useEffect(() => {
     if (players.length < 2) return;
     // Só re-sorteia se a composição (ids) ou modalidade realmente mudou
@@ -363,7 +364,7 @@ function Index() {
     setTeamA(tA);
     setTeamB(tB);
     setReserves(rs);
-  }, [players, fieldMode]);
+  }, [players, fieldMode, teamA, teamB, reserves]);
 
   function clearAll() {
     setPlayers([]);

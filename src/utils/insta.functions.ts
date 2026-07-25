@@ -1,15 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const MessageSchema = z.object({
-  role: z.enum(["user", "assistant"]),
-  content: z.string().min(1).max(2000),
-});
-
-const InputSchema = z.object({
-  messages: z.array(MessageSchema).min(1).max(20),
-});
+import { AiChatInputSchema, callAiGateway, checkAiRateLimit } from "@/lib/aiChat";
 
 const SYSTEM_PROMPT = `# CONTEXTO E IDENTIDADE
 Você é um especialista sênior em Instagram, engenheiro de crescimento (Growth Hacker) e consultor de marketing digital integrado ao aplicativo JemTech Sports. Seu único objetivo é ajudar o usuário a dominar o Instagram: estratégias de conteúdo, análises de engajamento, cópias de legenda, roteiros de Reels/Stories e suporte técnico sobre a plataforma.
@@ -32,7 +23,7 @@ Você é um especialista sênior em Instagram, engenheiro de crescimento (Growth
 
 export const askInsta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => InputSchema.parse(input))
+  .inputValidator((input: unknown) => AiChatInputSchema.parse(input))
   .handler(async ({ data, context }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) {
@@ -40,57 +31,9 @@ export const askInsta = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count } = await supabaseAdmin
-      .from("ai_usage_log")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", context.userId)
-      .eq("endpoint", "askInsta")
-      .gte("created_at", since);
-    if ((count ?? 0) >= 20) {
-      return { ok: false as const, error: "Limite de 20 perguntas/hora atingido. Volta mais tarde." };
-    }
-    await supabaseAdmin.from("ai_usage_log").insert({
-      user_id: context.userId,
-      endpoint: "askInsta",
-    });
 
-    try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...data.messages,
-          ],
-        }),
-      });
+    const rateLimitError = await checkAiRateLimit(supabaseAdmin, context.userId, "askInsta");
+    if (rateLimitError) return rateLimitError;
 
-      if (res.status === 429) {
-        return { ok: false as const, error: "Muitas perguntas seguidas. Espera um pouco." };
-      }
-      if (res.status === 402) {
-        return { ok: false as const, error: "Créditos de IA esgotados. Avise o admin." };
-      }
-      if (!res.ok) {
-        const t = await res.text();
-        console.error("AI gateway error", res.status, t);
-        return { ok: false as const, error: "Assistente indisponível agora" };
-      }
-
-      const json = (await res.json()) as {
-        choices?: Array<{ message?: { content?: string } }>;
-      };
-      const reply = json.choices?.[0]?.message?.content?.trim() ?? "";
-      if (!reply) return { ok: false as const, error: "Sem resposta" };
-      return { ok: true as const, reply };
-    } catch (err) {
-      console.error("askInsta error", err);
-      return { ok: false as const, error: "Erro ao falar com o assistente" };
-    }
+    return callAiGateway(apiKey, SYSTEM_PROMPT, data.messages);
   });

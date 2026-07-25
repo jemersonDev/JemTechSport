@@ -5,8 +5,19 @@ import { createFileRoute } from "@tanstack/react-router";
 //   curl -X POST -H "x-push-secret: $PUSH_HOOK_SECRET" \
 //     https://<projeto>.lovable.app/api/public/hooks/racha-lembretes
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Route = (createFileRoute as any)("/api/public/hooks/racha-lembretes")({
+interface RachaRow {
+  id: string;
+  name: string;
+  scheduled_at: string;
+  location: string | null;
+  address: string | null;
+}
+
+interface InscricaoRow {
+  user_id: string;
+}
+
+export const Route = createFileRoute("/api/public/hooks/racha-lembretes")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
@@ -30,35 +41,36 @@ export const Route = (createFileRoute as any)("/api/public/hooks/racha-lembretes
         const from = new Date(now + 2.75 * 3600_000).toISOString();
         const to = new Date(now + 3.25 * 3600_000).toISOString();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: rachas } = await (supabaseAdmin as any)
+        const { data: rachas } = await supabaseAdmin
           .from("rachas")
-          .select("id, name, data_hora, local")
-          .gte("data_hora", from)
-          .lte("data_hora", to);
+          .select("id, name, scheduled_at, location, address")
+          .gte("scheduled_at", from)
+          .lte("scheduled_at", to);
 
-        if (!rachas?.length) return Response.json({ rachas: 0 });
+        const rachasList = (rachas ?? []) as RachaRow[];
+        if (!rachasList.length) return Response.json({ rachas: 0 });
 
         let created = 0;
-        for (const r of rachas) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: insc } = await (supabaseAdmin as any)
+        for (const r of rachasList) {
+          const { data: insc } = await supabaseAdmin
             .from("inscricoes")
             .select("user_id")
             .eq("racha_id", r.id);
-          if (!insc?.length) continue;
+          const inscList = (insc ?? []) as InscricaoRow[];
+          if (!inscList.length) continue;
 
-          const rows = insc.map((i: any) => ({
+          const local = r.address || r.location;
+          const rows = inscList.map((i) => ({
             user_id: i.user_id,
-            tipo: "racha_join",
-            message: `⏰ Faltam 3h para "${r.name}"${r.local ? " — " + r.local : ""}. Prepare a chuteira!`,
+            tipo: "racha_join" as const,
+            message: `⏰ Faltam 3h para "${r.name}"${local ? " — " + local : ""}. Prepare a chuteira!`,
             link: "/rachas",
           }));
-          const { error } = await (supabaseAdmin as any).from("notificacoes").insert(rows);
+          const { error } = await supabaseAdmin.from("notificacoes").insert(rows);
           if (!error) created += rows.length;
         }
 
-        return Response.json({ rachas: rachas.length, notifications: created });
+        return Response.json({ rachas: rachasList.length, notifications: created });
       },
     },
   },

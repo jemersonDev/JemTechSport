@@ -5,6 +5,19 @@ import { createFileRoute } from "@tanstack/react-router";
  * Retorna faixas com preview de 30s (MP3) — grátis e sem OAuth.
  * Rota pública (leitura de metadata musical, sem PII).
  */
+interface DeezerTrack {
+  id: number | string;
+  title: string;
+  artist?: { name?: string };
+  album?: { cover_medium?: string; cover?: string };
+  preview?: string;
+  duration?: number;
+}
+
+interface DeezerSearchResponse {
+  data?: DeezerTrack[];
+}
+
 export const Route = createFileRoute("/api/public/deezer-search")({
   server: {
     handlers: {
@@ -22,10 +35,10 @@ export const Route = createFileRoute("/api/public/deezer-search")({
           if (!res.ok) {
             return Response.json({ tracks: [], error: `deezer_${res.status}` }, { status: 200 });
           }
-          const data: any = await res.json();
+          const data = (await res.json()) as DeezerSearchResponse;
           const tracks = (data?.data ?? [])
-            .filter((t: any) => t?.preview)
-            .map((t: any) => ({
+            .filter((t) => t?.preview)
+            .map((t) => ({
               id: String(t.id),
               title: t.title,
               artist: t.artist?.name ?? "",
@@ -37,8 +50,9 @@ export const Route = createFileRoute("/api/public/deezer-search")({
             { tracks },
             { headers: { "Cache-Control": "public, max-age=300" } },
           );
-        } catch (e: any) {
-          return Response.json({ tracks: [], error: e?.message ?? "fetch_failed" }, { status: 200 });
+        } catch (e) {
+          const message = e instanceof Error ? e.message : "fetch_failed";
+          return Response.json({ tracks: [], error: message }, { status: 200 });
         }
       },
     },

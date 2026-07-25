@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid,
 } from "recharts";
-import { DollarSign, Users, AlertTriangle, Calendar } from "lucide-react";
+import { DollarSign, Users, AlertTriangle, Calendar, type LucideIcon } from "lucide-react";
 
 export function OrganizadorDashboard({ organizadorId }: { organizadorId: string }) {
   const [stats, setStats] = useState({
@@ -42,7 +42,7 @@ export function OrganizadorDashboard({ organizadorId }: { organizadorId: string 
       ]);
 
       const pgs = pgRes.data ?? [];
-      const receita = pgs.reduce((a, p: any) => a + Number(p.valor_organizador || 0), 0);
+      const receita = pgs.reduce((a, p) => a + Number(p.valor_organizador || 0), 0);
 
       // série diária 30d
       const buckets = new Map<string, number>();
@@ -51,7 +51,7 @@ export function OrganizadorDashboard({ organizadorId }: { organizadorId: string 
         const k = `${d.getDate()}/${d.getMonth() + 1}`;
         buckets.set(k, 0);
       }
-      pgs.forEach((p: any) => {
+      pgs.forEach((p) => {
         const d = new Date(p.paid_at ?? p.created_at);
         const k = `${d.getDate()}/${d.getMonth() + 1}`;
         if (buckets.has(k)) buckets.set(k, buckets.get(k)! + Number(p.valor_organizador || 0));
@@ -59,21 +59,21 @@ export function OrganizadorDashboard({ organizadorId }: { organizadorId: string 
       setSerie(Array.from(buckets, ([dia, valor]) => ({ dia, valor })));
 
       // top jogadores assíduos
-      const rachaIds = (rachasRes.data ?? []).map((r: any) => r.id);
+      const rachaIds = (rachasRes.data ?? []).map((r) => r.id);
       if (rachaIds.length) {
         const { data: inscs } = await supabase
           .from("inscricoes")
           .select("user_id")
           .in("racha_id", rachaIds);
         const counts = new Map<string, number>();
-        (inscs ?? []).forEach((i: any) => counts.set(i.user_id, (counts.get(i.user_id) ?? 0) + 1));
+        (inscs ?? []).forEach((i) => counts.set(i.user_id, (counts.get(i.user_id) ?? 0) + 1));
         const top = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
         if (top.length) {
           const { data: profs } = await supabase
             .from("profiles")
             .select("user_id, display_name")
             .in("user_id", top.map(([uid]) => uid));
-          const nameMap = new Map((profs ?? []).map((p: any) => [p.user_id, p.display_name]));
+          const nameMap = new Map((profs ?? []).map((p) => [p.user_id, p.display_name]));
           setTopJogadores(top.map(([uid, n]) => ({ nome: nameMap.get(uid) ?? "Jogador", n })));
         }
       }
@@ -114,7 +114,7 @@ export function OrganizadorDashboard({ organizadorId }: { organizadorId: string 
                   borderRadius: 8,
                   fontSize: 12,
                 }}
-                formatter={(v: any) => `R$ ${Number(v).toFixed(2)}`}
+                formatter={(v: number) => `R$ ${v.toFixed(2)}`}
               />
               <Bar dataKey="valor" fill="#10b981" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -144,7 +144,17 @@ export function OrganizadorDashboard({ organizadorId }: { organizadorId: string 
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }: any) {
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  color: string;
+}) {
   return (
     <Card className="p-3">
       <div className="flex items-center gap-2 mb-1">

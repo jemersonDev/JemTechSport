@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Loader2 } from "lucide-react";
+import type { Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
+import type * as LeafletNamespace from "leaflet";
 
 /**
  * Mapa baseado em Leaflet + OpenStreetMap (gratuito, sem chave).
@@ -54,9 +56,9 @@ export function AddressMap({
   onResolved,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
-  const LRef = useRef<any>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
+  const LRef = useRef<typeof LeafletNamespace | null>(null);
   const [coords, setCoords] = useState<Coords | null>(
     lat != null && lng != null ? { lat, lng } : null,
   );

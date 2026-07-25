@@ -32,12 +32,12 @@ function alocar(jogadores: Jogador[], f: { gk: 1; def: number; mid: number; atk:
   const remaining: Jogador[] = [];
   for (const j of sorted) {
     const tipo = classifyPos(j.posicao);
-    if (buckets[tipo].length < (f as any)[tipo]) buckets[tipo].push(j);
+    if (buckets[tipo].length < f[tipo]) buckets[tipo].push(j);
     else remaining.push(j);
   }
   // fill empty slots with remaining
   (["def", "mid", "atk"] as const).forEach((tipo) => {
-    while (buckets[tipo].length < (f as any)[tipo] && remaining.length) {
+    while (buckets[tipo].length < f[tipo] && remaining.length) {
       buckets[tipo].push(remaining.shift()!);
     }
   });

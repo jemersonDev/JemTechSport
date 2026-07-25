@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import type { TeamNamesMap } from "@/lib/teamMeta";
 
 const ACTIVE_RACHA_KEY = "jemtech_active_racha";
 
@@ -23,6 +24,7 @@ export type Racha = {
   pix_holder: string | null;
   invite_code: string;
   finalizado_em?: string | null;
+  team_names: TeamNamesMap;
 };
 
 export type Inscricao = {

@@ -14,6 +14,14 @@ export type Conversa = {
   unread?: number;
 };
 
+type MiniProfile = {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+};
+
+type ConversaRow = Omit<Conversa, "other" | "unread">;
+
 export type Mensagem = {
   id: string;
   conversa_id: string;
@@ -47,13 +55,13 @@ export function useInbox() {
           .from("profiles")
           .select("user_id, display_name, avatar_url")
           .in("user_id", others)
-      : { data: [] as any[] };
-    const map = new Map((profilesRes.data ?? []).map((p: any) => [p.user_id, p]));
+      : { data: [] as MiniProfile[] };
+    const map = new Map((profilesRes.data ?? []).map((p: MiniProfile) => [p.user_id, p] as const));
 
     setConversas(
       (data ?? []).map((c) => {
         const otherId = c.user_a === user.id ? c.user_b : c.user_a;
-        return { ...c, other: map.get(otherId) as any };
+        return { ...c, other: map.get(otherId) };
       }),
     );
     setLoading(false);
@@ -92,7 +100,7 @@ export async function openOrCreateConversa(otherUserId: string): Promise<string 
 export function useConversa(conversaId: string | null) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Mensagem[]>([]);
-  const [other, setOther] = useState<{ user_id: string; display_name: string; avatar_url: string | null } | null>(null);
+  const [other, setOther] = useState<MiniProfile | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -115,7 +123,7 @@ export function useConversa(conversaId: string | null) {
           .limit(200),
       ]);
       if (!active) return;
-      const conv = convRes.data as any;
+      const conv = convRes.data as ConversaRow | null;
       if (conv) {
         const otherId = conv.user_a === user.id ? conv.user_b : conv.user_a;
         const { data: prof } = await supabase
@@ -123,7 +131,7 @@ export function useConversa(conversaId: string | null) {
           .select("user_id, display_name, avatar_url")
           .eq("user_id", otherId)
           .maybeSingle();
-        if (active) setOther(prof as any);
+        if (active) setOther((prof ?? null) as MiniProfile | null);
       }
       if (active) {
         setMessages((msgsRes.data ?? []) as Mensagem[]);

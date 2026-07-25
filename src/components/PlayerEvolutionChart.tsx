@@ -31,12 +31,12 @@ export function PlayerEvolutionChart({ userId }: { userId: string | null }) {
         .eq("user_id", userId);
 
       const golsPorRacha = new Map<string, number>();
-      (gols ?? []).forEach((g: any) => {
+      (gols ?? []).forEach((g) => {
         golsPorRacha.set(g.racha_id, (golsPorRacha.get(g.racha_id) ?? 0) + g.gols);
       });
 
       let vAcum = 0;
-      const points: Point[] = (partidas ?? []).map((p: any, i: number) => {
+      const points: Point[] = (partidas ?? []).map((p, i) => {
         const venceu =
           (p.vencedor === "A" && p.team_a_ids.includes(userId)) ||
           (p.vencedor === "B" && p.team_b_ids.includes(userId));

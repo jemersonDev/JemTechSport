@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Trophy } from "lucide-react";
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
+
+type ConquistaUsuarioRow = { conquista_code: string };
 
 export function ConquistasListener() {
   const { user } = useAuth();
@@ -18,7 +21,7 @@ export function ConquistasListener() {
           table: "conquistas_usuario",
           filter: `user_id=eq.${user.id}`,
         },
-        async (payload: any) => {
+        async (payload: RealtimePostgresInsertPayload<ConquistaUsuarioRow>) => {
           const code = payload.new.conquista_code;
           const { data } = await supabase
             .from("conquistas")

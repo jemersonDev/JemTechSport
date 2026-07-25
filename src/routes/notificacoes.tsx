@@ -115,7 +115,7 @@ function NotifItem({ n, onClick }: { n: Notificacao; onClick: () => void }) {
   );
   if (n.link) {
     return (
-      <Link to={n.link as any} className="block">
+      <Link to={n.link} className="block">
         {content}
       </Link>
     );

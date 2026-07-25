@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Trophy, Crown, Flame, Zap, Shield, ShieldCheck, Target, Flag, Lock,
+  type LucideIcon,
 } from "lucide-react";
 
 type Conquista = {
@@ -13,7 +14,7 @@ type Conquista = {
   ordem: number;
 };
 
-const ICONS: Record<string, any> = {
+const ICONS: Record<string, LucideIcon> = {
   trophy: Trophy, crown: Crown, flame: Flame, zap: Zap,
   shield: Shield, "shield-check": ShieldCheck, target: Target, flag: Flag,
 };
@@ -38,7 +39,7 @@ export function ConquistasGrid({ userId }: { userId: string | null }) {
         supabase.from("conquistas_usuario").select("conquista_code").eq("user_id", userId),
       ]);
       setConquistas((all ?? []) as Conquista[]);
-      setUnlocked(new Set((mine ?? []).map((m: any) => m.conquista_code)));
+      setUnlocked(new Set((mine ?? []).map((m) => m.conquista_code)));
       setLoading(false);
     })();
   }, [userId]);
