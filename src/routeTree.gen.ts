@@ -24,6 +24,7 @@ import { Route as RachasRouteImport } from './routes/rachas'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as ResenhaRouteImport } from './routes/resenha'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as ApiPublicDeezerSearchRouteImport } from './routes/api/public/deezer-search'
@@ -107,6 +108,11 @@ const AtletaUserIdRoute = AtletaUserIdRouteImport.update({
   path: '/atleta/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
   id: '/chat/$conversaId',
   path: '/chat/$conversaId',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
   '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
   '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/resenha': typeof ResenhaRoute
   '/atleta/$userId': typeof AtletaUserIdRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
   '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/resenha'
     | '/atleta/$userId'
+    | '/auth/callback'
     | '/chat/$conversaId'
     | '/r/$code'
     | '/api/public/deezer-search'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/resenha'
     | '/atleta/$userId'
+    | '/auth/callback'
     | '/chat/$conversaId'
     | '/r/$code'
     | '/api/public/deezer-search'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/resenha'
     | '/atleta/$userId'
+    | '/auth/callback'
     | '/chat/$conversaId'
     | '/r/$code'
     | '/api/public/deezer-search'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   RankingRoute: typeof RankingRoute
   ResenhaRoute: typeof ResenhaRoute
   AtletaUserIdRoute: typeof AtletaUserIdRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ChatConversaIdRoute: typeof ChatConversaIdRoute
   RCodeRoute: typeof RCodeRoute
   ApiPublicDeezerSearchRoute: typeof ApiPublicDeezerSearchRoute
@@ -426,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat/$conversaId': {
       id: '/chat/$conversaId'
       path: '/chat/$conversaId'
@@ -494,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   RankingRoute: RankingRoute,
   ResenhaRoute: ResenhaRoute,
   AtletaUserIdRoute: AtletaUserIdRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ChatConversaIdRoute: ChatConversaIdRoute,
   RCodeRoute: RCodeRoute,
   ApiPublicDeezerSearchRoute: ApiPublicDeezerSearchRoute,
