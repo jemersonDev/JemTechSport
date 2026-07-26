@@ -127,8 +127,20 @@ function AdminPage() {
       listarSaquesPendentesFn({ data: undefined }),
     ]);
     if (saldoRes.ok) setSaldoPlataforma(saldoRes.saldo);
+    else {
+      console.error("verSaldoPlataforma falhou:", saldoRes.error);
+      toast.error(`Saldo da plataforma: ${saldoRes.error}`);
+    }
     if (orgRes.ok) setTotalOrganizadores(orgRes.total);
+    else {
+      console.error("contarOrganizadores falhou:", orgRes.error);
+      toast.error(`Contagem de organizadores: ${orgRes.error}`);
+    }
     if (pendRes.ok) setSaquesPendentes(pendRes.saques);
+    else {
+      console.error("listarSaquesPendentes falhou:", pendRes.error);
+      toast.error(`Saques pendentes: ${pendRes.error}`);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
