@@ -1,13 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, DollarSign, TrendingUp, Wallet, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, DollarSign, TrendingUp, Wallet, Loader2, Banknote } from "lucide-react";
 import { DevedoresPanel } from "@/components/DevedoresPanel";
 import { RelatorioMensal } from "@/components/RelatorioMensal";
 import { OrganizadorDashboard } from "@/components/OrganizadorDashboard";
+import { SolicitarSaqueDialog } from "@/components/SolicitarSaqueDialog";
+import { verSaldoDisponivel, listarMeusSaques } from "@/utils/saques.functions";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -39,15 +43,40 @@ type Saldo = {
   total_recebido_plataforma: number;
 };
 
+type Saque = {
+  id: string;
+  valor: number;
+  pix_key: string;
+  pix_key_type: string;
+  destinatario_nome: string | null;
+  status: string;
+  created_at: string;
+  paid_at: string | null;
+};
+
 function OrganizadorPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const verSaldoFn = useServerFn(verSaldoDisponivel);
+  const listarSaquesFn = useServerFn(listarMeusSaques);
   const [pagamentos, setPagamentos] = useState<Pagamento[]>([]);
   const [saldo, setSaldo] = useState<Saldo>({
     total_devido_plataforma: 0,
     total_recebido_plataforma: 0,
   });
+  const [saldoSaque, setSaldoSaque] = useState(0);
+  const [meusSaques, setMeusSaques] = useState<Saque[]>([]);
+  const [saqueDialogOpen, setSaqueDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const carregarSaqueInfo = async () => {
+    const [saldoRes, saquesRes] = await Promise.all([
+      verSaldoFn({ data: undefined }),
+      listarSaquesFn({ data: undefined }),
+    ]);
+    if (saldoRes.ok) setSaldoSaque(saldoRes.saldo);
+    if (saquesRes.ok) setMeusSaques(saquesRes.saques);
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -97,8 +126,10 @@ function OrganizadorPage() {
         total_devido_plataforma: Number(s?.total_devido_plataforma ?? 0),
         total_recebido_plataforma: Number(s?.total_recebido_plataforma ?? 0),
       });
+      await carregarSaqueInfo();
       setLoading(false);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const aprovados = pagamentos.filter((p) => p.status === "aprovado");
@@ -161,6 +192,29 @@ function OrganizadorPage() {
           </p>
         </Card>
 
+        {/* Saldo disponível pra saque */}
+        <Card className="p-4 space-y-3 border-primary/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                <Banknote className="w-3 h-3" /> Disponível pra saque
+              </div>
+              <div className="text-2xl font-black tabular-nums">
+                R$ {saldoSaque.toFixed(2).replace(".", ",")}
+              </div>
+            </div>
+            <Button onClick={() => setSaqueDialogOpen(true)} disabled={saldoSaque <= 0}>
+              Sacar
+            </Button>
+          </div>
+        </Card>
+
+        <SolicitarSaqueDialog
+          open={saqueDialogOpen}
+          onOpenChange={setSaqueDialogOpen}
+          onSolicitado={carregarSaqueInfo}
+        />
+
         {/* Dashboard */}
         <OrganizadorDashboard organizadorId={user!.id} />
 
@@ -169,6 +223,38 @@ function OrganizadorPage() {
 
         {/* Devedores */}
         <DevedoresPanel />
+
+        {/* Meus saques */}
+        {meusSaques.length > 0 && (
+          <section className="space-y-2">
+            <h2 className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
+              Meus saques
+            </h2>
+            <div className="space-y-1.5">
+              {meusSaques.map((s) => (
+                <Card key={s.id} className="p-3 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">
+                      {s.destinatario_nome || "Minha conta"} · {s.pix_key_type.toUpperCase()}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {formatDistanceToNow(new Date(s.created_at), {
+                        addSuffix: true,
+                        locale: ptBR,
+                      })}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-bold tabular-nums">
+                      R$ {s.valor.toFixed(2).replace(".", ",")}
+                    </div>
+                    <SaqueStatusBadge status={s.status} />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Lista */}
         <section className="space-y-2">
@@ -209,6 +295,28 @@ function OrganizadorPage() {
         </section>
       </main>
     </div>
+  );
+}
+
+function SaqueStatusBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; className: string }> = {
+    aguardando_aprovacao: {
+      label: "Aguardando aprovação",
+      className: "bg-yellow-500/20 text-yellow-500 border-yellow-500/40",
+    },
+    processando: {
+      label: "Processando",
+      className: "bg-blue-500/20 text-blue-500 border-blue-500/40",
+    },
+    pago: { label: "Pago", className: "bg-green-500/20 text-green-500 border-green-500/40" },
+    falhou: { label: "Falhou", className: "bg-red-500/20 text-red-500 border-red-500/40" },
+    rejeitado: { label: "Rejeitado", className: "bg-muted text-muted-foreground border-border" },
+  };
+  const v = map[status] ?? { label: status, className: "" };
+  return (
+    <Badge variant="outline" className={`${v.className} text-[9px] px-1.5 py-0 mt-0.5`}>
+      {v.label}
+    </Badge>
   );
 }
 

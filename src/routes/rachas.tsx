@@ -49,6 +49,7 @@ const FIELD_MODES: { id: "futsal" | "society" | "campo"; label: string; sub: str
 ];
 
 const VAGAS_OPCOES = [10, 12, 14, 16, 20];
+const GOLEIRO_OPCOES = [0, 1, 2, 3, 4];
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -364,6 +365,7 @@ function CreateRachaForm({
   const [busy, setBusy] = useState(false);
   const [fieldMode, setFieldMode] = useState<"futsal" | "society" | "campo">("society");
   const [maxPlayers, setMaxPlayers] = useState<number>(14);
+  const [vagasGoleiro, setVagasGoleiro] = useState<number>(2);
 
   const days = useMemo(() => nextDays(7), []);
   const [selectedDay, setSelectedDay] = useState<Date>(days[0]);
@@ -396,6 +398,7 @@ function CreateRachaForm({
       scheduled_at: scheduledAtIso,
       field_mode: fieldMode,
       max_players: maxPlayers,
+      vagas_goleiro: vagasGoleiro,
     });
     setBusy(false);
     if (error || !data) {
@@ -518,7 +521,7 @@ function CreateRachaForm({
       {/* Vagas */}
       <div className="space-y-2">
         <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <Users className="w-3 h-3" /> Vagas
+          <Users className="w-3 h-3" /> Vagas de linha (pagam)
         </label>
         <div className="grid grid-cols-5 gap-1.5">
           {VAGAS_OPCOES.map((v) => {
@@ -532,6 +535,32 @@ function CreateRachaForm({
                   active
                     ? "border-neon bg-neon text-black shadow-neon"
                     : "border-border bg-background text-foreground hover:border-neon/40"
+                }`}
+              >
+                {v}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Vagas de goleiro (grátis) */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          🧤 Vagas de goleiro (não pagam)
+        </label>
+        <div className="grid grid-cols-5 gap-1.5">
+          {GOLEIRO_OPCOES.map((v) => {
+            const active = vagasGoleiro === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setVagasGoleiro(v)}
+                className={`py-2.5 rounded-lg border-2 text-sm font-black transition ${
+                  active
+                    ? "border-keeper bg-keeper text-black"
+                    : "border-border bg-background text-foreground hover:border-keeper/40"
                 }`}
               >
                 {v}

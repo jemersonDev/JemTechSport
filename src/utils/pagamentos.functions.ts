@@ -49,7 +49,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     // 1) Buscar inscrição (com RLS = utilizador só vê as suas / do seu racha)
     const { data: inscricao, error: insErr } = await supabase
       .from("inscricoes")
-      .select("id, racha_id, user_id, paid")
+      .select("id, racha_id, user_id, paid, position")
       .eq("id", data.inscricaoId)
       .maybeSingle();
 
@@ -61,6 +61,9 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     }
     if (inscricao.paid) {
       return { ok: false as const, error: "Já pago" };
+    }
+    if (inscricao.position === "goleiro") {
+      return { ok: false as const, error: "Goleiro não paga" };
     }
 
     // 2) Buscar racha (admin = organizador)

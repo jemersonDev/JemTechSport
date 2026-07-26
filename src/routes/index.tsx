@@ -1129,6 +1129,12 @@ function Index() {
 
                   {/* Botões: vou jogar / sair / pago */}
                   {!myInscricao ? (
+                    (() => {
+                      const linhaCount = inscricoes.filter((i) => i.position === "linha").length;
+                      const goleiroCount = inscricoes.filter((i) => i.position === "goleiro").length;
+                      const linhaCheia = linhaCount >= racha.max_players;
+                      const golCheio = goleiroCount >= (racha.vagas_goleiro ?? 2);
+                      return (
                     <div className="space-y-2">
                       <p className="text-xs text-center text-muted-foreground">
                         Você ainda não está na lista
@@ -1140,7 +1146,7 @@ function Index() {
                             if (error) toast.error(error);
                             else toast.success("Bora pro racha! ⚽");
                           }}
-                          disabled={inscricoes.length >= racha.max_players}
+                          disabled={linhaCheia}
                           className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40"
                         >
                           ⚽ Vou jogar (Linha)
@@ -1149,15 +1155,15 @@ function Index() {
                           onClick={async () => {
                             const { error } = await joinList("goleiro");
                             if (error) toast.error(error);
-                            else toast.success("No gol! 🧤");
+                            else toast.success("No gol! Você não paga 🧤");
                           }}
-                          disabled={inscricoes.length >= racha.max_players}
+                          disabled={golCheio}
                           className="flex items-center justify-center gap-2 py-3 rounded-xl bg-keeper text-black font-bold uppercase tracking-wider text-sm hover:brightness-110 active:scale-95 transition disabled:opacity-40"
                         >
-                          🧤 Goleiro
+                          🧤 Goleiro (grátis)
                         </button>
                       </div>
-                      {user && racha && inscricoes.length >= racha.max_players && (
+                      {user && racha && linhaCheia && (
                         <div className="mt-3">
                           <ListaEsperaCard
                             rachaId={racha.id}
@@ -1168,9 +1174,11 @@ function Index() {
                         </div>
                       )}
                     </div>
+                      );
+                    })()
                   ) : (
                     <div className="space-y-2">
-                      {!myInscricao.paid && (
+                      {!myInscricao.paid && myInscricao.position !== "goleiro" && (
                         <button
                           onClick={() => setPixOpen(true)}
                           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-bold uppercase tracking-wider text-sm hover:brightness-110 active:scale-95 transition"
@@ -1178,6 +1186,25 @@ function Index() {
                           <QrCode className="w-4 h-4" /> Pagar com PIX
                         </button>
                       )}
+                      {myInscricao.position === "goleiro" && (
+                        <div className="w-full text-center py-2 rounded-xl bg-keeper/15 border border-keeper/40 text-xs font-bold text-keeper">
+                          🧤 Goleiro não paga
+                        </div>
+                      )}
+                      {myInscricao.position === "goleiro" ? (
+                        <button
+                          onClick={async () => {
+                            if (!confirm("Sair do racha?")) return;
+                            const { error } = await leaveList();
+                            if (error) toast.error(error);
+                            else toast.success("Você saiu da lista");
+                          }}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-muted-foreground hover:bg-destructive hover:border-destructive hover:text-destructive-foreground active:scale-95 transition uppercase tracking-wider text-sm font-bold"
+                        >
+                          <X className="w-4 h-4" strokeWidth={2.5} />
+                          Sair
+                        </button>
+                      ) : (
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={async () => {
@@ -1214,6 +1241,7 @@ function Index() {
                           Sair
                         </button>
                       </div>
+                      )}
                     </div>
                   )}
 

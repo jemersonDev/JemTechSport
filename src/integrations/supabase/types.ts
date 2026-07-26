@@ -666,6 +666,7 @@ export type Database = {
           team_names: Json
           total_value: number
           updated_at: string
+          vagas_goleiro: number
           whatsapp_group_link: string | null
         }
         Insert: {
@@ -697,6 +698,7 @@ export type Database = {
           team_names?: Json
           total_value?: number
           updated_at?: string
+          vagas_goleiro?: number
           whatsapp_group_link?: string | null
         }
         Update: {
@@ -728,6 +730,7 @@ export type Database = {
           team_names?: Json
           total_value?: number
           updated_at?: string
+          vagas_goleiro?: number
           whatsapp_group_link?: string | null
         }
         Relationships: []
@@ -1076,6 +1079,60 @@ export type Database = {
         }
         Relationships: []
       }
+      saques: {
+        Row: {
+          created_at: string
+          destinatario_nome: string | null
+          id: string
+          is_plataforma: boolean
+          mp_transfer_id: string | null
+          notas: string | null
+          organizador_id: string
+          paid_at: string | null
+          pix_key: string
+          pix_key_type: string
+          processado_por: string | null
+          raw: Json | null
+          status: Database["public"]["Enums"]["saque_status"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          destinatario_nome?: string | null
+          id?: string
+          is_plataforma?: boolean
+          mp_transfer_id?: string | null
+          notas?: string | null
+          organizador_id: string
+          paid_at?: string | null
+          pix_key: string
+          pix_key_type: string
+          processado_por?: string | null
+          raw?: Json | null
+          status?: Database["public"]["Enums"]["saque_status"]
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          destinatario_nome?: string | null
+          id?: string
+          is_plataforma?: boolean
+          mp_transfer_id?: string | null
+          notas?: string | null
+          organizador_id?: string
+          paid_at?: string | null
+          pix_key?: string
+          pix_key_type?: string
+          processado_por?: string | null
+          raw?: Json | null
+          status?: Database["public"]["Enums"]["saque_status"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1091,6 +1148,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      contar_organizadores: { Args: never; Returns: number }
       enviar_lembretes_3h: { Args: never; Returns: number }
       find_user_by_email: {
         Args: { _email: string }
@@ -1114,6 +1172,8 @@ export type Database = {
           scheduled_at: string
         }[]
       }
+      get_saldo_disponivel_saque: { Args: { _organizador_id: string }; Returns: number }
+      get_saldo_plataforma: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1159,6 +1219,12 @@ export type Database = {
       preferred_position_ext: "goleiro" | "zagueiro" | "meia" | "atacante"
       racha_role: "admin" | "jogador"
       resenha_voto_tipo: "cheia" | "murcha"
+      saque_status:
+        | "aguardando_aprovacao"
+        | "processando"
+        | "pago"
+        | "falhou"
+        | "rejeitado"
       skill_level: "iniciante" | "casual" | "bom_de_bola" | "craque"
     }
     CompositeTypes: {
@@ -1309,6 +1375,13 @@ export const Constants = {
       preferred_position_ext: ["goleiro", "zagueiro", "meia", "atacante"],
       racha_role: ["admin", "jogador"],
       resenha_voto_tipo: ["cheia", "murcha"],
+      saque_status: [
+        "aguardando_aprovacao",
+        "processando",
+        "pago",
+        "falhou",
+        "rejeitado",
+      ],
       skill_level: ["iniciante", "casual", "bom_de_bola", "craque"],
     },
   },

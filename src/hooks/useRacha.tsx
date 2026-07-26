@@ -18,6 +18,7 @@ export type Racha = {
   total_value: number;
   app_fee: number;
   max_players: number;
+  vagas_goleiro: number;
   field_mode: "futsal" | "society" | "campo";
   pix_key: string | null;
   pix_key_type: string | null;
@@ -362,6 +363,7 @@ export async function createRacha(input: {
   scheduled_at?: string;
   field_mode?: "futsal" | "society" | "campo";
   max_players?: number;
+  vagas_goleiro?: number;
 }) {
   const { data, error } = await supabase
     .from("rachas")
@@ -373,6 +375,7 @@ export async function createRacha(input: {
       scheduled_at: input.scheduled_at ?? null,
       field_mode: input.field_mode ?? "society",
       max_players: input.max_players ?? 12,
+      vagas_goleiro: input.vagas_goleiro ?? 2,
     })
     .select("*")
     .single();

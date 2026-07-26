@@ -1,11 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ArrowLeft,
@@ -19,7 +27,17 @@ import {
   X,
   DollarSign,
   Check,
+  Users,
+  Wallet,
 } from "lucide-react";
+import {
+  verSaldoPlataforma,
+  contarOrganizadores,
+  listarSaquesPendentes,
+  aprovarSaque,
+  rejeitarSaque,
+  solicitarSaquePlataforma,
+} from "@/utils/saques.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -60,10 +78,29 @@ type SaldoOrganizador = {
   display_name?: string;
 };
 
+type SaquePendente = {
+  id: string;
+  organizador_id: string;
+  is_plataforma: boolean;
+  valor: number;
+  pix_key: string;
+  pix_key_type: string;
+  destinatario_nome: string | null;
+  status: string;
+  created_at: string;
+  organizador_nome: string;
+};
+
 function AdminPage() {
   // Painel de moderação JemTech Sports
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const verSaldoPlataformaFn = useServerFn(verSaldoPlataforma);
+  const contarOrganizadoresFn = useServerFn(contarOrganizadores);
+  const listarSaquesPendentesFn = useServerFn(listarSaquesPendentes);
+  const aprovarSaqueFn = useServerFn(aprovarSaque);
+  const rejeitarSaqueFn = useServerFn(rejeitarSaque);
+  const solicitarSaquePlataformaFn = useServerFn(solicitarSaquePlataforma);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isSuper, setIsSuper] = useState(false);
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
@@ -71,6 +108,29 @@ function AdminPage() {
   const [saldos, setSaldos] = useState<SaldoOrganizador[]>([]);
   const [loading, setLoading] = useState(true);
   const [newAdminEmail, setNewAdminEmail] = useState("");
+
+  // Financeiro
+  const [saldoPlataforma, setSaldoPlataforma] = useState(0);
+  const [totalOrganizadores, setTotalOrganizadores] = useState(0);
+  const [saquesPendentes, setSaquesPendentes] = useState<SaquePendente[]>([]);
+  const [valorSaquePlataforma, setValorSaquePlataforma] = useState("");
+  const [pixSaquePlataforma, setPixSaquePlataforma] = useState("");
+  const [pixTipoSaquePlataforma, setPixTipoSaquePlataforma] = useState<
+    "cpf" | "cnpj" | "email" | "telefone" | "aleatoria"
+  >("cpf");
+  const [enviandoSaquePlataforma, setEnviandoSaquePlataforma] = useState(false);
+
+  const loadFinanceiro = useCallback(async () => {
+    const [saldoRes, orgRes, pendRes] = await Promise.all([
+      verSaldoPlataformaFn({ data: undefined }),
+      contarOrganizadoresFn({ data: undefined }),
+      listarSaquesPendentesFn({ data: undefined }),
+    ]);
+    if (saldoRes.ok) setSaldoPlataforma(saldoRes.saldo);
+    if (orgRes.ok) setTotalOrganizadores(orgRes.total);
+    if (pendRes.ok) setSaquesPendentes(pendRes.saques);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -188,6 +248,53 @@ function AdminPage() {
   useEffect(() => {
     if (isAdmin) loadAll();
   }, [isAdmin, loadAll]);
+
+  useEffect(() => {
+    if (isSuper) loadFinanceiro();
+  }, [isSuper, loadFinanceiro]);
+
+  const handleAprovarSaque = async (saqueId: string) => {
+    if (!confirm("Aprovar este saque? O PIX será enviado.")) return;
+    const res = await aprovarSaqueFn({ data: { saqueId } });
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
+    }
+    toast.success("Saque aprovado — processando envio");
+    loadFinanceiro();
+  };
+
+  const handleRejeitarSaque = async (saqueId: string) => {
+    const motivo = prompt("Motivo da rejeição (opcional):") ?? undefined;
+    const res = await rejeitarSaqueFn({ data: { saqueId, motivo } });
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
+    }
+    toast.success("Saque rejeitado");
+    loadFinanceiro();
+  };
+
+  const handleSolicitarSaquePlataforma = async () => {
+    const valorNum = Number(valorSaquePlataforma.replace(",", "."));
+    if (!(valorNum > 0) || pixSaquePlataforma.trim().length < 3) return;
+    setEnviandoSaquePlataforma(true);
+    try {
+      const res = await solicitarSaquePlataformaFn({
+        data: { valor: valorNum, pixKey: pixSaquePlataforma.trim(), pixKeyType: pixTipoSaquePlataforma },
+      });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success("Pedido de saque criado");
+      setValorSaquePlataforma("");
+      setPixSaquePlataforma("");
+      loadFinanceiro();
+    } finally {
+      setEnviandoSaquePlataforma(false);
+    }
+  };
 
   const togglePostHidden = async (postId: string, currentHidden: boolean) => {
     const { error } = await supabase
@@ -326,7 +433,7 @@ function AdminPage() {
 
       <main className="px-4 py-5 max-w-2xl mx-auto">
         <Tabs defaultValue="denuncias">
-          <TabsList className={`grid w-full ${isSuper ? "grid-cols-3" : "grid-cols-2"}`}>
+          <TabsList className={`grid w-full ${isSuper ? "grid-cols-4" : "grid-cols-2"}`}>
             <TabsTrigger value="denuncias" className="gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5" /> Denúncias ({denuncias.length})
             </TabsTrigger>
@@ -336,6 +443,11 @@ function AdminPage() {
             {isSuper && (
               <TabsTrigger value="cobranca" className="gap-1.5">
                 <DollarSign className="w-3.5 h-3.5" /> Cobrança ({saldos.filter(s => s.total_devido_plataforma > 0).length})
+              </TabsTrigger>
+            )}
+            {isSuper && (
+              <TabsTrigger value="financeiro" className="gap-1.5">
+                <Wallet className="w-3.5 h-3.5" /> Financeiro ({saquesPendentes.length})
               </TabsTrigger>
             )}
           </TabsList>
@@ -531,6 +643,117 @@ function AdminPage() {
                         <Check className="w-3 h-3" /> Recebi
                       </Button>
                     )}
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+          )}
+
+          {isSuper && (
+            <TabsContent value="financeiro" className="space-y-3 mt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <Card className="p-3 text-center bg-primary/10 border-primary/30">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+                    Saldo da plataforma
+                  </p>
+                  <p className="text-xl font-black tabular-nums">
+                    R$ {saldoPlataforma.toFixed(2)}
+                  </p>
+                </Card>
+                <Card className="p-3 text-center bg-muted/30">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 flex items-center justify-center gap-1">
+                    <Users className="w-3 h-3" /> Organizadores
+                  </p>
+                  <p className="text-xl font-black tabular-nums">{totalOrganizadores}</p>
+                </Card>
+              </div>
+
+              <Card className="p-4 space-y-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Sacar minhas taxas
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    inputMode="decimal"
+                    placeholder="Valor (R$)"
+                    value={valorSaquePlataforma}
+                    onChange={(e) => setValorSaquePlataforma(e.target.value)}
+                  />
+                  <Select
+                    value={pixTipoSaquePlataforma}
+                    onValueChange={(v) => setPixTipoSaquePlataforma(v as typeof pixTipoSaquePlataforma)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cpf">CPF</SelectItem>
+                      <SelectItem value="cnpj">CNPJ</SelectItem>
+                      <SelectItem value="email">E-mail</SelectItem>
+                      <SelectItem value="telefone">Telefone</SelectItem>
+                      <SelectItem value="aleatoria">Chave aleatória</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Input
+                  placeholder="Chave PIX de destino"
+                  value={pixSaquePlataforma}
+                  onChange={(e) => setPixSaquePlataforma(e.target.value)}
+                />
+                <Button
+                  className="w-full"
+                  disabled={enviandoSaquePlataforma}
+                  onClick={handleSolicitarSaquePlataforma}
+                >
+                  {enviandoSaquePlataforma ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Solicitar saque"
+                  )}
+                </Button>
+              </Card>
+
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-2">
+                Saques aguardando aprovação ({saquesPendentes.length})
+              </p>
+              {saquesPendentes.length === 0 ? (
+                <Card className="p-6 text-center text-sm text-muted-foreground">
+                  Nenhum saque esperando aprovação.
+                </Card>
+              ) : (
+                saquesPendentes.map((s) => (
+                  <Card key={s.id} className="p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium">
+                          {s.is_plataforma ? "🏦 Plataforma (você)" : s.organizador_nome}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {s.pix_key_type.toUpperCase()}: {s.pix_key}
+                          {s.destinatario_nome ? ` · ${s.destinatario_nome}` : ""}
+                        </div>
+                      </div>
+                      <div className="text-lg font-black tabular-nums">
+                        R$ {s.valor.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAprovarSaque(s.id)}
+                        className="text-xs gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Aprovar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRejeitarSaque(s.id)}
+                        className="text-xs gap-1"
+                      >
+                        <X className="w-3 h-3" /> Rejeitar
+                      </Button>
+                    </div>
                   </Card>
                 ))
               )}
