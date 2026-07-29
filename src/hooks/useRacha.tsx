@@ -387,27 +387,30 @@ export async function joinByInviteCode(code: string, userId: string) {
   const cleaned = code.trim().toUpperCase();
   if (cleaned.length !== 6) return { data: null, error: "Código deve ter 6 caracteres" };
 
-  const { data: racha, error: rachaErr } = await supabase
-    .from("rachas")
-    .select("*")
-    .eq("invite_code", cleaned)
-    .maybeSingle();
+  // Usa a função seleção segura (SECURITY DEFINER) — consultar a tabela
+  // `rachas` direto falha aqui porque a política de segurança só deixa ver
+  // rachas dos quais já se é membro, e é justamente esse o problema:
+  // ainda não se é membro no momento de entrar pelo código.
+  const { data: rows, error: rachaErr } = await supabase.rpc("get_racha_by_invite", {
+    _code: cleaned,
+  });
+  const racha = Array.isArray(rows) ? rows[0] : rows;
 
   if (rachaErr) return { data: null, error: rachaErr.message };
   if (!racha) return { data: null, error: "Código inválido" };
 
   const { data: existing } = await supabase
-    .from("racha_membros")
+    .from("inscricoes")
     .select("id")
     .eq("racha_id", racha.id)
     .eq("user_id", userId)
     .maybeSingle();
 
   if (!existing) {
-    const { error: joinErr } = await supabase.from("racha_membros").insert({
+    const { error: joinErr } = await supabase.from("inscricoes").insert({
       racha_id: racha.id,
       user_id: userId,
-      role: "jogador",
+      position: "linha",
     });
     if (joinErr) return { data: null, error: joinErr.message };
   }
