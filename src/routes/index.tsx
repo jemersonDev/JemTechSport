@@ -265,12 +265,16 @@ function Index() {
   }, [pixKey, pixKeyType, pixOwner]);
 
   const APP_FEE = 0.2; // taxa interna — não exibir na UI
-  // Valor exibido aos jogadores: apenas o rateio puro da quadra (sem taxa do app)
+  // Valor exibido aos jogadores: apenas o rateio puro da quadra (sem taxa do app).
+  // Goleiros não entram no rateio — usa max_players (vagas de linha) como
+  // divisor fixo, igual ao valor real cobrado no PIX.
   const valuePerPerson = useMemo(() => {
     const total = parseFloat(totalValue.replace(",", ".")) || 0;
-    if (players.length === 0 || total === 0) return 0;
-    return total / players.length;
-  }, [totalValue, players.length]);
+    const linhaCount = players.filter((p) => !p.isGoalkeeper).length;
+    const divisor = racha?.max_players && racha.max_players > 0 ? racha.max_players : linhaCount;
+    if (divisor === 0 || total === 0) return 0;
+    return total / divisor;
+  }, [totalValue, players, racha?.max_players]);
 
   const goalkeeperCount = useMemo(
     () => players.filter((p) => p.isGoalkeeper).length,
@@ -1425,115 +1429,10 @@ function Index() {
         {/* ─────────────── TAB: PARTIDA ─────────────── */}
         {activeTab === "match" && (
           <div key="tab-match" className="space-y-5 animate-fade-in">
-            {/* ============== PAINEL FINANCEIRO DO ORGANIZADOR ============== */}
-            {isAdmin && racha && inscricoes.length > 0 && (
-              <section className="rounded-2xl bg-gradient-to-br from-neon/10 via-graphite to-graphite border border-neon/40 p-5 shadow-card space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <SectionTitle icon={DollarSign} title="Painel do organizador" />
-                    <p className="text-xs text-muted-foreground mt-1.5">
-                      Quem pagou, quem deve, total arrecadado.
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-neon/20 text-neon font-bold uppercase tracking-wider">
-                    Admin
-                  </span>
-                </div>
-
-                {(() => {
-                  const total = parseFloat(totalValue.replace(",", ".")) || 0;
-                  const valorBase = inscricoes.length > 0 ? total / inscricoes.length : 0;
-                  // Exibido sem a taxa interna do app
-                  const valorComTaxa = valorBase;
-                  const pagos = inscricoes.filter((i) => i.paid);
-                  const devendo = inscricoes.filter((i) => !i.paid);
-                  const arrecadado = pagos.length * valorComTaxa;
-                  const aReceber = devendo.length * valorComTaxa;
-                  const pct = inscricoes.length > 0 ? (pagos.length / inscricoes.length) * 100 : 0;
-
-                  return (
-                    <>
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-center">
-                          <p className="text-[9px] uppercase tracking-widest text-green-400/80 mb-1">Pagaram</p>
-                          <p className="text-2xl font-black text-green-400 leading-none">{pagos.length}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">R$ {arrecadado.toFixed(2).replace(".", ",")}</p>
-                        </div>
-                        <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 p-3 text-center">
-                          <p className="text-[9px] uppercase tracking-widest text-orange-400/80 mb-1">Devendo</p>
-                          <p className="text-2xl font-black text-orange-400 leading-none">{devendo.length}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">R$ {aReceber.toFixed(2).replace(".", ",")}</p>
-                        </div>
-                        <div className="rounded-xl bg-neon/10 border border-neon/30 p-3 text-center">
-                          <p className="text-[9px] uppercase tracking-widest text-neon/80 mb-1">Total</p>
-                          <p className="text-2xl font-black text-neon leading-none">{inscricoes.length}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">de {racha.max_players}</p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
-                          <span>Pagamentos</span>
-                          <span className="text-neon font-bold">{pct.toFixed(0)}%</span>
-                        </div>
-                        <div className="h-2 rounded-full bg-black/40 overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-green-500 to-neon transition-all" style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-
-                      {devendo.length > 0 && (
-                        <div className="rounded-xl bg-black/40 border border-orange-500/20 p-3 space-y-2">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400">
-                            ⚠️ Falta pagar ({devendo.length})
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {devendo.map((d) => (
-                              <span key={d.id} className="text-[11px] px-2 py-1 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30">
-                                {d.position === "goleiro" ? "🧤" : "⚽"} {d.display_name}
-                              </span>
-                            ))}
-                          </div>
-                          <button
-                            onClick={() => {
-                              const nomes = devendo.map((d) => d.display_name).join(", ");
-                              const valor = valorComTaxa.toFixed(2).replace(".", ",");
-                              const lines = [
-                                `⚠️ *Cobrança do racha — ${racha.name}*`,
-                                "",
-                                `Galera, falta pagar: ${nomes}`,
-                                `💵 Valor por pessoa: R$ ${valor}`,
-                              ];
-                              if (pixKey.trim()) {
-                                lines.push("");
-                                lines.push(`🔑 *PIX (${PIX_TYPE_LABEL[pixKeyType]}):* ${pixKey.trim()}`);
-                                if (pixOwner.trim()) lines.push(`👤 ${pixOwner.trim()}`);
-                              }
-                              lines.push("");
-                              lines.push("_Bora fechar a grana! 💸_");
-                              window.open(`https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`, "_blank");
-                            }}
-                            className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-orange-500 text-black font-bold uppercase tracking-wider text-xs hover:brightness-110 active:scale-95 transition"
-                          >
-                            <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
-                            Cobrar no Zap
-                          </button>
-                        </div>
-                      )}
-
-                      <div className="rounded-xl bg-black/60 border border-neon/30 p-3 flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Valor por pessoa</p>
-                          <p className="text-xl font-black text-neon">R$ {valorComTaxa.toFixed(2).replace(".", ",")}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Meta total</p>
-                          <p className="text-xl font-black text-foreground">R$ {total.toFixed(2).replace(".", ",")}</p>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()}
-              </section>
+            {isAdmin && racha && (
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 px-1 pt-1">
+                ⚙️ Configurações do racha
+              </p>
             )}
 
             {/* ============== EDITAR RACHA (admin) ============== */}
@@ -1574,6 +1473,27 @@ function Index() {
                       else toast.success("Limite atualizado");
                     }}
                     className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-neon focus:ring-2 focus:ring-neon/30 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1.5">
+                    🧤 Vagas de goleiro (não pagam)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={6}
+                    defaultValue={racha.vagas_goleiro ?? 2}
+                    key={`golv-${racha.id}-${racha.vagas_goleiro}`}
+                    onBlur={async (e) => {
+                      const v = parseInt(e.target.value, 10);
+                      if (Number.isNaN(v) || v === racha.vagas_goleiro) return;
+                      const { error } = await updateRacha({ vagas_goleiro: v });
+                      if (error) toast.error(error);
+                      else toast.success("Vagas de goleiro atualizadas");
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-input border border-border text-foreground text-sm focus:outline-none focus:border-keeper focus:ring-2 focus:ring-keeper/30 transition"
                   />
                 </div>
 
@@ -1693,6 +1613,10 @@ function Index() {
                 </p>
               </div>
             </section>
+
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 px-1 pt-2">
+              🏆 Dia do jogo
+            </p>
 
             <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-3">
               <SectionTitle icon={Trophy} title="Resumo da partida" />
@@ -1840,6 +1764,119 @@ function Index() {
                 aceita pagar PIX no crédito.
               </p>
             </section>
+
+            {/* ============== PAINEL FINANCEIRO DO ORGANIZADOR ============== */}
+            {isAdmin && racha && inscricoes.length > 0 && (
+              <section className="rounded-2xl bg-gradient-to-br from-neon/10 via-graphite to-graphite border border-neon/40 p-5 shadow-card space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <SectionTitle icon={DollarSign} title="Painel do organizador" />
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Quem pagou, quem deve, total arrecadado.
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-neon/20 text-neon font-bold uppercase tracking-wider">
+                    Admin
+                  </span>
+                </div>
+
+                {(() => {
+                  const total = parseFloat(totalValue.replace(",", ".")) || 0;
+                  const linhaInscritos = inscricoes.filter((i) => i.position !== "goleiro");
+                  const divisor = racha.max_players > 0 ? racha.max_players : linhaInscritos.length;
+                  const valorBase = divisor > 0 ? total / divisor : 0;
+                  // Exibido sem a taxa interna do app
+                  const valorComTaxa = valorBase;
+                  const pagos = linhaInscritos.filter((i) => i.paid);
+                  const devendo = linhaInscritos.filter((i) => !i.paid);
+                  const arrecadado = pagos.length * valorComTaxa;
+                  const aReceber = devendo.length * valorComTaxa;
+                  const pct = linhaInscritos.length > 0 ? (pagos.length / linhaInscritos.length) * 100 : 0;
+
+                  return (
+                    <>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-center">
+                          <p className="text-[9px] uppercase tracking-widest text-green-400/80 mb-1">Pagaram</p>
+                          <p className="text-2xl font-black text-green-400 leading-none">{pagos.length}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">R$ {arrecadado.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 p-3 text-center">
+                          <p className="text-[9px] uppercase tracking-widest text-orange-400/80 mb-1">Devendo</p>
+                          <p className="text-2xl font-black text-orange-400 leading-none">{devendo.length}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">R$ {aReceber.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="rounded-xl bg-neon/10 border border-neon/30 p-3 text-center">
+                          <p className="text-[9px] uppercase tracking-widest text-neon/80 mb-1">Total (linha)</p>
+                          <p className="text-2xl font-black text-neon leading-none">{linhaInscritos.length}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">de {racha.max_players}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                          <span>Pagamentos</span>
+                          <span className="text-neon font-bold">{pct.toFixed(0)}%</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-green-500 to-neon transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+
+                      {devendo.length > 0 && (
+                        <div className="rounded-xl bg-black/40 border border-orange-500/20 p-3 space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                            ⚠️ Falta pagar ({devendo.length})
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {devendo.map((d) => (
+                              <span key={d.id} className="text-[11px] px-2 py-1 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30">
+                                ⚽ {d.display_name}
+                              </span>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => {
+                              const nomes = devendo.map((d) => d.display_name).join(", ");
+                              const valor = valorComTaxa.toFixed(2).replace(".", ",");
+                              const lines = [
+                                `⚠️ *Cobrança do racha — ${racha.name}*`,
+                                "",
+                                `Galera, falta pagar: ${nomes}`,
+                                `💵 Valor por pessoa: R$ ${valor}`,
+                              ];
+                              if (pixKey.trim()) {
+                                lines.push("");
+                                lines.push(`🔑 *PIX (${PIX_TYPE_LABEL[pixKeyType]}):* ${pixKey.trim()}`);
+                                if (pixOwner.trim()) lines.push(`👤 ${pixOwner.trim()}`);
+                              }
+                              lines.push("");
+                              lines.push("_Bora fechar a grana! 💸_");
+                              window.open(`https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`, "_blank");
+                            }}
+                            className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-orange-500 text-black font-bold uppercase tracking-wider text-xs hover:brightness-110 active:scale-95 transition"
+                          >
+                            <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
+                            Cobrar no Zap
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="rounded-xl bg-black/60 border border-neon/30 p-3 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Valor por pessoa</p>
+                          <p className="text-xl font-black text-neon">R$ {valorComTaxa.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Meta total</p>
+                          <p className="text-xl font-black text-foreground">R$ {total.toFixed(2).replace(".", ",")}</p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </section>
+            )}
 
             {/* Encerrar partida — só admin, libera MVP automático e troféus */}
             {isAdmin && racha && teamsReady && !racha.finalizado_em && (
