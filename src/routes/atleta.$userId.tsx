@@ -57,7 +57,7 @@ function AthleteProfile() {
           .eq("is_hidden", false)
           .order("created_at", { ascending: false }),
         supabase
-          .from("racha_membros")
+          .from("inscricoes")
           .select("racha_id", { count: "exact", head: true })
           .eq("user_id", userId),
         supabase

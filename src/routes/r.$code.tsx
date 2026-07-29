@@ -54,14 +54,14 @@ function SharedRachaPage() {
 
 
       const { count } = await supabase
-        .from("racha_membros")
+        .from("inscricoes")
         .select("id", { count: "exact", head: true })
         .eq("racha_id", r.id);
       setMemberCount(count ?? 0);
 
       if (user) {
         const { data: m } = await supabase
-          .from("racha_membros")
+          .from("inscricoes")
           .select("id")
           .eq("racha_id", r.id)
           .eq("user_id", user.id)
@@ -81,8 +81,8 @@ function SharedRachaPage() {
     if (!racha) return;
     setJoining(true);
     const { error } = await supabase
-      .from("racha_membros")
-      .insert({ racha_id: racha.id, user_id: user.id, role: "jogador" });
+      .from("inscricoes")
+      .insert({ racha_id: racha.id, user_id: user.id, position: "linha" });
     if (error && !error.message.includes("duplicate")) {
       toast.error(error.message);
     } else {

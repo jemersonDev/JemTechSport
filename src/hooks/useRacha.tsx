@@ -66,12 +66,20 @@ export function useUserRachas() {
       return;
     }
     setLoading(true);
-    const { data: memberships } = await supabase
-      .from("racha_membros")
-      .select("racha_id")
-      .eq("user_id", user.id);
+    // Rachas que a pessoa organiza (admin_id) + rachas em que ela está
+    // inscrita como jogadora (inscricoes) — essa é a tabela real de
+    // participação usada pelo app hoje.
+    const [adminRes, inscricoesRes] = await Promise.all([
+      supabase.from("rachas").select("id").eq("admin_id", user.id),
+      supabase.from("inscricoes").select("racha_id").eq("user_id", user.id),
+    ]);
 
-    const ids = (memberships ?? []).map((m) => m.racha_id);
+    const ids = Array.from(
+      new Set([
+        ...((adminRes.data ?? []).map((r) => r.id)),
+        ...((inscricoesRes.data ?? []).map((i) => i.racha_id)),
+      ]),
+    );
     if (ids.length === 0) {
       setRachas([]);
       setLoading(false);

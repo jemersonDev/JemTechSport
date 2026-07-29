@@ -78,7 +78,7 @@ function PerfilPage() {
     (async () => {
       const [partidasRes, golsRes, craqueRes, bagreRes] = await Promise.all([
         supabase
-          .from("racha_membros")
+          .from("inscricoes")
           .select("racha_id", { count: "exact", head: true })
           .eq("user_id", user.id),
         supabase.from("gols_jogador").select("gols, assistencias").eq("user_id", user.id),
