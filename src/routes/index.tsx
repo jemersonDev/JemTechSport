@@ -1357,6 +1357,11 @@ function Index() {
                                     isMe={i.user_id === user?.id}
                                     isAdmin={isAdmin}
                                     showPosition="linha"
+                                    onPay={
+                                      i.user_id === user?.id && !i.paid
+                                        ? () => setPixOpen(true)
+                                        : undefined
+                                    }
                                     onRemove={async () => {
                                       if (!confirm(`Remover ${i.display_name} do racha?`)) return;
                                       const { error } = await removeInscricao(i.user_id);
@@ -2085,6 +2090,7 @@ function RachaListItem({
   isAdmin,
   showPosition,
   onRemove,
+  onPay,
 }: {
   index: number;
   inscricao: RachaInscricao;
@@ -2092,6 +2098,7 @@ function RachaListItem({
   isAdmin: boolean;
   showPosition: "goleiro" | "linha";
   onRemove: () => void;
+  onPay?: () => void;
 }) {
   const initials = inscricao.display_name
     .split(" ")
@@ -2156,6 +2163,15 @@ function RachaListItem({
         >
           <Check className="w-4 h-4" strokeWidth={3} />
         </span>
+      ) : onPay ? (
+        <button
+          onClick={onPay}
+          title="Pagar com PIX"
+          aria-label="Pagar com PIX"
+          className="h-8 px-2.5 rounded-lg bg-neon text-black flex items-center justify-center gap-1 shrink-0 text-[10px] font-black uppercase tracking-wide shadow-neon hover:brightness-110 active:scale-95 transition"
+        >
+          <QrCode className="w-3.5 h-3.5" strokeWidth={2.5} /> Pagar
+        </button>
       ) : (
         <span
           className="w-8 h-8 rounded-lg bg-secondary/40 text-muted-foreground/40 flex items-center justify-center shrink-0"
