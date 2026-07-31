@@ -372,6 +372,7 @@ export async function createRacha(input: {
   field_mode?: "futsal" | "society" | "campo";
   max_players?: number;
   vagas_goleiro?: number;
+  total_value?: number;
 }) {
   const { data, error } = await supabase
     .from("rachas")
@@ -384,6 +385,7 @@ export async function createRacha(input: {
       field_mode: input.field_mode ?? "society",
       max_players: input.max_players ?? 12,
       vagas_goleiro: input.vagas_goleiro ?? 2,
+      total_value: input.total_value ?? 0,
     })
     .select("*")
     .single();

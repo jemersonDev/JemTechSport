@@ -28,6 +28,7 @@ import {
   LayoutGrid,
   Share2,
   Trash2,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 import { shareRachaViaWhatsApp } from "@/utils/shareRacha";
@@ -366,6 +367,7 @@ function CreateRachaForm({
   const [fieldMode, setFieldMode] = useState<"futsal" | "society" | "campo">("society");
   const [maxPlayers, setMaxPlayers] = useState<number>(14);
   const [vagasGoleiro, setVagasGoleiro] = useState<number>(2);
+  const [totalValue, setTotalValue] = useState("");
 
   const days = useMemo(() => nextDays(7), []);
   const [selectedDay, setSelectedDay] = useState<Date>(days[0]);
@@ -389,6 +391,11 @@ function CreateRachaForm({
       toast.error("Nome muito longo (máx 60)");
       return;
     }
+    const valorNum = Number(totalValue.replace(",", "."));
+    if (!(valorNum > 0)) {
+      toast.error("Coloca o valor total da quadra");
+      return;
+    }
     setBusy(true);
     const { data, error } = await createRacha({
       admin_id: user.id,
@@ -399,6 +406,7 @@ function CreateRachaForm({
       field_mode: fieldMode,
       max_players: maxPlayers,
       vagas_goleiro: vagasGoleiro,
+      total_value: valorNum,
     });
     setBusy(false);
     if (error || !data) {
@@ -568,6 +576,27 @@ function CreateRachaForm({
             );
           })}
         </div>
+      </div>
+
+      {/* Valor da quadra */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <DollarSign className="w-3 h-3" /> Valor total da quadra (R$)
+        </label>
+        <Input
+          inputMode="decimal"
+          value={totalValue}
+          onChange={(e) => setTotalValue(e.target.value)}
+          placeholder="Ex: 140"
+        />
+        {Number(totalValue.replace(",", ".")) > 0 && maxPlayers > 0 && (
+          <p className="text-[11px] text-muted-foreground">
+            Cada jogador de linha paga{" "}
+            <span className="text-neon font-bold">
+              R$ {(Number(totalValue.replace(",", ".")) / maxPlayers).toFixed(2).replace(".", ",")}
+            </span>
+          </p>
+        )}
       </div>
 
       {/* Endereço */}

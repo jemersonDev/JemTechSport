@@ -1405,12 +1405,24 @@ function Index() {
                                     </p>
                                   </div>
                                   {m.paid ? (
-                                    <span
-                                      className="w-7 h-7 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center shrink-0"
-                                      title="Já pagou"
+                                    <button
+                                      onClick={
+                                        isAdmin ? () => toggleManualPaid(m.id, false) : undefined
+                                      }
+                                      disabled={!isAdmin}
+                                      title={isAdmin ? "Marcar como não pago" : "Já pagou"}
+                                      className="w-7 h-7 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center shrink-0 disabled:cursor-default"
                                     >
                                       <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                                    </span>
+                                    </button>
+                                  ) : isAdmin ? (
+                                    <button
+                                      onClick={() => toggleManualPaid(m.id, true)}
+                                      title="Marcar como pago"
+                                      className="h-7 px-2 rounded-lg bg-secondary border border-border text-muted-foreground flex items-center gap-1 shrink-0 text-[10px] font-bold uppercase tracking-wide hover:border-green-500/60 hover:text-green-400 active:scale-95 transition"
+                                    >
+                                      <DollarSign className="w-3.5 h-3.5" /> Marcar
+                                    </button>
                                   ) : (
                                     <span
                                       className="w-7 h-7 rounded-lg bg-secondary/40 text-muted-foreground/40 flex items-center justify-center shrink-0"
