@@ -18,6 +18,7 @@ import {
   Check,
   Calculator,
   QrCode,
+  Clock,
   CreditCard,
   Loader2,
   KeyRound,
@@ -132,6 +133,7 @@ function Index() {
   }, [user, authLoading, navigate]);
 
   const [pixOpen, setPixOpen] = useState(false);
+  const [pixExtraOpen, setPixExtraOpen] = useState(false);
   const [teamEditorSlot, setTeamEditorSlot] = useState<TeamSlot | null>(null);
   const teamNamesMap: TeamNamesMap = racha?.team_names ?? {};
   const metaA = getTeamMeta(teamNamesMap, "A");
@@ -1194,6 +1196,19 @@ function Index() {
                           <QrCode className="w-4 h-4" /> Pagar com PIX
                         </button>
                       )}
+                      {racha &&
+                        racha.valor_extra > 0 &&
+                        myInscricao.position !== "goleiro" &&
+                        !myInscricao.paid_extra && (
+                          <button
+                            onClick={() => setPixExtraOpen(true)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-orange-500 text-black font-bold uppercase tracking-wider text-xs hover:brightness-110 active:scale-95 transition"
+                          >
+                            <Clock className="w-3.5 h-3.5" strokeWidth={2.5} />
+                            Pagar prorrogação (R$
+                            {(racha.valor_extra / racha.max_players).toFixed(2).replace(".", ",")})
+                          </button>
+                        )}
                       {myInscricao.position === "goleiro" && (
                         <div className="w-full text-center py-2 rounded-xl bg-keeper/15 border border-keeper/40 text-xs font-bold text-keeper">
                           🧤 Goleiro não paga
@@ -1951,6 +1966,73 @@ function Index() {
               </section>
             )}
 
+            {/* Prorrogação — valor extra combinado durante/depois do jogo */}
+            {racha && !racha.finalizado_em && (
+              <section className="rounded-2xl bg-graphite border border-border p-4 shadow-card space-y-3">
+                <SectionTitle icon={Clock} title="Prorrogação" />
+                {racha.valor_extra > 0 ? (
+                  <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 p-3 space-y-2">
+                    <p className="text-sm">
+                      <span className="font-bold text-orange-400">
+                        +R$ {racha.valor_extra.toFixed(2).replace(".", ",")}
+                      </span>{" "}
+                      combinado —{" "}
+                      <span className="font-bold text-orange-400">
+                        R$ {(racha.valor_extra / racha.max_players).toFixed(2).replace(".", ",")}
+                      </span>{" "}
+                      a mais por jogador de linha.
+                    </p>
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          const valorPorPessoa = (racha.valor_extra / racha.max_players)
+                            .toFixed(2)
+                            .replace(".", ",");
+                          const texto = `⏱️ *Prorrogação combinada!*\n\nMais R$ ${valorPorPessoa} por pessoa pra cobrir o tempo extra da quadra. Já dá pra pagar direto no app 💸`;
+                          window.open(
+                            `https://wa.me/?text=${encodeURIComponent(texto)}`,
+                            "_blank",
+                          );
+                        }}
+                        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-orange-500 text-black font-bold uppercase tracking-wider text-xs hover:brightness-110 active:scale-95 transition"
+                      >
+                        <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        Avisar no Zap
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Nenhuma prorrogação combinada ainda.
+                  </p>
+                )}
+
+                {isAdmin && (
+                  <button
+                    onClick={async () => {
+                      const input = prompt(
+                        "Quanto a quadra está cobrando a mais (R$)? Ex: 30",
+                      );
+                      if (!input) return;
+                      const valorNum = Number(input.replace(",", "."));
+                      if (!(valorNum > 0)) {
+                        toast.error("Valor inválido");
+                        return;
+                      }
+                      const novoValorExtra = (racha.valor_extra ?? 0) + valorNum;
+                      const { error } = await updateRacha({ valor_extra: novoValorExtra });
+                      if (error) toast.error(error);
+                      else toast.success(`+R$ ${valorNum.toFixed(2).replace(".", ",")} adicionado`);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-xs hover:border-orange-500/60 active:scale-95 transition"
+                  >
+                    <Clock className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    + Tempo extra
+                  </button>
+                )}
+              </section>
+            )}
+
             {/* Encerrar partida — só admin, libera MVP automático e troféus */}
             {isAdmin && racha && teamsReady && !racha.finalizado_em && (
               <section className="rounded-2xl bg-gradient-to-br from-orange-500/10 to-neon/10 border border-neon/40 p-4 shadow-card space-y-3">
@@ -2064,6 +2146,13 @@ function Index() {
         onOpenChange={setPixOpen}
       />
 
+      <PixPaymentDialog
+        inscricaoId={myInscricao?.id ?? null}
+        open={pixExtraOpen}
+        onOpenChange={setPixExtraOpen}
+        tipo="extra"
+      />
+
       <TeamNameEditorDialog
         open={teamEditorSlot !== null}
         onClose={() => setTeamEditorSlot(null)}
@@ -2112,6 +2201,7 @@ type RachaInscricao = {
   user_id: string;
   position: "goleiro" | "linha";
   paid: boolean;
+  paid_extra: boolean;
   display_name: string;
   avatar_url: string | null;
 };

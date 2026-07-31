@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { criarPagamentoPix, verPagamentoStatus } from "@/utils/pagamentos.functions";
+import { criarPagamentoPix, criarPagamentoExtra, verPagamentoStatus } from "@/utils/pagamentos.functions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check, ExternalLink } from "lucide-react";
@@ -11,10 +11,12 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPaid?: () => void;
+  tipo?: "principal" | "extra";
 };
 
-export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Props) {
-  const criarFn = useServerFn(criarPagamentoPix);
+export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo = "principal" }: Props) {
+  const criarPrincipalFn = useServerFn(criarPagamentoPix);
+  const criarExtraFn = useServerFn(criarPagamentoExtra);
   const statusFn = useServerFn(verPagamentoStatus);
 
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,7 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
     if (!open || !inscricaoId) return;
     setLoading(true);
     setPaid(false);
+    const criarFn = tipo === "extra" ? criarExtraFn : criarPrincipalFn;
     criarFn({ data: { inscricaoId } })
       .then((res) => {
         if (!res.ok) {
@@ -51,7 +54,7 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
       })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, inscricaoId]);
+  }, [open, inscricaoId, tipo]);
 
   // Polling do status
   useEffect(() => {
@@ -86,7 +89,7 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid }: Pr
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#22c55e] text-black font-extrabold text-xs shadow-[0_0_12px_rgba(34,197,94,0.6)]">
               PIX
             </span>
-            Pagar com PIX
+            Pagar {tipo === "extra" ? "prorrogação" : "com PIX"}
           </DialogTitle>
           <DialogDescription className="text-white/60">
             {valor > 0 ? (

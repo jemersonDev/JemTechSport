@@ -166,6 +166,7 @@ export type Database = {
           id: string
           paid: boolean
           paid_at: string | null
+          paid_extra: boolean
           position: Database["public"]["Enums"]["player_position"]
           racha_id: string
           updated_at: string
@@ -176,6 +177,7 @@ export type Database = {
           id?: string
           paid?: boolean
           paid_at?: string | null
+          paid_extra?: boolean
           position?: Database["public"]["Enums"]["player_position"]
           racha_id: string
           updated_at?: string
@@ -186,6 +188,7 @@ export type Database = {
           id?: string
           paid?: boolean
           paid_at?: string | null
+          paid_extra?: boolean
           position?: Database["public"]["Enums"]["player_position"]
           racha_id?: string
           updated_at?: string
@@ -382,6 +385,7 @@ export type Database = {
           racha_id: string
           raw: Json | null
           status: Database["public"]["Enums"]["pagamento_status"]
+          tipo: string
           updated_at: string
           valor_organizador: number
           valor_plataforma: number
@@ -403,6 +407,7 @@ export type Database = {
           racha_id: string
           raw?: Json | null
           status?: Database["public"]["Enums"]["pagamento_status"]
+          tipo?: string
           updated_at?: string
           valor_organizador: number
           valor_plataforma: number
@@ -424,6 +429,7 @@ export type Database = {
           racha_id?: string
           raw?: Json | null
           status?: Database["public"]["Enums"]["pagamento_status"]
+          tipo?: string
           updated_at?: string
           valor_organizador?: number
           valor_plataforma?: number
@@ -667,6 +673,7 @@ export type Database = {
           total_value: number
           updated_at: string
           vagas_goleiro: number
+          valor_extra: number
           whatsapp_group_link: string | null
         }
         Insert: {
@@ -699,6 +706,7 @@ export type Database = {
           total_value?: number
           updated_at?: string
           vagas_goleiro?: number
+          valor_extra?: number
           whatsapp_group_link?: string | null
         }
         Update: {
@@ -731,6 +739,7 @@ export type Database = {
           total_value?: number
           updated_at?: string
           vagas_goleiro?: number
+          valor_extra?: number
           whatsapp_group_link?: string | null
         }
         Relationships: []

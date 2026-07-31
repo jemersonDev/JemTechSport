@@ -19,6 +19,7 @@ export type Racha = {
   app_fee: number;
   max_players: number;
   vagas_goleiro: number;
+  valor_extra: number;
   field_mode: "futsal" | "society" | "campo";
   pix_key: string | null;
   pix_key_type: string | null;
@@ -35,6 +36,7 @@ export type Inscricao = {
   position: "goleiro" | "linha";
   paid: boolean;
   paid_at: string | null;
+  paid_extra: boolean;
   // joined profile
   display_name: string;
   avatar_url: string | null;
@@ -153,6 +155,7 @@ export function useRacha(rachaId: string | null) {
         position: i.position,
         paid: i.paid,
         paid_at: i.paid_at,
+        paid_extra: i.paid_extra,
         display_name: p?.display_name ?? "Jogador",
         avatar_url: p?.avatar_url ?? null,
         skill_level: (p?.skill_level as SkillLevel) ?? "casual",
