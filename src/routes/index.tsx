@@ -995,16 +995,18 @@ function Index() {
               );
             })()}
 
-            {/* Quick actions */}
+            {/* Quick actions — sortear só o organizador decide */}
             <section className="grid grid-cols-2 gap-3">
-              <button
-                onClick={shuffleTeams}
-                disabled={players.length < 2}
-                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Shuffle className="w-4 h-4" strokeWidth={2.5} />
-                Re-sortear
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={shuffleTeams}
+                  disabled={players.length < 2}
+                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Shuffle className="w-4 h-4" strokeWidth={2.5} />
+                  Re-sortear
+                </button>
+              )}
               <button
                 onClick={() => setActiveTab("roster")}
                 className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/50 active:scale-95 transition"
@@ -1064,7 +1066,9 @@ function Index() {
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className="text-xs px-2.5 py-1 rounded-full bg-neon/15 text-neon font-bold whitespace-nowrap">
-                        {inscricoes.length}/{racha.max_players}
+                        {inscricoes.filter((i) => i.position !== "goleiro").length +
+                          manuais.filter((m) => m.position !== "goleiro").length}
+                        /{racha.max_players}
                       </span>
                     </div>
                   </div>
@@ -1378,17 +1382,21 @@ function Index() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
-                    <button
-                      onClick={shuffleTeams}
-                      disabled={players.length < 2}
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-                    >
-                      <Shuffle className="w-4 h-4" strokeWidth={2.5} />
-                      Sortear times
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={shuffleTeams}
+                        disabled={players.length < 2}
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl bg-neon text-black font-bold uppercase tracking-wider text-sm shadow-neon hover:brightness-110 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                      >
+                        <Shuffle className="w-4 h-4" strokeWidth={2.5} />
+                        Sortear times
+                      </button>
+                    )}
                     <Link
                       to="/rachas"
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/60 active:scale-95 transition"
+                      className={`flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary border border-border text-foreground font-bold uppercase tracking-wider text-sm hover:border-neon/60 active:scale-95 transition ${
+                        isAdmin ? "" : "col-span-2"
+                      }`}
                     >
                       <Trophy className="w-4 h-4" strokeWidth={2.5} />
                       Trocar racha

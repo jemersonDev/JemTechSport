@@ -90,12 +90,12 @@ function RachasPage() {
     }
     (async () => {
       const ids = rachas.map((r) => r.id);
-      const { data } = await supabase
-        .from("inscricoes")
-        .select("racha_id, paid")
-        .in("racha_id", ids);
+      const [inscricoesRes, avulsosRes] = await Promise.all([
+        supabase.from("inscricoes").select("racha_id, paid").in("racha_id", ids),
+        supabase.from("jogadores_manuais").select("racha_id, paid").in("racha_id", ids),
+      ]);
       const map: Record<string, { total: number; paid: number }> = {};
-      (data ?? []).forEach((i) => {
+      [...(inscricoesRes.data ?? []), ...(avulsosRes.data ?? [])].forEach((i) => {
         const k = i.racha_id;
         if (!map[k]) map[k] = { total: 0, paid: 0 };
         map[k].total += 1;
