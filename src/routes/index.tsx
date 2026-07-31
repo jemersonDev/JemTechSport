@@ -1376,6 +1376,54 @@ function Index() {
                               </div>
                             );
                           })()}
+
+                        {/* Avulsos — visível pra todos, mas só o organizador edita (via "Editar elenco" abaixo) */}
+                        {(() => {
+                          const manuaisFiltrados = manuais.filter(
+                            (m) =>
+                              (posFilter === "todos" || m.position === posFilter) &&
+                              !(posFilter === "goleiro" ? m.position !== "goleiro" : false),
+                          );
+                          if (manuaisFiltrados.length === 0) return null;
+                          return (
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
+                                👤 Avulsos (sem app)
+                              </p>
+                              {manuaisFiltrados.map((m, idx) => (
+                                <div
+                                  key={m.id}
+                                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-secondary/40 border border-dashed border-border"
+                                >
+                                  <span className="w-6 h-6 rounded-full bg-black/30 text-[11px] font-bold text-muted-foreground flex items-center justify-center shrink-0">
+                                    {idx + 1}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{m.name}</p>
+                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                                      {POSITION_LABEL[m.position] ?? m.position} · avulso
+                                    </p>
+                                  </div>
+                                  {m.paid ? (
+                                    <span
+                                      className="w-7 h-7 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center shrink-0"
+                                      title="Já pagou"
+                                    >
+                                      <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className="w-7 h-7 rounded-lg bg-secondary/40 text-muted-foreground/40 flex items-center justify-center shrink-0"
+                                      title="Aguardando pagamento"
+                                    >
+                                      <DollarSign className="w-3.5 h-3.5" />
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </>
 
                     )}
