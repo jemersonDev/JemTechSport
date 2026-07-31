@@ -1619,6 +1619,7 @@ function Index() {
               </section>
             )}
 
+            {isAdmin && racha && (
             <section className="rounded-2xl bg-graphite border border-border p-5 shadow-card space-y-4">
               <SectionTitle icon={DollarSign} title="Financeiro" />
 
@@ -1701,6 +1702,7 @@ function Index() {
                 </p>
               </div>
             </section>
+            )}
 
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 px-1 pt-2">
               🏆 Dia do jogo
