@@ -1028,6 +1028,60 @@ export type Database = {
         }
         Relationships: []
       }
+      saques: {
+        Row: {
+          created_at: string
+          destinatario_nome: string | null
+          id: string
+          is_plataforma: boolean
+          mp_transfer_id: string | null
+          notas: string | null
+          organizador_id: string
+          paid_at: string | null
+          pix_key: string
+          pix_key_type: string
+          processado_por: string | null
+          raw: Json | null
+          status: Database["public"]["Enums"]["saque_status"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          destinatario_nome?: string | null
+          id?: string
+          is_plataforma?: boolean
+          mp_transfer_id?: string | null
+          notas?: string | null
+          organizador_id: string
+          paid_at?: string | null
+          pix_key: string
+          pix_key_type: string
+          processado_por?: string | null
+          raw?: Json | null
+          status?: Database["public"]["Enums"]["saque_status"]
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          destinatario_nome?: string | null
+          id?: string
+          is_plataforma?: boolean
+          mp_transfer_id?: string | null
+          notas?: string | null
+          organizador_id?: string
+          paid_at?: string | null
+          pix_key?: string
+          pix_key_type?: string
+          processado_por?: string | null
+          raw?: Json | null
+          status?: Database["public"]["Enums"]["saque_status"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       trofeus: {
         Row: {
           created_at: string
@@ -1088,60 +1142,6 @@ export type Database = {
         }
         Relationships: []
       }
-      saques: {
-        Row: {
-          created_at: string
-          destinatario_nome: string | null
-          id: string
-          is_plataforma: boolean
-          mp_transfer_id: string | null
-          notas: string | null
-          organizador_id: string
-          paid_at: string | null
-          pix_key: string
-          pix_key_type: string
-          processado_por: string | null
-          raw: Json | null
-          status: Database["public"]["Enums"]["saque_status"]
-          updated_at: string
-          valor: number
-        }
-        Insert: {
-          created_at?: string
-          destinatario_nome?: string | null
-          id?: string
-          is_plataforma?: boolean
-          mp_transfer_id?: string | null
-          notas?: string | null
-          organizador_id: string
-          paid_at?: string | null
-          pix_key: string
-          pix_key_type: string
-          processado_por?: string | null
-          raw?: Json | null
-          status?: Database["public"]["Enums"]["saque_status"]
-          updated_at?: string
-          valor: number
-        }
-        Update: {
-          created_at?: string
-          destinatario_nome?: string | null
-          id?: string
-          is_plataforma?: boolean
-          mp_transfer_id?: string | null
-          notas?: string | null
-          organizador_id?: string
-          paid_at?: string | null
-          pix_key?: string
-          pix_key_type?: string
-          processado_por?: string | null
-          raw?: Json | null
-          status?: Database["public"]["Enums"]["saque_status"]
-          updated_at?: string
-          valor?: number
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -1181,7 +1181,10 @@ export type Database = {
           scheduled_at: string
         }[]
       }
-      get_saldo_disponivel_saque: { Args: { _organizador_id: string }; Returns: number }
+      get_saldo_disponivel_saque: {
+        Args: { _organizador_id: string }
+        Returns: number
+      }
       get_saldo_plataforma: { Args: never; Returns: number }
       has_role: {
         Args: {
@@ -1192,6 +1195,10 @@ export type Database = {
       }
       increment_post_view: { Args: { _post_id: string }; Returns: undefined }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_fellow_participant: {
+        Args: { _racha_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_racha_admin: {
         Args: { _racha_id: string; _user_id: string }
         Returns: boolean
