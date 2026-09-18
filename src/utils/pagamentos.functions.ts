@@ -156,7 +156,14 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     if (!mpRes.ok) {
       const errText = await mpRes.text();
       console.error("MP create payment error", mpRes.status, errText);
-      return { ok: false as const, error: `Mercado Pago erro ${mpRes.status}` };
+      let detalhe = errText;
+      try {
+        const j = JSON.parse(errText) as { message?: string; cause?: { description?: string }[] };
+        detalhe = j.cause?.[0]?.description ?? j.message ?? errText;
+      } catch {
+        // mantém errText cru se não for JSON
+      }
+      return { ok: false as const, error: `Mercado Pago recusou: ${detalhe}` };
     }
 
     const mp = (await mpRes.json()) as MpPixResponse;
@@ -309,7 +316,14 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
     if (!mpRes.ok) {
       const errText = await mpRes.text();
       console.error("MP create payment (extra) error", mpRes.status, errText);
-      return { ok: false as const, error: `Mercado Pago erro ${mpRes.status}` };
+      let detalhe = errText;
+      try {
+        const j = JSON.parse(errText) as { message?: string; cause?: { description?: string }[] };
+        detalhe = j.cause?.[0]?.description ?? j.message ?? errText;
+      } catch {
+        // mantém errText cru se não for JSON
+      }
+      return { ok: false as const, error: `Mercado Pago recusou: ${detalhe}` };
     }
 
     const mp = (await mpRes.json()) as MpPixResponse;
