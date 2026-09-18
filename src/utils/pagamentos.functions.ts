@@ -95,7 +95,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     // 3) Verificar se já existe pagamento pendente para esta inscrição
     const { data: existing } = await supabaseAdmin
       .from("pagamentos")
-      .select("id, status, mp_qr_code, mp_qr_code_base64, mp_ticket_url, mp_payment_id")
+      .select("id, status, mp_qr_code, mp_qr_code_base64, mp_ticket_url, mp_payment_id, valor_total")
       .eq("inscricao_id", inscricao.id)
       .eq("tipo", "principal")
       .in("status", ["pendente"])
@@ -103,7 +103,10 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    if (existing && existing.mp_qr_code) {
+    // Só reaproveita o PIX já gerado se o valor bater exatamente com o
+    // calculado agora — senão o texto na tela mostraria o valor novo, mas
+    // o código PIX de verdade (já gerado antes) cobraria o valor antigo.
+    if (existing && existing.mp_qr_code && Number(existing.valor_total) === valorPorJogador) {
       return {
         ok: true as const,
         pagamentoId: existing.id,
@@ -255,7 +258,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
 
     const { data: existing } = await supabaseAdmin
       .from("pagamentos")
-      .select("id, status, mp_qr_code, mp_qr_code_base64, mp_ticket_url")
+      .select("id, status, mp_qr_code, mp_qr_code_base64, mp_ticket_url, valor_total")
       .eq("inscricao_id", inscricao.id)
       .eq("tipo", "extra")
       .in("status", ["pendente"])
@@ -263,7 +266,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    if (existing && existing.mp_qr_code) {
+    if (existing && existing.mp_qr_code && Number(existing.valor_total) === valorPorJogador) {
       return {
         ok: true as const,
         pagamentoId: existing.id,
