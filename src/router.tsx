@@ -1,8 +1,33 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { routeTree } from "./routeTree.gen";
+
+// Erro conhecido: extensões do navegador (tradução automática, bloqueador de
+// anúncio, gerenciador de senha) às vezes mexem no HTML por fora do React,
+// e ele se perde ao tentar organizar a tela sozinho — não é um bug real do
+// app nem perda de dados, só uma "brigadinha" de reconciliação do DOM. Nesse
+// caso específico, tenta uma vez sozinho antes de pedir clique manual.
+function isDomExtensionConflict(error: Error): boolean {
+  return (
+    error.name === "NotFoundError" &&
+    /removeChild|insertBefore/.test(error.message)
+  );
+}
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
+  const tentouSozinho = useRef(false);
+
+  useEffect(() => {
+    if (isDomExtensionConflict(error) && !tentouSozinho.current) {
+      tentouSozinho.current = true;
+      const id = setTimeout(() => {
+        router.invalidate();
+        reset();
+      }, 60);
+      return () => clearTimeout(id);
+    }
+  }, [error, reset, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
