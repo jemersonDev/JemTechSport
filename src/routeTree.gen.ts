@@ -9,88 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResenhaRouteImport } from './routes/resenha'
-import { Route as RankingRouteImport } from './routes/ranking'
-import { Route as RachasRouteImport } from './routes/rachas'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as OrganizadorRouteImport } from './routes/organizador'
-import { Route as NotificacoesRouteImport } from './routes/notificacoes'
-import { Route as MercadoRouteImport } from './routes/mercado'
-import { Route as LpRouteImport } from './routes/lp'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as InstaRouteImport } from './routes/insta'
-import { Route as InboxRouteImport } from './routes/inbox'
-import { Route as AjudaRouteImport } from './routes/ajuda'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RCodeRouteImport } from './routes/r.$code'
-import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AjudaRouteImport } from './routes/ajuda'
+import { Route as InboxRouteImport } from './routes/inbox'
+import { Route as InstaRouteImport } from './routes/insta'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LpRouteImport } from './routes/lp'
+import { Route as MercadoRouteImport } from './routes/mercado'
+import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as OrganizadorRouteImport } from './routes/organizador'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as RachasRouteImport } from './routes/rachas'
+import { Route as RankingRouteImport } from './routes/ranking'
+import { Route as ResenhaRouteImport } from './routes/resenha'
 import { Route as AtletaUserIdRouteImport } from './routes/atleta.$userId'
-import { Route as ApiPublicMpWebhookRouteImport } from './routes/api.public.mp-webhook'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as ApiPublicDeezerSearchRouteImport } from './routes/api/public/deezer-search'
-import { Route as ApiPublicHooksRachaLembretesRouteImport } from './routes/api/public/hooks/racha-lembretes'
-import { Route as ApiPublicHooksPushDeliverRouteImport } from './routes/api/public/hooks/push-deliver'
+import { Route as ApiPublicMpWebhookRouteImport } from './routes/api.public.mp-webhook'
 import { Route as ApiPublicHooksDailyBackupRouteImport } from './routes/api/public/hooks/daily-backup'
+import { Route as ApiPublicHooksPushDeliverRouteImport } from './routes/api/public/hooks/push-deliver'
+import { Route as ApiPublicHooksRachaLembretesRouteImport } from './routes/api/public/hooks/racha-lembretes'
 
-const ResenhaRoute = ResenhaRouteImport.update({
-  id: '/resenha',
-  path: '/resenha',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RankingRoute = RankingRouteImport.update({
-  id: '/ranking',
-  path: '/ranking',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RachasRoute = RachasRouteImport.update({
-  id: '/rachas',
-  path: '/rachas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrganizadorRoute = OrganizadorRouteImport.update({
-  id: '/organizador',
-  path: '/organizador',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificacoesRoute = NotificacoesRouteImport.update({
-  id: '/notificacoes',
-  path: '/notificacoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MercadoRoute = MercadoRouteImport.update({
-  id: '/mercado',
-  path: '/mercado',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LpRoute = LpRouteImport.update({
-  id: '/lp',
-  path: '/lp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InstaRoute = InstaRouteImport.update({
-  id: '/insta',
-  path: '/insta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InboxRoute = InboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AjudaRoute = AjudaRouteImport.update({
-  id: '/ajuda',
-  path: '/ajuda',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -98,24 +43,64 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AjudaRoute = AjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RCodeRoute = RCodeRouteImport.update({
-  id: '/r/$code',
-  path: '/r/$code',
+const InboxRoute = InboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
-  id: '/chat/$conversaId',
-  path: '/chat/$conversaId',
+const InstaRoute = InstaRouteImport.update({
+  id: '/insta',
+  path: '/insta',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpRoute = LpRouteImport.update({
+  id: '/lp',
+  path: '/lp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MercadoRoute = MercadoRouteImport.update({
+  id: '/mercado',
+  path: '/mercado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificacoesRoute = NotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizadorRoute = OrganizadorRouteImport.update({
+  id: '/organizador',
+  path: '/organizador',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RachasRoute = RachasRouteImport.update({
+  id: '/rachas',
+  path: '/rachas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingRoute = RankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResenhaRoute = ResenhaRouteImport.update({
+  id: '/resenha',
+  path: '/resenha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtletaUserIdRoute = AtletaUserIdRouteImport.update({
@@ -123,9 +108,19 @@ const AtletaUserIdRoute = AtletaUserIdRouteImport.update({
   path: '/atleta/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
-  id: '/api/public/mp-webhook',
-  path: '/api/public/mp-webhook',
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatConversaIdRoute = ChatConversaIdRouteImport.update({
+  id: '/chat/$conversaId',
+  path: '/chat/$conversaId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicDeezerSearchRoute = ApiPublicDeezerSearchRouteImport.update({
@@ -133,10 +128,15 @@ const ApiPublicDeezerSearchRoute = ApiPublicDeezerSearchRouteImport.update({
   path: '/api/public/deezer-search',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksRachaLembretesRoute =
-  ApiPublicHooksRachaLembretesRouteImport.update({
-    id: '/api/public/hooks/racha-lembretes',
-    path: '/api/public/hooks/racha-lembretes',
+const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
+  id: '/api/public/mp-webhook',
+  path: '/api/public/mp-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksDailyBackupRoute =
+  ApiPublicHooksDailyBackupRouteImport.update({
+    id: '/api/public/hooks/daily-backup',
+    path: '/api/public/hooks/daily-backup',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksPushDeliverRoute =
@@ -145,10 +145,10 @@ const ApiPublicHooksPushDeliverRoute =
     path: '/api/public/hooks/push-deliver',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksDailyBackupRoute =
-  ApiPublicHooksDailyBackupRouteImport.update({
-    id: '/api/public/hooks/daily-backup',
-    path: '/api/public/hooks/daily-backup',
+const ApiPublicHooksRachaLembretesRoute =
+  ApiPublicHooksRachaLembretesRouteImport.update({
+    id: '/api/public/hooks/racha-lembretes',
+    path: '/api/public/hooks/racha-lembretes',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -334,88 +334,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/resenha': {
-      id: '/resenha'
-      path: '/resenha'
-      fullPath: '/resenha'
-      preLoaderRoute: typeof ResenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ranking': {
-      id: '/ranking'
-      path: '/ranking'
-      fullPath: '/ranking'
-      preLoaderRoute: typeof RankingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rachas': {
-      id: '/rachas'
-      path: '/rachas'
-      fullPath: '/rachas'
-      preLoaderRoute: typeof RachasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/organizador': {
-      id: '/organizador'
-      path: '/organizador'
-      fullPath: '/organizador'
-      preLoaderRoute: typeof OrganizadorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notificacoes': {
-      id: '/notificacoes'
-      path: '/notificacoes'
-      fullPath: '/notificacoes'
-      preLoaderRoute: typeof NotificacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mercado': {
-      id: '/mercado'
-      path: '/mercado'
-      fullPath: '/mercado'
-      preLoaderRoute: typeof MercadoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lp': {
-      id: '/lp'
-      path: '/lp'
-      fullPath: '/lp'
-      preLoaderRoute: typeof LpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/insta': {
-      id: '/insta'
-      path: '/insta'
-      fullPath: '/insta'
-      preLoaderRoute: typeof InstaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/inbox': {
-      id: '/inbox'
-      path: '/inbox'
-      fullPath: '/inbox'
-      preLoaderRoute: typeof InboxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ajuda': {
-      id: '/ajuda'
-      path: '/ajuda'
-      fullPath: '/ajuda'
-      preLoaderRoute: typeof AjudaRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -425,32 +348,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ajuda': {
+      id: '/ajuda'
+      path: '/ajuda'
+      fullPath: '/ajuda'
+      preLoaderRoute: typeof AjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/r/$code': {
-      id: '/r/$code'
-      path: '/r/$code'
-      fullPath: '/r/$code'
-      preLoaderRoute: typeof RCodeRouteImport
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat/$conversaId': {
-      id: '/chat/$conversaId'
-      path: '/chat/$conversaId'
-      fullPath: '/chat/$conversaId'
-      preLoaderRoute: typeof ChatConversaIdRouteImport
+    '/insta': {
+      id: '/insta'
+      path: '/insta'
+      fullPath: '/insta'
+      preLoaderRoute: typeof InstaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp': {
+      id: '/lp'
+      path: '/lp'
+      fullPath: '/lp'
+      preLoaderRoute: typeof LpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mercado': {
+      id: '/mercado'
+      path: '/mercado'
+      fullPath: '/mercado'
+      preLoaderRoute: typeof MercadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes': {
+      id: '/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizador': {
+      id: '/organizador'
+      path: '/organizador'
+      fullPath: '/organizador'
+      preLoaderRoute: typeof OrganizadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rachas': {
+      id: '/rachas'
+      path: '/rachas'
+      fullPath: '/rachas'
+      preLoaderRoute: typeof RachasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking': {
+      id: '/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof RankingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resenha': {
+      id: '/resenha'
+      path: '/resenha'
+      fullPath: '/resenha'
+      preLoaderRoute: typeof ResenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atleta/$userId': {
@@ -460,11 +439,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/mp-webhook': {
-      id: '/api/public/mp-webhook'
-      path: '/api/public/mp-webhook'
-      fullPath: '/api/public/mp-webhook'
-      preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat/$conversaId': {
+      id: '/chat/$conversaId'
+      path: '/chat/$conversaId'
+      fullPath: '/chat/$conversaId'
+      preLoaderRoute: typeof ChatConversaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/deezer-search': {
@@ -474,11 +467,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDeezerSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/racha-lembretes': {
-      id: '/api/public/hooks/racha-lembretes'
-      path: '/api/public/hooks/racha-lembretes'
-      fullPath: '/api/public/hooks/racha-lembretes'
-      preLoaderRoute: typeof ApiPublicHooksRachaLembretesRouteImport
+    '/api/public/mp-webhook': {
+      id: '/api/public/mp-webhook'
+      path: '/api/public/mp-webhook'
+      fullPath: '/api/public/mp-webhook'
+      preLoaderRoute: typeof ApiPublicMpWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/daily-backup': {
+      id: '/api/public/hooks/daily-backup'
+      path: '/api/public/hooks/daily-backup'
+      fullPath: '/api/public/hooks/daily-backup'
+      preLoaderRoute: typeof ApiPublicHooksDailyBackupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/push-deliver': {
@@ -488,11 +488,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksPushDeliverRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/daily-backup': {
-      id: '/api/public/hooks/daily-backup'
-      path: '/api/public/hooks/daily-backup'
-      fullPath: '/api/public/hooks/daily-backup'
-      preLoaderRoute: typeof ApiPublicHooksDailyBackupRouteImport
+    '/api/public/hooks/racha-lembretes': {
+      id: '/api/public/hooks/racha-lembretes'
+      path: '/api/public/hooks/racha-lembretes'
+      fullPath: '/api/public/hooks/racha-lembretes'
+      preLoaderRoute: typeof ApiPublicHooksRachaLembretesRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
