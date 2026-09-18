@@ -28,6 +28,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ChatConversaIdRouteImport } from './routes/chat.$conversaId'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as ApiPublicDeezerSearchRouteImport } from './routes/api/public/deezer-search'
+import { Route as ApiPublicMpOauthCallbackRouteImport } from './routes/api.public.mp-oauth-callback'
 import { Route as ApiPublicMpWebhookRouteImport } from './routes/api.public.mp-webhook'
 import { Route as ApiPublicHooksDailyBackupRouteImport } from './routes/api/public/hooks/daily-backup'
 import { Route as ApiPublicHooksPushDeliverRouteImport } from './routes/api/public/hooks/push-deliver'
@@ -128,6 +129,12 @@ const ApiPublicDeezerSearchRoute = ApiPublicDeezerSearchRouteImport.update({
   path: '/api/public/deezer-search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMpOauthCallbackRoute =
+  ApiPublicMpOauthCallbackRouteImport.update({
+    id: '/api/public/mp-oauth-callback',
+    path: '/api/public/mp-oauth-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMpWebhookRoute = ApiPublicMpWebhookRouteImport.update({
   id: '/api/public/mp-webhook',
   path: '/api/public/mp-webhook',
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
   '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
+  '/api/public/mp-oauth-callback': typeof ApiPublicMpOauthCallbackRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
   '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
@@ -197,6 +205,7 @@ export interface FileRoutesByTo {
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
   '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
+  '/api/public/mp-oauth-callback': typeof ApiPublicMpOauthCallbackRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
   '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
@@ -223,6 +232,7 @@ export interface FileRoutesById {
   '/chat/$conversaId': typeof ChatConversaIdRoute
   '/r/$code': typeof RCodeRoute
   '/api/public/deezer-search': typeof ApiPublicDeezerSearchRoute
+  '/api/public/mp-oauth-callback': typeof ApiPublicMpOauthCallbackRoute
   '/api/public/mp-webhook': typeof ApiPublicMpWebhookRoute
   '/api/public/hooks/daily-backup': typeof ApiPublicHooksDailyBackupRoute
   '/api/public/hooks/push-deliver': typeof ApiPublicHooksPushDeliverRoute
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/chat/$conversaId'
     | '/r/$code'
     | '/api/public/deezer-search'
+    | '/api/public/mp-oauth-callback'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
     | '/api/public/hooks/push-deliver'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/chat/$conversaId'
     | '/r/$code'
     | '/api/public/deezer-search'
+    | '/api/public/mp-oauth-callback'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
     | '/api/public/hooks/push-deliver'
@@ -300,6 +312,7 @@ export interface FileRouteTypes {
     | '/chat/$conversaId'
     | '/r/$code'
     | '/api/public/deezer-search'
+    | '/api/public/mp-oauth-callback'
     | '/api/public/mp-webhook'
     | '/api/public/hooks/daily-backup'
     | '/api/public/hooks/push-deliver'
@@ -326,6 +339,7 @@ export interface RootRouteChildren {
   ChatConversaIdRoute: typeof ChatConversaIdRoute
   RCodeRoute: typeof RCodeRoute
   ApiPublicDeezerSearchRoute: typeof ApiPublicDeezerSearchRoute
+  ApiPublicMpOauthCallbackRoute: typeof ApiPublicMpOauthCallbackRoute
   ApiPublicMpWebhookRoute: typeof ApiPublicMpWebhookRoute
   ApiPublicHooksDailyBackupRoute: typeof ApiPublicHooksDailyBackupRoute
   ApiPublicHooksPushDeliverRoute: typeof ApiPublicHooksPushDeliverRoute
@@ -467,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDeezerSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/mp-oauth-callback': {
+      id: '/api/public/mp-oauth-callback'
+      path: '/api/public/mp-oauth-callback'
+      fullPath: '/api/public/mp-oauth-callback'
+      preLoaderRoute: typeof ApiPublicMpOauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/mp-webhook': {
       id: '/api/public/mp-webhook'
       path: '/api/public/mp-webhook'
@@ -518,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatConversaIdRoute: ChatConversaIdRoute,
   RCodeRoute: RCodeRoute,
   ApiPublicDeezerSearchRoute: ApiPublicDeezerSearchRoute,
+  ApiPublicMpOauthCallbackRoute: ApiPublicMpOauthCallbackRoute,
   ApiPublicMpWebhookRoute: ApiPublicMpWebhookRoute,
   ApiPublicHooksDailyBackupRoute: ApiPublicHooksDailyBackupRoute,
   ApiPublicHooksPushDeliverRoute: ApiPublicHooksPushDeliverRoute,

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { obterTokenOrganizador } from "@/utils/mpConecta.functions";
 
 /**
  * Cria um pagamento PIX no Mercado Pago para uma inscrição num racha.
@@ -113,26 +114,40 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
       };
     }
 
-    // 4) Criar pagamento PIX no MP
+    // 4) Criar pagamento PIX no MP — se o organizador já conectou a
+    // própria conta (Split de Pagamentos), o pagamento usa o token DELE
+    // com application_fee = comissão da plataforma. O Mercado Pago já
+    // divide o valor na hora: comissão cai na conta da plataforma, resto
+    // cai direto na conta do organizador — sem saque manual depois.
+    // Se ele ainda não conectou, cai no modelo antigo (conta da
+    // plataforma inteira, saque manual via /saques).
+    const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
+    const tokenParaCobranca = tokenOrganizador ?? accessToken;
+
     const idempotencyKey = crypto.randomUUID();
     const payerEmail =
       (typeof claims.email === "string" && claims.email) || `user-${userId}@jemtech.local`;
 
+    const corpoPagamento: Record<string, unknown> = {
+      transaction_amount: valorPorJogador,
+      description: `Racha: ${racha.name}`,
+      payment_method_id: "pix",
+      payer: { email: payerEmail },
+      external_reference: inscricao.id,
+      notification_url: `${process.env.SITE_URL ?? "https://tanstack-start-app.jemtechsports.workers.dev"}/api/public/mp-webhook`,
+    };
+    if (tokenOrganizador) {
+      corpoPagamento.application_fee = valorPlataforma;
+    }
+
     const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${tokenParaCobranca}`,
         "Content-Type": "application/json",
         "X-Idempotency-Key": idempotencyKey,
       },
-      body: JSON.stringify({
-        transaction_amount: valorPorJogador,
-        description: `Racha: ${racha.name}`,
-        payment_method_id: "pix",
-        payer: { email: payerEmail },
-        external_reference: inscricao.id,
-        notification_url: `${process.env.SITE_URL ?? "https://project--13a4231e-8dba-4869-871b-742097393f53.lovable.app"}/api/public/mp-webhook`,
-      }),
+      body: JSON.stringify(corpoPagamento),
     });
 
     if (!mpRes.ok) {
@@ -259,25 +274,33 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       };
     }
 
+    const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
+    const tokenParaCobranca = tokenOrganizador ?? accessToken;
+
     const idempotencyKey = crypto.randomUUID();
     const payerEmail =
       (typeof claims.email === "string" && claims.email) || `user-${userId}@jemtech.local`;
 
+    const corpoPagamento: Record<string, unknown> = {
+      transaction_amount: valorPorJogador,
+      description: `Prorrogação: ${racha.name}`,
+      payment_method_id: "pix",
+      payer: { email: payerEmail },
+      external_reference: `extra-${inscricao.id}`,
+      notification_url: `${process.env.SITE_URL ?? "https://tanstack-start-app.jemtechsports.workers.dev"}/api/public/mp-webhook`,
+    };
+    if (tokenOrganizador) {
+      corpoPagamento.application_fee = valorPlataforma;
+    }
+
     const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${tokenParaCobranca}`,
         "Content-Type": "application/json",
         "X-Idempotency-Key": idempotencyKey,
       },
-      body: JSON.stringify({
-        transaction_amount: valorPorJogador,
-        description: `Prorrogação: ${racha.name}`,
-        payment_method_id: "pix",
-        payer: { email: payerEmail },
-        external_reference: `extra-${inscricao.id}`,
-        notification_url: `${process.env.SITE_URL ?? "https://project--13a4231e-8dba-4869-871b-742097393f53.lovable.app"}/api/public/mp-webhook`,
-      }),
+      body: JSON.stringify(corpoPagamento),
     });
 
     if (!mpRes.ok) {

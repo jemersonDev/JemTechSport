@@ -12,6 +12,8 @@ import { RelatorioMensal } from "@/components/RelatorioMensal";
 import { OrganizadorDashboard } from "@/components/OrganizadorDashboard";
 import { SolicitarSaqueDialog } from "@/components/SolicitarSaqueDialog";
 import { verSaldoDisponivel, listarMeusSaques } from "@/utils/saques.functions";
+import { iniciarConexaoMp, statusConexaoMp, desconectarMp } from "@/utils/mpConecta.functions";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -59,6 +61,9 @@ function OrganizadorPage() {
   const navigate = useNavigate();
   const verSaldoFn = useServerFn(verSaldoDisponivel);
   const listarSaquesFn = useServerFn(listarMeusSaques);
+  const iniciarConexaoMpFn = useServerFn(iniciarConexaoMp);
+  const statusConexaoMpFn = useServerFn(statusConexaoMp);
+  const desconectarMpFn = useServerFn(desconectarMp);
   const [pagamentos, setPagamentos] = useState<Pagamento[]>([]);
   const [saldo, setSaldo] = useState<Saldo>({
     total_devido_plataforma: 0,
@@ -68,6 +73,57 @@ function OrganizadorPage() {
   const [meusSaques, setMeusSaques] = useState<Saque[]>([]);
   const [saqueDialogOpen, setSaqueDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [mpConectado, setMpConectado] = useState<boolean | null>(null);
+  const [conectandoMp, setConectandoMp] = useState(false);
+
+  const carregarStatusMp = async () => {
+    const res = await statusConexaoMpFn({ data: undefined });
+    if (res.ok) setMpConectado(res.conectado);
+  };
+
+  const handleConectarMp = async () => {
+    setConectandoMp(true);
+    try {
+      const res = await iniciarConexaoMpFn({ data: undefined });
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      window.location.href = res.url;
+    } finally {
+      setConectandoMp(false);
+    }
+  };
+
+  const handleDesconectarMp = async () => {
+    if (!confirm("Desconectar sua conta Mercado Pago? Os próximos pagamentos voltam a cair na conta da plataforma.")) return;
+    const res = await desconectarMpFn({ data: undefined });
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
+    }
+    toast.success("Conta desconectada");
+    setMpConectado(false);
+  };
+
+  // Lê o retorno do fluxo OAuth (?mp=conectado / ?mp=erro) na volta do Mercado Pago
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mp = params.get("mp");
+    if (mp === "conectado") {
+      toast.success("Conta Mercado Pago conectada! Seus próximos pagamentos já caem direto na sua conta.");
+      window.history.replaceState({}, "", "/organizador");
+    } else if (mp === "erro") {
+      toast.error(`Não deu pra conectar (${params.get("motivo") ?? "erro desconhecido"})`);
+      window.history.replaceState({}, "", "/organizador");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    carregarStatusMp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const carregarSaqueInfo = async () => {
     const [saldoRes, saquesRes] = await Promise.all([
@@ -190,6 +246,37 @@ function OrganizadorPage() {
             plataforma. Pagamentos em dinheiro recebes na hora — mas a comissão da plataforma
             (acima) acumula como saldo devido.
           </p>
+        </Card>
+
+        {/* Conectar Mercado Pago — split de pagamento (recomendado) */}
+        <Card className={`p-4 space-y-2 ${mpConectado ? "border-green-500/30" : "border-orange-500/30"}`}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Conta Mercado Pago
+              </p>
+              {mpConectado === null ? (
+                <p className="text-xs text-muted-foreground">Verificando…</p>
+              ) : mpConectado ? (
+                <p className="text-xs text-green-500">
+                  ✓ Conectada — seus pagamentos caem direto na sua conta
+                </p>
+              ) : (
+                <p className="text-xs text-orange-400">
+                  Não conectada — pagamentos caem na conta da plataforma (saque manual)
+                </p>
+              )}
+            </div>
+            {mpConectado ? (
+              <Button variant="outline" size="sm" onClick={handleDesconectarMp}>
+                Desconectar
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handleConectarMp} disabled={conectandoMp}>
+                {conectandoMp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Conectar"}
+              </Button>
+            )}
+          </div>
         </Card>
 
         {/* Saldo disponível pra saque */}
