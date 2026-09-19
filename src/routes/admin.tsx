@@ -115,6 +115,7 @@ function AdminPage() {
   const [saquesPendentes, setSaquesPendentes] = useState<SaquePendente[]>([]);
   const [valorSaquePlataforma, setValorSaquePlataforma] = useState("");
   const [pixSaquePlataforma, setPixSaquePlataforma] = useState("");
+  const [documentoSaquePlataforma, setDocumentoSaquePlataforma] = useState("");
   const [pixTipoSaquePlataforma, setPixTipoSaquePlataforma] = useState<
     "cpf" | "cnpj" | "email" | "telefone" | "aleatoria"
   >("cpf");
@@ -289,11 +290,34 @@ function AdminPage() {
 
   const handleSolicitarSaquePlataforma = async () => {
     const valorNum = Number(valorSaquePlataforma.replace(",", "."));
-    if (!(valorNum > 0) || pixSaquePlataforma.trim().length < 3) return;
+    const documentoLimpo = documentoSaquePlataforma.replace(/\D/g, "");
+    const documentoValido = documentoLimpo.length === 11 || documentoLimpo.length === 14;
+
+    if (!(valorNum > 0)) {
+      toast.error("Preenche o valor que quer sacar");
+      return;
+    }
+    if (valorNum > saldoPlataforma) {
+      toast.error(`Você só tem R$ ${saldoPlataforma.toFixed(2).replace(".", ",")} disponível`);
+      return;
+    }
+    if (pixSaquePlataforma.trim().length < 3) {
+      toast.error("Preenche a chave PIX de destino");
+      return;
+    }
+    if (!documentoValido) {
+      toast.error("CPF (11 dígitos) ou CNPJ (14 dígitos) do titular");
+      return;
+    }
     setEnviandoSaquePlataforma(true);
     try {
       const res = await solicitarSaquePlataformaFn({
-        data: { valor: valorNum, pixKey: pixSaquePlataforma.trim(), pixKeyType: pixTipoSaquePlataforma },
+        data: {
+          valor: valorNum,
+          pixKey: pixSaquePlataforma.trim(),
+          pixKeyType: pixTipoSaquePlataforma,
+          destinatarioDocumento: documentoLimpo,
+        },
       });
       if (!res.ok) {
         toast.error(res.error);
@@ -302,6 +326,7 @@ function AdminPage() {
       toast.success("Pedido de saque criado");
       setValorSaquePlataforma("");
       setPixSaquePlataforma("");
+      setDocumentoSaquePlataforma("");
       loadFinanceiro();
     } finally {
       setEnviandoSaquePlataforma(false);
@@ -685,12 +710,22 @@ function AdminPage() {
                   Sacar minhas taxas
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    inputMode="decimal"
-                    placeholder="Valor (R$)"
-                    value={valorSaquePlataforma}
-                    onChange={(e) => setValorSaquePlataforma(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input
+                      inputMode="decimal"
+                      placeholder="Valor (R$)"
+                      value={valorSaquePlataforma}
+                      onChange={(e) => setValorSaquePlataforma(e.target.value)}
+                      className="pr-14"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setValorSaquePlataforma(String(saldoPlataforma))}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-neon px-2 py-1 rounded hover:bg-neon/10"
+                    >
+                      Tudo
+                    </button>
+                  </div>
                   <Select
                     value={pixTipoSaquePlataforma}
                     onValueChange={(v) => setPixTipoSaquePlataforma(v as typeof pixTipoSaquePlataforma)}
@@ -711,6 +746,11 @@ function AdminPage() {
                   placeholder="Chave PIX de destino"
                   value={pixSaquePlataforma}
                   onChange={(e) => setPixSaquePlataforma(e.target.value)}
+                />
+                <Input
+                  placeholder="CPF ou CNPJ do titular (só números)"
+                  value={documentoSaquePlataforma}
+                  onChange={(e) => setDocumentoSaquePlataforma(e.target.value)}
                 />
                 <Button
                   className="w-full"
