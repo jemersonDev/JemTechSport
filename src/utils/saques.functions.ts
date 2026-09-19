@@ -8,17 +8,13 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  * do saldo disponível. Pedidos até LIMITE_AUTO_APROVACAO são processados
  * automaticamente; acima disso, ficam esperando um admin aprovar.
  *
- * ⚠️ IMPORTANTE — leia antes de usar em produção:
- * A função `executarTransferenciaPix` abaixo é um STUB. Ela ainda não
- * chama a API real de transferência do Mercado Pago — hoje ela só marca
- * o pedido como "falhou" com uma mensagem clara, pra nunca fingir que
- * mandou dinheiro sem ter mandado de verdade. Antes de usar de verdade,
- * confirme na documentação atual do Mercado Pago (developers.mercadopago.com)
- * qual é o endpoint certo pra "enviar PIX pra uma chave de terceiro" pela
- * conta da plataforma, e implemente a chamada real ali dentro. Essa API
- * pode exigir aprovação especial de conta (tipo "Payouts"/Marketplace) e
- * os detalhes mudam com frequência — não dá pra confiar num endpoint
- * "decorado" sem confirmar primeiro.
+ * A transferência de verdade usa a API Payouts do Mercado Pago
+ * (POST /v1/transaction-intents/process). Em produção essa API exige uma
+ * assinatura Ed25519 do corpo da requisição (header X-signature) — a
+ * chave pública correspondente precisa ser enviada manualmente pra
+ * equipe de Integrações do Mercado Pago antes da primeira transferência
+ * real funcionar (não tem como fazer isso só por código). A chave
+ * privada correspondente fica no secret MP_PAYOUTS_PRIVATE_KEY.
  */
 
 export const LIMITE_AUTO_APROVACAO = 250;
@@ -28,6 +24,13 @@ const InputSchema = z.object({
   pixKey: z.string().trim().min(3).max(200),
   pixKeyType: z.enum(["cpf", "cnpj", "email", "telefone", "aleatoria"]),
   destinatarioNome: z.string().trim().max(120).optional(),
+  destinatarioDocumento: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length === 11 || v.length === 14, {
+      message: "CPF (11 dígitos) ou CNPJ (14 dígitos) do dono da conta de destino",
+    }),
 });
 
 async function checkIsAdmin(userId: string): Promise<boolean> {
@@ -35,26 +38,153 @@ async function checkIsAdmin(userId: string): Promise<boolean> {
   return !!data;
 }
 
+const CHAVE_TYPE_MAP: Record<string, string> = {
+  cpf: "CPF",
+  cnpj: "CNPJ",
+  email: "EMAIL",
+  telefone: "PHONE",
+  aleatoria: "PIX_CODE",
+};
+
+/** Assina o corpo da requisição com Ed25519, conforme exigido em produção. */
+async function assinarCorpoPayouts(bodyStr: string): Promise<string | null> {
+  const privateKeyB64 = process.env.MP_PAYOUTS_PRIVATE_KEY;
+  if (!privateKeyB64) return null;
+  const keyBytes = Uint8Array.from(atob(privateKeyB64), (c) => c.charCodeAt(0));
+  const privateKey = await crypto.subtle.importKey(
+    "pkcs8",
+    keyBytes,
+    { name: "Ed25519" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign(
+    "Ed25519",
+    privateKey,
+    new TextEncoder().encode(bodyStr),
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
 /**
- * STUB — ver aviso no topo do arquivo. Hoje sempre retorna falha, de
- * propósito, até a chamada real ser implementada e testada.
+ * Chama a API Payouts do Mercado Pago pra mandar o PIX de verdade.
+ * Documentação: developers.mercadopago.com/pt/docs/payouts
  */
-async function executarTransferenciaPix(_opts: {
+async function executarTransferenciaPix(opts: {
+  saqueId: string;
   valor: number;
   pixKey: string;
   pixKeyType: string;
+  destinatarioDocumento: string;
 }): Promise<{ ok: true; mpTransferId: string } | { ok: false; error: string }> {
-  return {
-    ok: false,
-    error:
-      "Transferência automática ainda não configurada — confirme o endpoint da API do Mercado Pago antes de habilitar.",
+  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  if (!accessToken) {
+    return { ok: false, error: "Mercado Pago não configurado (MERCADOPAGO_ACCESS_TOKEN)" };
+  }
+
+  const chaveType = CHAVE_TYPE_MAP[opts.pixKeyType];
+  if (!chaveType) {
+    return { ok: false, error: `Tipo de chave PIX não suportado: ${opts.pixKeyType}` };
+  }
+
+  const documentoTipo = opts.destinatarioDocumento.length === 14 ? "CNPJ" : "CPF";
+  const externalReference = opts.saqueId.replace(/-/g, "").slice(0, 64);
+  const notificationUrl = `${
+    process.env.SITE_URL ?? "https://tanstack-start-app.jemtechsports.workers.dev"
+  }/api/public/mp-webhook`;
+
+  const body = {
+    external_reference: externalReference,
+    point_of_interaction: { type: '{"type":"PSP_TRANSFER"}' },
+    seller_configuration: { notification_info: { notification_url: notificationUrl } },
+    transaction: {
+      from: { accounts: [{ amount: opts.valor }] },
+      to: {
+        accounts: [
+          {
+            type: "current",
+            amount: opts.valor,
+            chave: { type: chaveType, value: opts.pixKey },
+            owner: {
+              identification: { type: documentoTipo, number: opts.destinatarioDocumento },
+            },
+          },
+        ],
+      },
+      total_amount: opts.valor,
+    },
   };
+  const bodyStr = JSON.stringify(body);
+
+  const signature = await assinarCorpoPayouts(bodyStr);
+  if (!signature) {
+    return {
+      ok: false,
+      error:
+        "Assinatura de produção não configurada (MP_PAYOUTS_PRIVATE_KEY) — confirme com o suporte do Mercado Pago se a chave pública já foi registrada.",
+    };
+  }
+
+  const mpRes = await fetch("https://api.mercadopago.com/v1/transaction-intents/process", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": externalReference,
+      "X-signature": signature,
+      "X-enforce-signature": "true",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: bodyStr,
+  });
+
+  const respText = await mpRes.text();
+  let resp: { id?: string; status?: string; message?: string } = {};
+  try {
+    resp = JSON.parse(respText);
+  } catch {
+    // resposta não era JSON — segue com resp vazio, respText vai pro erro
+  }
+
+  if (!mpRes.ok) {
+    console.error("MP payout error", mpRes.status, respText);
+    return { ok: false, error: `Mercado Pago recusou (${mpRes.status}): ${resp.message ?? respText}` };
+  }
+
+  if (resp.status !== "approved") {
+    console.error("MP payout não aprovado", respText);
+    return {
+      ok: false,
+      error: `Transferência não aprovada (status: ${resp.status ?? "desconhecido"})`,
+    };
+  }
+
+  return { ok: true, mpTransferId: resp.id ?? externalReference };
 }
 
-async function processarSaque(saqueId: string, valor: number, pixKey: string, pixKeyType: string) {
+async function processarSaque(
+  saqueId: string,
+  valor: number,
+  pixKey: string,
+  pixKeyType: string,
+  destinatarioDocumento: string | null,
+) {
   await supabaseAdmin.from("saques").update({ status: "processando" }).eq("id", saqueId);
 
-  const resultado = await executarTransferenciaPix({ valor, pixKey, pixKeyType });
+  if (!destinatarioDocumento) {
+    await supabaseAdmin
+      .from("saques")
+      .update({ status: "falhou", notas: "Documento (CPF/CNPJ) do destinatário não informado" })
+      .eq("id", saqueId);
+    return;
+  }
+
+  const resultado = await executarTransferenciaPix({
+    saqueId,
+    valor,
+    pixKey,
+    pixKeyType,
+    destinatarioDocumento,
+  });
 
   if (resultado.ok) {
     await supabaseAdmin
@@ -108,6 +238,7 @@ export const solicitarSaque = createServerFn({ method: "POST" })
         pix_key: data.pixKey,
         pix_key_type: data.pixKeyType,
         destinatario_nome: data.destinatarioNome || null,
+        destinatario_documento: data.destinatarioDocumento,
         status: precisaAprovacao ? "aguardando_aprovacao" : "processando",
       })
       .select("id")
@@ -119,9 +250,16 @@ export const solicitarSaque = createServerFn({ method: "POST" })
     }
 
     if (!precisaAprovacao) {
-      // Processa "em segundo plano" (não bloqueia a resposta ao usuário).
-      processarSaque(saque.id, data.valor, data.pixKey, data.pixKeyType).catch((e) =>
-        console.error("processarSaque error", e),
+      // Precisa ESPERAR terminar de verdade — no Cloudflare Workers,
+      // qualquer trabalho assíncrono que não seja aguardado é encerrado
+      // assim que a resposta é enviada, então "rodar em segundo plano"
+      // sem "await" deixava o saque preso pra sempre em "processando".
+      await processarSaque(
+        saque.id,
+        data.valor,
+        data.pixKey,
+        data.pixKeyType,
+        data.destinatarioDocumento,
       );
     }
 
@@ -185,6 +323,13 @@ const SaquePlataformaSchema = z.object({
   valor: z.number().positive().max(1000000),
   pixKey: z.string().trim().min(3).max(200),
   pixKeyType: z.enum(["cpf", "cnpj", "email", "telefone", "aleatoria"]),
+  destinatarioDocumento: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length === 11 || v.length === 14, {
+      message: "CPF (11 dígitos) ou CNPJ (14 dígitos) do dono da conta de destino",
+    }),
 });
 
 export const solicitarSaquePlataforma = createServerFn({ method: "POST" })
@@ -213,6 +358,7 @@ export const solicitarSaquePlataforma = createServerFn({ method: "POST" })
         valor: data.valor,
         pix_key: data.pixKey,
         pix_key_type: data.pixKeyType,
+        destinatario_documento: data.destinatarioDocumento,
         status: "aguardando_aprovacao",
       })
       .select("id")
@@ -237,7 +383,7 @@ export const aprovarSaque = createServerFn({ method: "POST" })
     }
     const { data: saque } = await supabaseAdmin
       .from("saques")
-      .select("id,valor,pix_key,pix_key_type,status")
+      .select("id,valor,pix_key,pix_key_type,status,destinatario_documento")
       .eq("id", data.saqueId)
       .maybeSingle();
 
@@ -250,7 +396,13 @@ export const aprovarSaque = createServerFn({ method: "POST" })
       .update({ processado_por: context.userId })
       .eq("id", data.saqueId);
 
-    await processarSaque(saque.id, Number(saque.valor), saque.pix_key, saque.pix_key_type);
+    await processarSaque(
+      saque.id,
+      Number(saque.valor),
+      saque.pix_key,
+      saque.pix_key_type,
+      saque.destinatario_documento,
+    );
     return { ok: true as const };
   });
 
