@@ -246,7 +246,10 @@ export const solicitarSaque = createServerFn({ method: "POST" })
 
     if (error || !saque) {
       console.error("solicitarSaque: erro ao inserir", error);
-      return { ok: false as const, error: "Erro ao criar pedido de saque" };
+      return {
+        ok: false as const,
+        error: `Erro ao criar pedido de saque: ${error?.message ?? "desconhecido"}`,
+      };
     }
 
     if (!precisaAprovacao) {
@@ -366,7 +369,10 @@ export const solicitarSaquePlataforma = createServerFn({ method: "POST" })
 
     if (error || !saque) {
       console.error("solicitarSaquePlataforma: erro ao inserir", error);
-      return { ok: false as const, error: "Erro ao criar pedido de saque" };
+      return {
+        ok: false as const,
+        error: `Erro ao criar pedido de saque: ${error?.message ?? "desconhecido"}`,
+      };
     }
     return { ok: true as const, saqueId: saque.id };
   });
