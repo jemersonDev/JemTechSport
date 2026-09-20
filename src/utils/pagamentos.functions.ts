@@ -91,10 +91,15 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     if (valorOrganizador <= 0) {
       return { ok: false as const, error: "Racha sem valor definido" };
     }
+    // Se o próprio organizador está pagando o próprio racha, não tem
+    // sentido cobrar comissão dele mesmo — nem o Mercado Pago permite
+    // (application_fee exige pagador e recebedor diferentes). Ele paga só
+    // o valor puro, sem taxa nenhuma.
+    const ehOProprioOrganizador = userId === racha.admin_id;
     // Taxa fixa: R$ 5,00 por racha (rateado pelos jogadores) + R$ 0,12 por jogador
-    const valorPlataforma = +(
-      TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR
-    ).toFixed(2);
+    const valorPlataforma = ehOProprioOrganizador
+      ? 0
+      : +(TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR).toFixed(2);
     const valorPorJogador = +(valorOrganizador + valorPlataforma).toFixed(2);
 
     // 3) Verificar se já existe pagamento pendente para esta inscrição
@@ -135,7 +140,6 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     // próprio racha), o Mercado Pago não permite application_fee — faz
     // sentido, é o mesmo dono dos dois lados. Nesse caso usa o token dele
     // normalmente, mas sem tentar cobrar comissão de si mesmo.
-    const ehOProprioOrganizador = userId === racha.admin_id;
     const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
     const tokenParaCobranca = tokenOrganizador ?? accessToken;
 
@@ -274,7 +278,8 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
     if (valorOrganizador <= 0) {
       return { ok: false as const, error: "Sem prorrogação no momento" };
     }
-    const valorPlataforma = +TAXA_POR_JOGADOR.toFixed(2);
+    const ehOProprioOrganizador = userId === racha.admin_id;
+    const valorPlataforma = ehOProprioOrganizador ? 0 : +TAXA_POR_JOGADOR.toFixed(2);
     const valorPorJogador = +(valorOrganizador + valorPlataforma).toFixed(2);
 
     const { data: existing } = await supabaseAdmin
@@ -300,7 +305,6 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       };
     }
 
-    const ehOProprioOrganizador = userId === racha.admin_id;
     const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
     const tokenParaCobranca = tokenOrganizador ?? accessToken;
 
