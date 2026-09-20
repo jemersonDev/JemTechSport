@@ -131,6 +131,11 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     // cai direto na conta do organizador — sem saque manual depois.
     // Se ele ainda não conectou, cai no modelo antigo (conta da
     // plataforma inteira, saque manual via /saques).
+    // Exceção: se quem está pagando é o PRÓPRIO organizador (jogando no
+    // próprio racha), o Mercado Pago não permite application_fee — faz
+    // sentido, é o mesmo dono dos dois lados. Nesse caso usa o token dele
+    // normalmente, mas sem tentar cobrar comissão de si mesmo.
+    const ehOProprioOrganizador = userId === racha.admin_id;
     const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
     const tokenParaCobranca = tokenOrganizador ?? accessToken;
 
@@ -146,7 +151,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
       external_reference: inscricao.id,
       notification_url: `${process.env.SITE_URL ?? "https://tanstack-start-app.jemtechsports.workers.dev"}/api/public/mp-webhook`,
     };
-    if (tokenOrganizador) {
+    if (tokenOrganizador && !ehOProprioOrganizador) {
       corpoPagamento.application_fee = valorPlataforma;
     }
 
@@ -295,6 +300,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       };
     }
 
+    const ehOProprioOrganizador = userId === racha.admin_id;
     const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
     const tokenParaCobranca = tokenOrganizador ?? accessToken;
 
@@ -310,7 +316,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       external_reference: `extra-${inscricao.id}`,
       notification_url: `${process.env.SITE_URL ?? "https://tanstack-start-app.jemtechsports.workers.dev"}/api/public/mp-webhook`,
     };
-    if (tokenOrganizador) {
+    if (tokenOrganizador && !ehOProprioOrganizador) {
       corpoPagamento.application_fee = valorPlataforma;
     }
 
