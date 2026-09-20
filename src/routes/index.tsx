@@ -417,17 +417,17 @@ function Index() {
 
     // ===== Regras / avisos (lista compacta, escaneável) =====
     const maxP = racha?.max_players ?? 12;
-    lines.push(`🔒 Fecha a lista com *${maxP} atletas*`);
-    lines.push("⏰ Retirar o nome até *domingo*");
-    lines.push("💳 Pagamento antecipado garante a vaga na quadra");
+    lines.push(`Fecha a lista com *${maxP} atletas*`);
+    lines.push("Retirar o nome até *domingo*");
+    lines.push("Pagamento antecipado garante a vaga na quadra");
     lines.push("");
 
     // Local (se tiver)
     if (location.trim() || racha?.address || racha?.location) {
       const loc = location.trim() || racha?.address || racha?.location || "";
-      lines.push(`📍 *Local:* ${loc}`);
+      lines.push(`*Local:* ${loc}`);
       lines.push(
-        `🗺️ Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`,
+        `Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`,
       );
       lines.push("");
     }
@@ -440,19 +440,19 @@ function Index() {
 
     if (goleiros.length > 0) {
       lines.push("");
-      lines.push(`🧤 *GOLEIROS* (${goleiros.length})`);
+      lines.push(`*GOLEIROS* (${goleiros.length})`);
       goleiros.forEach((g) => {
-        const paid = g.paid ? " ✅" : "";
-        lines.push(`• ${g.display_name}${paid}`);
+        const paid = g.paid ? " (pago)" : "";
+        lines.push(`- ${g.display_name}${paid}`);
       });
     }
 
     // ===== Jogadores numerados =====
     if (linha.length > 0) {
       lines.push("");
-      lines.push(`⚽ *JOGADORES* (${linha.length}/${maxP})`);
+      lines.push(`*JOGADORES* (${linha.length}/${maxP})`);
       linha.forEach((p, idx) => {
-        const paid = p.paid ? " ✅" : "";
+        const paid = p.paid ? " (pago)" : "";
         lines.push(`${idx + 1}. ${p.display_name}${paid}`);
       });
     }
@@ -462,24 +462,24 @@ function Index() {
       lines.push("");
       lines.push("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
       lines.push("");
-      lines.push(`🟢 *TIME A* (${scoreA})`);
+      lines.push(`*TIME A* (${scoreA})`);
       teamA.forEach((p) =>
         lines.push(
-          `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
+          `- ${p.name}${p.isGoalkeeper ? " (goleiro)" : ""}${p.goals > 0 ? ` (${p.goals} gol${p.goals > 1 ? "s" : ""})` : ""}`,
         ),
       );
       lines.push("");
-      lines.push(`🔵 *TIME B* (${scoreB})`);
+      lines.push(`*TIME B* (${scoreB})`);
       teamB.forEach((p) =>
         lines.push(
-          `• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}${p.goals > 0 ? ` ⚽x${p.goals}` : ""}`,
+          `- ${p.name}${p.isGoalkeeper ? " (goleiro)" : ""}${p.goals > 0 ? ` (${p.goals} gol${p.goals > 1 ? "s" : ""})` : ""}`,
         ),
       );
       if (reserves.length > 0) {
         lines.push("");
-        lines.push(`⏳ *RESERVAS* (${reserves.length})`);
+        lines.push(`*RESERVAS* (${reserves.length})`);
         reserves.forEach((p) =>
-          lines.push(`• ${p.name}${p.isGoalkeeper ? " 🧤" : ""}`),
+          lines.push(`- ${p.name}${p.isGoalkeeper ? " (goleiro)" : ""}`),
         );
       }
     }
@@ -489,7 +489,7 @@ function Index() {
       lines.push("");
       lines.push("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
       lines.push("");
-      lines.push("💰 *VALORES*");
+      lines.push("*VALORES*");
       lines.push(`Total: R$ ${total.toFixed(2).replace(".", ",")}`);
       lines.push(`Por pessoa: R$ ${valuePerPerson.toFixed(2).replace(".", ",")}`);
     }
@@ -497,13 +497,13 @@ function Index() {
     // ===== PIX =====
     if (pixKey.trim()) {
       lines.push("");
-      lines.push("💸 *PIX*");
+      lines.push("*PIX*");
       lines.push(`${PIX_TYPE_LABEL[pixKeyType]}: ${pixKey.trim()}`);
       if (pixOwner.trim()) lines.push(`Favorecido: ${pixOwner.trim()}`);
     }
 
     lines.push("");
-    lines.push("_Bora pro jogo! 🔥⚽_");
+    lines.push("_Bora pro jogo!_");
     return lines.join("\n");
   }
 
