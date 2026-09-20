@@ -414,15 +414,12 @@ function Index() {
     }
     lines.push(header);
     lines.push("");
-    lines.push("");
 
-    // ===== Regras / avisos =====
+    // ===== Regras / avisos (lista compacta, escaneável) =====
     const maxP = racha?.max_players ?? 12;
-    lines.push(`*${maxP} atletas já fecha a lista*`);
-    lines.push("");
-    lines.push("*retirar o nome da lista até domingo*");
-    lines.push("");
-    lines.push("*Pagamento antecipado pra segurar o horário da quadra*");
+    lines.push(`🔒 Fecha a lista com *${maxP} atletas*`);
+    lines.push("⏰ Retirar o nome até *domingo*");
+    lines.push("💳 Pagamento antecipado garante a vaga na quadra");
     lines.push("");
 
     // Local (se tiver)
@@ -435,31 +432,35 @@ function Index() {
       lines.push("");
     }
 
+    lines.push("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+
     // ===== Goleiros =====
     const goleiros = inscricoes.filter((i) => i.position === "goleiro");
     const linha = inscricoes.filter((i) => i.position === "linha");
 
     if (goleiros.length > 0) {
-      lines.push("Goleiros:");
+      lines.push("");
+      lines.push(`🧤 *GOLEIROS* (${goleiros.length})`);
       goleiros.forEach((g) => {
         const paid = g.paid ? " ✅" : "";
-        lines.push(`🧤${g.display_name}${paid}`);
+        lines.push(`• ${g.display_name}${paid}`);
       });
-      lines.push("");
     }
 
     // ===== Jogadores numerados =====
     if (linha.length > 0) {
-      lines.push("Jogadores:");
+      lines.push("");
+      lines.push(`⚽ *JOGADORES* (${linha.length}/${maxP})`);
       linha.forEach((p, idx) => {
         const paid = p.paid ? " ✅" : "";
-        lines.push(`⚽️${idx + 1} ${p.display_name}${paid}`);
+        lines.push(`${idx + 1}. ${p.display_name}${paid}`);
       });
-      lines.push("");
     }
 
     // ===== Times sorteados (se houver) =====
     if (teamA.length > 0 || teamB.length > 0) {
+      lines.push("");
+      lines.push("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
       lines.push("");
       lines.push(`🟢 *TIME A* (${scoreA})`);
       teamA.forEach((p) =>
@@ -486,22 +487,23 @@ function Index() {
     // ===== Financeiro =====
     if (total > 0 && inscricoes.length > 0) {
       lines.push("");
-      lines.push(`💰 *Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
-      lines.push(
-        `💵 *Por pessoa:* R$ ${valuePerPerson.toFixed(2).replace(".", ",")}`,
-      );
+      lines.push("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+      lines.push("");
+      lines.push("💰 *VALORES*");
+      lines.push(`Total: R$ ${total.toFixed(2).replace(".", ",")}`);
+      lines.push(`Por pessoa: R$ ${valuePerPerson.toFixed(2).replace(".", ",")}`);
     }
 
     // ===== PIX =====
     if (pixKey.trim()) {
       lines.push("");
-      lines.push("💸 *PAGAMENTO PIX*");
-      lines.push(`🔑 *${PIX_TYPE_LABEL[pixKeyType]}:* ${pixKey.trim()}`);
-      if (pixOwner.trim()) lines.push(`👤 *Favorecido:* ${pixOwner.trim()}`);
+      lines.push("💸 *PIX*");
+      lines.push(`${PIX_TYPE_LABEL[pixKeyType]}: ${pixKey.trim()}`);
+      if (pixOwner.trim()) lines.push(`Favorecido: ${pixOwner.trim()}`);
     }
 
     lines.push("");
-    lines.push("_Bora pro jogo! 🔥_");
+    lines.push("_Bora pro jogo! 🔥⚽_");
     return lines.join("\n");
   }
 
