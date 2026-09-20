@@ -82,15 +82,20 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
 
     const maxPlayers = Math.max(1, racha.max_players);
     const valorTotalRacha = Number(racha.total_value) || 0;
-    const valorPorJogador = +(valorTotalRacha / maxPlayers).toFixed(2);
-    if (valorPorJogador <= 0) {
+    // O organizador recebe exatamente o valor que ele colocou na quadra,
+    // dividido entre os jogadores de linha — a taxa da plataforma soma
+    // POR CIMA disso no valor cobrado do jogador (não é descontada do
+    // organizador). Assim o organizador nunca fica devendo do próprio
+    // bolso pra fechar a conta da quadra.
+    const valorOrganizador = +(valorTotalRacha / maxPlayers).toFixed(2);
+    if (valorOrganizador <= 0) {
       return { ok: false as const, error: "Racha sem valor definido" };
     }
     // Taxa fixa: R$ 5,00 por racha (rateado pelos jogadores) + R$ 0,12 por jogador
     const valorPlataforma = +(
       TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR
     ).toFixed(2);
-    const valorOrganizador = +(valorPorJogador - valorPlataforma).toFixed(2);
+    const valorPorJogador = +(valorOrganizador + valorPlataforma).toFixed(2);
 
     // 3) Verificar se já existe pagamento pendente para esta inscrição
     const { data: existing } = await supabaseAdmin
@@ -114,6 +119,8 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
         qrCodeBase64: existing.mp_qr_code_base64,
         ticketUrl: existing.mp_ticket_url,
         valor: valorPorJogador,
+        valorQuadra: valorOrganizador,
+        valorTaxa: valorPlataforma,
       };
     }
 
@@ -204,6 +211,8 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
       qrCodeBase64: td?.qr_code_base64 ?? null,
       ticketUrl: td?.ticket_url ?? null,
       valor: valorPorJogador,
+      valorQuadra: valorOrganizador,
+      valorTaxa: valorPlataforma,
     };
   });
 
@@ -256,12 +265,12 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
 
     const maxPlayers = Math.max(1, racha.max_players);
     const valorExtraTotal = Number(racha.valor_extra) || 0;
-    const valorPorJogador = +(valorExtraTotal / maxPlayers).toFixed(2);
-    if (valorPorJogador <= 0) {
+    const valorOrganizador = +(valorExtraTotal / maxPlayers).toFixed(2);
+    if (valorOrganizador <= 0) {
       return { ok: false as const, error: "Sem prorrogação no momento" };
     }
     const valorPlataforma = +TAXA_POR_JOGADOR.toFixed(2);
-    const valorOrganizador = +(valorPorJogador - valorPlataforma).toFixed(2);
+    const valorPorJogador = +(valorOrganizador + valorPlataforma).toFixed(2);
 
     const { data: existing } = await supabaseAdmin
       .from("pagamentos")
@@ -281,6 +290,8 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
         qrCodeBase64: existing.mp_qr_code_base64,
         ticketUrl: existing.mp_ticket_url,
         valor: valorPorJogador,
+        valorQuadra: valorOrganizador,
+        valorTaxa: valorPlataforma,
       };
     }
 
@@ -363,6 +374,8 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       qrCodeBase64: td?.qr_code_base64 ?? null,
       ticketUrl: td?.ticket_url ?? null,
       valor: valorPorJogador,
+      valorQuadra: valorOrganizador,
+      valorTaxa: valorPlataforma,
     };
   });
 

@@ -46,6 +46,7 @@ import { TeamNameEditorDialog } from "@/components/TeamNameEditorDialog";
 import { getTeamMeta, type TeamMeta, type TeamNamesMap, type TeamSlot } from "@/lib/teamMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
+import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR } from "@/utils/pagamentos.functions";
 import { toast } from "sonner";
 
 type TabId = "tactical" | "roster" | "match";
@@ -275,7 +276,12 @@ function Index() {
     const linhaCount = players.filter((p) => !p.isGoalkeeper).length;
     const divisor = racha?.max_players && racha.max_players > 0 ? racha.max_players : linhaCount;
     if (divisor === 0 || total === 0) return 0;
-    return total / divisor;
+    const valorOrganizadorPorJogador = total / divisor;
+    const taxaPlataforma = TAXA_FIXA_RACHA / divisor + TAXA_POR_JOGADOR;
+    // O organizador recebe o valor cheio (total / divisor) — a taxa da
+    // plataforma soma POR CIMA no valor cobrado do jogador, pra ele nunca
+    // precisar completar do próprio bolso.
+    return valorOrganizadorPorJogador + taxaPlataforma;
   }, [totalValue, players, racha?.max_players]);
 
   const goalkeeperCount = useMemo(
@@ -1662,6 +1668,19 @@ function Index() {
                 <p className="text-3xl font-black text-neon text-glow">
                   R$ {valuePerPerson.toFixed(2).replace(".", ",")}
                 </p>
+                {(() => {
+                  const linhaCount = players.filter((p) => !p.isGoalkeeper).length;
+                  const divisor = racha?.max_players && racha.max_players > 0 ? racha.max_players : linhaCount;
+                  if (divisor === 0) return null;
+                  const taxa = TAXA_FIXA_RACHA / divisor + TAXA_POR_JOGADOR;
+                  return (
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Você recebe R$ {(valuePerPerson - taxa).toFixed(2).replace(".", ",")} — os R$
+                      {" "}{taxa.toFixed(2).replace(".", ",")} restantes são a taxa da plataforma, já
+                      inclusos no valor que o jogador paga.
+                    </p>
+                  );
+                })()}
               </div>
 
               <div>
@@ -1875,8 +1894,13 @@ function Index() {
                   const linhaInscritos = inscricoes.filter((i) => i.position !== "goleiro");
                   const divisor = racha.max_players > 0 ? racha.max_players : linhaInscritos.length;
                   const valorBase = divisor > 0 ? total / divisor : 0;
-                  // Exibido sem a taxa interna do app
-                  const valorComTaxa = valorBase;
+                  // O organizador recebe valorBase por jogador (a meta
+                  // total bate certinho com o valor que ele colocou na
+                  // quadra) — mas o valor de fato cobrado no PIX de cada
+                  // jogador já vem com a taxa da plataforma somada em
+                  // cima, igual ao que a tela de pagamento mostra.
+                  const taxaPorJogador = divisor > 0 ? TAXA_FIXA_RACHA / divisor + TAXA_POR_JOGADOR : 0;
+                  const valorComTaxa = valorBase + taxaPorJogador;
                   const pagos = linhaInscritos.filter((i) => i.paid);
                   const devendo = linhaInscritos.filter((i) => !i.paid);
                   const arrecadado = pagos.length * valorComTaxa;
@@ -1954,11 +1978,11 @@ function Index() {
 
                       <div className="rounded-xl bg-black/60 border border-neon/30 p-3 flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Valor por pessoa</p>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Valor por pessoa (com taxa)</p>
                           <p className="text-xl font-black text-neon">R$ {valorComTaxa.toFixed(2).replace(".", ",")}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Meta total</p>
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Você recebe (meta)</p>
                           <p className="text-xl font-black text-foreground">R$ {total.toFixed(2).replace(".", ",")}</p>
                         </div>
                       </div>

@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { shareRachaViaWhatsApp } from "@/utils/shareRacha";
+import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR } from "@/utils/pagamentos.functions";
 
 export const Route = createFileRoute("/rachas")({
   component: RachasPage,
@@ -589,14 +590,26 @@ function CreateRachaForm({
           onChange={(e) => setTotalValue(e.target.value)}
           placeholder="Ex: 140"
         />
-        {Number(totalValue.replace(",", ".")) > 0 && maxPlayers > 0 && (
-          <p className="text-[11px] text-muted-foreground">
-            Cada jogador de linha paga{" "}
-            <span className="text-neon font-bold">
-              R$ {(Number(totalValue.replace(",", ".")) / maxPlayers).toFixed(2).replace(".", ",")}
-            </span>
-          </p>
-        )}
+        {Number(totalValue.replace(",", ".")) > 0 && maxPlayers > 0 && (() => {
+          const valorLiquido = Number(totalValue.replace(",", ".")) / maxPlayers;
+          const taxa = TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR;
+          const valorCobrado = valorLiquido + taxa;
+          return (
+            <div className="text-[11px] text-muted-foreground space-y-0.5">
+              <p>
+                Cada jogador de linha paga{" "}
+                <span className="text-neon font-bold">
+                  R$ {valorCobrado.toFixed(2).replace(".", ",")}
+                </span>
+              </p>
+              <p>
+                Você recebe os R$ {Number(totalValue.replace(",", ".")).toFixed(2).replace(".", ",")}
+                {" "}inteiros — a taxa da plataforma (R$ {taxa.toFixed(2).replace(".", ",")} por
+                jogador) já vem somada em cima, sem sair do seu valor.
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Endereço */}

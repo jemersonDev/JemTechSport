@@ -25,6 +25,8 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo
   const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
   const [ticketUrl, setTicketUrl] = useState<string | null>(null);
   const [valor, setValor] = useState<number>(0);
+  const [valorQuadra, setValorQuadra] = useState<number>(0);
+  const [valorTaxa, setValorTaxa] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [paid, setPaid] = useState(false);
 
@@ -46,6 +48,8 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo
         setQrCodeBase64(res.qrCodeBase64 ?? null);
         setTicketUrl(res.ticketUrl ?? null);
         setValor(res.valor);
+        setValorQuadra(res.valorQuadra ?? 0);
+        setValorTaxa(res.valorTaxa ?? 0);
       })
       .catch((e) => {
         console.error(e);
@@ -101,6 +105,26 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo
             )}
           </DialogDescription>
         </DialogHeader>
+
+        {valor > 0 && (valorQuadra > 0 || valorTaxa > 0) && (
+          <div className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 space-y-1 text-xs">
+            <div className="flex items-center justify-between text-white/70">
+              <span>{tipo === "extra" ? "Prorrogação" : "Valor da quadra"}</span>
+              <span className="font-semibold text-white">
+                R$ {valorQuadra.toFixed(2).replace(".", ",")}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-white/50">
+              <span>Taxa da plataforma (JemTech)</span>
+              <span>+ R$ {valorTaxa.toFixed(2).replace(".", ",")}</span>
+            </div>
+            <div className="h-px bg-white/10 my-1" />
+            <div className="flex items-center justify-between font-bold">
+              <span className="text-white">Total no PIX</span>
+              <span className="text-[#22c55e]">R$ {valor.toFixed(2).replace(".", ",")}</span>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
