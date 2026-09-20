@@ -106,7 +106,7 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo
           </DialogDescription>
         </DialogHeader>
 
-        {valor > 0 && (valorQuadra > 0 || valorTaxa > 0) && (
+        {valor > 0 && valorTaxa > 0 && (
           <div className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 space-y-1 text-xs">
             <div className="flex items-center justify-between text-white/70">
               <span>{tipo === "extra" ? "Prorrogação" : "Valor da quadra"}</span>
@@ -124,6 +124,11 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo
               <span className="text-[#22c55e]">R$ {valor.toFixed(2).replace(".", ",")}</span>
             </div>
           </div>
+        )}
+        {valor > 0 && valorTaxa === 0 && valorQuadra > 0 && (
+          <p className="text-[11px] text-white/50 text-center">
+            Você é o organizador — pagando sem taxa da plataforma 🙌
+          </p>
         )}
 
         {loading ? (
