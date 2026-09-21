@@ -1012,7 +1012,7 @@ function Index() {
                                   p.isGoalkeeper ? "text-keeper" : "text-foreground"
                                 }`}
                               >
-                                {p.name.split(" ")[0]}
+                                {p.name}
                                 {p.isGoalkeeper && (
                                   <span className="ml-1 text-[8px] uppercase opacity-70">GK</span>
                                 )}
