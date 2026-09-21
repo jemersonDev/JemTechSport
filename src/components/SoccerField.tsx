@@ -256,7 +256,7 @@ function PlayerPin({
         )}
       </div>
       <p
-        className={`text-[9px] font-bold leading-none px-1 py-0.5 rounded max-w-full truncate ${player.isGoalkeeper ? "bg-keeper text-black" : "bg-black/70 text-foreground"}`}
+        className={`text-[9px] font-bold leading-[1.05] px-1 py-0.5 rounded max-w-full text-center whitespace-normal break-words ${player.isGoalkeeper ? "bg-keeper text-black" : "bg-black/70 text-foreground"}`}
       >
         {player.name}
       </p>
