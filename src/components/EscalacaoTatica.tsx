@@ -138,7 +138,7 @@ export function EscalacaoTatica({
                   {p!.nome.slice(0, 2).toUpperCase()}
                 </div>
                 <span className="mt-0.5 text-[9px] text-white/90 font-semibold max-w-[60px] truncate drop-shadow">
-                  {p!.nome.split(" ")[0]}
+                  {p!.nome}
                 </span>
               </div>
             );
