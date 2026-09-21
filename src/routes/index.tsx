@@ -476,11 +476,34 @@ function Index() {
         ),
       );
       if (reserves.length > 0) {
-        lines.push("");
-        lines.push(`*RESERVAS* (${reserves.length})`);
-        reserves.forEach((p) =>
-          lines.push(`- ${p.name}${p.isGoalkeeper ? " (goleiro)" : ""}`),
-        );
+        // Mesmo agrupamento usado na aba Tático (Time C, D, E...) — assim
+        // quem lê no WhatsApp sabe exatamente em qual time entra, em vez
+        // de só "reserva" sem saber com quem vai jogar.
+        const size = TEAM_SIZE[fieldMode];
+        const lineSlots = Math.max(1, size - 1);
+        const extraKeepers = reserves.filter((p) => p.isGoalkeeper);
+        const lineReserves = reserves.filter((p) => !p.isGoalkeeper);
+        const teamLabels = ["C", "D", "E", "F", "G", "H", "I", "J"];
+        const reserveGroups: Player[][] = [];
+        let lineIdx = 0;
+        let keeperIdx = 0;
+        while (lineIdx < lineReserves.length || keeperIdx < extraKeepers.length) {
+          const hasKeeper = keeperIdx < extraKeepers.length;
+          const lineSlice = lineReserves.slice(lineIdx, lineIdx + lineSlots);
+          lineIdx += lineSlice.length;
+          const players: Player[] = hasKeeper
+            ? [extraKeepers[keeperIdx++], ...lineSlice]
+            : [...lineSlice];
+          if (players.length === 0) break;
+          reserveGroups.push(players);
+        }
+        reserveGroups.forEach((group, gi) => {
+          lines.push("");
+          lines.push(`*TIME ${teamLabels[gi] ?? `RESERVA ${gi + 1}`}*${gi === 0 ? " (próximo a entrar)" : ""}`);
+          group.forEach((p) =>
+            lines.push(`- ${p.name}${p.isGoalkeeper ? " (goleiro)" : ""}`),
+          );
+        });
       }
     }
 
