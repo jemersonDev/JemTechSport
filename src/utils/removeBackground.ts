@@ -12,10 +12,17 @@ async function getPipeline() {
       const { pipeline, env } = await import("@huggingface/transformers");
       env.allowLocalModels = false;
       env.useBrowserCache = true;
-      return pipeline("background-removal", "briaai/RMBG-1.4", {
+      // "briaai/RMBG-1.4" não publica os arquivos ONNX que o transformers.js
+      // precisa pra rodar no navegador (dá 404 direto na Hugging Face) —
+      // "Xenova/modnet" é o modelo oficialmente documentado e mantido pela
+      // própria equipe do transformers.js pra essa mesma tarefa.
+      return pipeline("background-removal", "Xenova/modnet", {
+        dtype: "fp32",
         device: "webgpu",
       } as Parameters<typeof pipeline>[2]).catch(() =>
-        pipeline("background-removal", "briaai/RMBG-1.4"),
+        pipeline("background-removal", "Xenova/modnet", { dtype: "fp32" } as Parameters<
+          typeof pipeline
+        >[2]),
       );
     })();
   }
