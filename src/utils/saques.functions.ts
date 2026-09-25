@@ -121,7 +121,7 @@ async function executarTransferenciaPix(opts: {
     return {
       ok: false,
       error:
-        "Assinatura de produção não configurada (MP_PAYOUTS_PRIVATE_KEY) — confirme com o suporte do Mercado Pago se a chave pública já foi registrada.",
+        "Transferência automática indisponível — o Mercado Pago ainda não libera saque manual pra essa conta. Peça pro organizador conectar a própria conta do Mercado Pago pra receber sem depender disso.",
     };
   }
 

@@ -248,8 +248,12 @@ function OrganizadorPage() {
           </p>
         </Card>
 
-        {/* Conectar Mercado Pago — split de pagamento (recomendado) */}
-        <Card className={`p-4 space-y-2 ${mpConectado ? "border-green-500/30" : "border-orange-500/30"}`}>
+        {/* Conectar Mercado Pago — split de pagamento (obrigatório pra receber) */}
+        <Card
+          className={`p-4 space-y-2 ${
+            mpConectado ? "border-green-500/30" : "border-destructive/60 bg-destructive/5"
+          }`}
+        >
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -262,8 +266,9 @@ function OrganizadorPage() {
                   ✓ Conectada — seus pagamentos caem direto na sua conta
                 </p>
               ) : (
-                <p className="text-xs text-orange-400">
-                  Não conectada — pagamentos caem na conta da plataforma (saque manual)
+                <p className="text-xs font-semibold text-destructive">
+                  Pra você receber, tem que conectar a conta do Mercado Pago — se não conectar,
+                  você não recebe.
                 </p>
               )}
             </div>
@@ -272,8 +277,13 @@ function OrganizadorPage() {
                 Desconectar
               </Button>
             ) : (
-              <Button size="sm" onClick={handleConectarMp} disabled={conectandoMp}>
-                {conectandoMp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Conectar"}
+              <Button
+                size="sm"
+                onClick={handleConectarMp}
+                disabled={conectandoMp}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground shrink-0"
+              >
+                {conectandoMp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Conectar agora"}
               </Button>
             )}
           </div>
@@ -294,6 +304,12 @@ function OrganizadorPage() {
               Sacar
             </Button>
           </div>
+          {!mpConectado && saldoSaque > 0 && (
+            <p className="text-[11px] text-destructive">
+              Saque manual indisponível no momento — conecte sua conta acima pra receber sem
+              depender dele.
+            </p>
+          )}
         </Card>
 
         <SolicitarSaqueDialog
