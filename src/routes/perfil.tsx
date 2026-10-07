@@ -21,6 +21,7 @@ import {
   FileText,
   Sparkles,
   DollarSign,
+  Share2,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ import { ConquistasGrid } from "@/components/ConquistasGrid";
 import { PushToggle } from "@/components/PushToggle";
 import { PlayerEvolutionChart } from "@/components/PlayerEvolutionChart";
 import { AthleteCard } from "@/components/AthleteCard";
+import { shareAppInvite } from "@/utils/shareRacha";
 import { processAvatar } from "@/utils/processAvatar";
 import { FounderBadge } from "@/components/FounderBadge";
 import { TeamCombobox } from "@/components/TeamCombobox";
@@ -679,6 +681,12 @@ function PerfilPage() {
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
           )}
+        </Card>
+
+        <Card className="p-4">
+          <Button onClick={shareAppInvite} variant="outline" className="w-full border-neon/40 text-neon">
+            <Share2 className="w-4 h-4" /> Convidar amigo pro app
+          </Button>
         </Card>
 
         <Card className="p-4">
