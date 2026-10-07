@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 
+// Só ligar quando o provedor Apple estiver configurado no Supabase
+// (exige conta Apple Developer). Enquanto false, o botão fica escondido
+// pra ninguém cair no erro "provider is not enabled".
+const APPLE_LOGIN_ENABLED = false;
+
 export const Route = createFileRoute("/login")({
   component: LoginPage,
   head: () => ({
     meta: [
       { title: "Entrar — JemTech Sports" },
-      { name: "description", content: "Entre com Google ou Apple para organizar seu racha." },
+      { name: "description", content: "Entre com Google para organizar seu racha." },
     ],
   }),
 });
@@ -75,15 +80,17 @@ function LoginPage() {
             {busy === "google" ? "Conectando…" : "Entrar com Google"}
           </Button>
 
-          <Button
-            onClick={handleApple}
-            disabled={busy !== null}
-            variant="outline"
-            className="w-full h-11 text-base"
-          >
-            <AppleIcon />
-            {busy === "apple" ? "Conectando…" : "Entrar com Apple"}
-          </Button>
+          {APPLE_LOGIN_ENABLED && (
+            <Button
+              onClick={handleApple}
+              disabled={busy !== null}
+              variant="outline"
+              className="w-full h-11 text-base"
+            >
+              <AppleIcon />
+              {busy === "apple" ? "Conectando…" : "Entrar com Apple"}
+            </Button>
+          )}
         </div>
 
         {error && (
