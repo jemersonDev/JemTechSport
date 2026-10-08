@@ -1,3 +1,4 @@
+import { appInviteLink } from "@/utils/shareRacha";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -527,6 +528,8 @@ function Index() {
 
     lines.push("");
     lines.push("_Bora pro jogo!_");
+    lines.push("");
+    lines.push(`Entra no app: ${appInviteLink()}`);
     return lines.join("\n");
   }
 
