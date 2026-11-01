@@ -15,6 +15,7 @@ import {
   Bookmark,
   Play,
   Music2,
+  AlertCircle,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +27,15 @@ import { ReportDialog } from "@/components/ReportDialog";
 import { PostVoteButtons } from "@/components/PostVoteButtons";
 import { OverlayLayer, type Overlay } from "@/components/OverlayEditor";
 import { toast } from "sonner";
+
+/** 1200 -> 1,2 mil | 1500000 -> 1,5 mi (igual Instagram). */
+function fmtCount(n: number | null | undefined): string {
+  const v = Number(n ?? 0);
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1).replace(".", ",").replace(",0", "")} mi`;
+  if (v >= 10_000) return `${Math.round(v / 1000)} mil`;
+  if (v >= 1_000) return `${(v / 1000).toFixed(1).replace(".", ",").replace(",0", "")} mil`;
+  return String(v);
+}
 
 export const Route = createFileRoute("/resenha")({
   component: ResenhaPage,
@@ -47,6 +57,7 @@ function ResenhaPage() {
   const [reportFor, setReportFor] = useState<string | null>(null);
   const [muted, setMuted] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [soundHint, setSoundHint] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,12 +83,15 @@ function ResenhaPage() {
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black text-white">
       {/* Header — estilo IG Reels */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-4 pt-3 pb-6">
-        <h1 className="pointer-events-auto text-2xl font-bold tracking-tight" style={{ fontFamily: "'Billabong', 'Dancing Script', cursive" }}>
+        <h1 className="pointer-events-auto text-[22px] font-extrabold tracking-tight">
           Reels
         </h1>
         <div className="pointer-events-auto flex items-center gap-4">
           <button
-            onClick={() => setMuted((m) => !m)}
+            onClick={() => {
+              setMuted((m) => !m);
+              setSoundHint(false);
+            }}
             aria-label={muted ? "Ativar som" : "Mudo"}
             className="text-white"
           >
@@ -98,6 +112,18 @@ function ResenhaPage() {
           </button>
         </div>
       </header>
+
+      {muted && soundHint && posts.length > 0 && (
+        <button
+          onClick={() => {
+            setMuted(false);
+            setSoundHint(false);
+          }}
+          className="absolute left-1/2 top-16 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-xs font-semibold backdrop-blur"
+        >
+          <VolumeX className="h-4 w-4" /> Toque para ativar o som
+        </button>
+      )}
 
       {loading ? (
         <div className="flex h-full items-center justify-center">
@@ -125,6 +151,7 @@ function ResenhaPage() {
               post={post}
               idx={idx}
               isActive={idx === activeIdx}
+              near={Math.abs(idx - activeIdx) <= 1}
               muted={muted}
               onLike={() => toggleLike(post.id)}
               onComment={() => setCommentsFor(post.id)}
@@ -185,6 +212,7 @@ function VideoSlide({
   post,
   idx,
   isActive,
+  near,
   muted,
   onLike,
   onComment,
@@ -194,6 +222,7 @@ function VideoSlide({
   post: ResenhaPost;
   idx: number;
   isActive: boolean;
+  near: boolean;
   muted: boolean;
   onLike: () => void;
   onComment: () => void;
@@ -206,6 +235,8 @@ function VideoSlide({
   const [progress, setProgress] = useState(0);
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [buffering, setBuffering] = useState(true);
   const lastTapRef = useRef(0);
   const navigate = useNavigate();
   const isOwn = currentUserId === post.user_id;
@@ -318,15 +349,44 @@ function VideoSlide({
       className="relative h-[100dvh] w-full snap-start"
       onClick={handleTap}
     >
+      {post.thumb_url && (failed || buffering) && (
+        <img src={post.thumb_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      )}
       <video
         ref={videoRef}
-        src={post.video_url}
+        src={near && !failed ? post.video_url : undefined}
         poster={post.thumb_url ?? undefined}
         muted={hasMusic ? true : muted}
         loop
         playsInline
+        preload={isActive ? "auto" : "metadata"}
+        onError={() => {
+          setFailed(true);
+          setBuffering(false);
+        }}
+        onWaiting={() => setBuffering(true)}
+        onPlaying={() => setBuffering(false)}
+        onCanPlay={() => setBuffering(false)}
         className="h-full w-full object-cover"
       />
+
+      {buffering && !failed && isActive && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-white/80" />
+        </div>
+      )}
+
+      {failed && (
+        <div className="absolute inset-0 z-[5] flex flex-col items-center justify-center gap-3 bg-black/80 px-8 text-center">
+          <AlertCircle className="h-12 w-12 text-white/70" />
+          <p className="text-base font-bold">Vídeo indisponível</p>
+          <p className="max-w-xs text-xs text-white/60">
+            {isOwn
+              ? "Esse vídeo não foi encontrado. Posta ele de novo pela câmera lá em cima."
+              : "Esse vídeo não está mais disponível. Role pra ver o próximo."}
+          </p>
+        </div>
+      )}
 
       <OverlayLayer overlays={(Array.isArray(post.overlays) ? post.overlays : []) as Overlay[]} />
 
@@ -432,7 +492,7 @@ function VideoSlide({
                 : "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
             }`}
           />
-          <span className="mt-0.5 text-xs font-semibold drop-shadow">{post.likes_count}</span>
+          <span className="mt-0.5 text-xs font-semibold drop-shadow">{fmtCount(post.likes_count)}</span>
         </button>
 
         <button
@@ -443,7 +503,7 @@ function VideoSlide({
           className="flex flex-col items-center"
         >
           <MessageCircle className="h-8 w-8 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]" />
-          <span className="mt-0.5 text-xs font-semibold drop-shadow">{post.comments_count}</span>
+          <span className="mt-0.5 text-xs font-semibold drop-shadow">{fmtCount(post.comments_count)}</span>
         </button>
 
         <button
