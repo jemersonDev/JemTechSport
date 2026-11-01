@@ -6,6 +6,8 @@ import {
   useActiveRachaId,
   createRacha,
   joinByInviteCode,
+  rachaExpirado,
+  permitirVerRachaEncerrado,
   type Racha,
 } from "@/hooks/useRacha";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,6 +116,7 @@ function RachasPage() {
   }, [user, authLoading, navigate]);
 
   const handlePick = (r: Racha) => {
+    if (rachaExpirado(r)) permitirVerRachaEncerrado(r.id);
     setActiveRachaId(r.id);
     toast.success(`Racha "${r.name}" selecionado`);
     navigate({ to: "/" });
@@ -170,13 +173,23 @@ function RachasPage() {
               </Card>
             ) : (
               <div className="space-y-3">
-                {rachas.map((r) => {
+                {[...rachas]
+                  .sort((a, b) => {
+                    const ea = rachaExpirado(a) ? 1 : 0;
+                    const eb = rachaExpirado(b) ? 1 : 0;
+                    if (ea !== eb) return ea - eb;
+                    const ta = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
+                    const tb = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
+                    return ea ? tb - ta : ta - tb;
+                  })
+                  .map((r) => {
                   const c = counts[r.id] ?? { total: 0, paid: 0 };
                   const pct = r.max_players > 0 ? (c.total / r.max_players) * 100 : 0;
                   const isActive = activeRachaId === r.id;
                   const isAdmin = user?.id === r.admin_id;
                   const finalizado = !!(r as { finalizado_em?: string | null }).finalizado_em;
                   const scheduledMs = r.scheduled_at ? new Date(r.scheduled_at).getTime() : null;
+                  const encerrado = !finalizado && rachaExpirado(r);
                   const emAndamento =
                     !finalizado &&
                     scheduledMs !== null &&
@@ -196,6 +209,10 @@ function RachasPage() {
                         {finalizado ? (
                           <span className="text-[10px] font-black px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border uppercase tracking-wider">
                             ✓ Finalizada
+                          </span>
+                        ) : encerrado ? (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border uppercase tracking-wider">
+                            Encerrado
                           </span>
                         ) : emAndamento ? (
                           <span className="text-[10px] font-black px-2 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/40 uppercase tracking-wider animate-pulse">

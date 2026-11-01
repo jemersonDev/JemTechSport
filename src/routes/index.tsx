@@ -29,7 +29,7 @@ import { SoccerField, type Player, type FieldMode } from "@/components/SoccerFie
 import { MatchTimer } from "@/components/MatchTimer";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useRacha, useActiveRachaId, SKILL_WEIGHT, POSITION_LABEL, POSITION_EMOJI, type JogadorManual, type PositionExt } from "@/hooks/useRacha";
+import { useRacha, useActiveRachaId, rachaExpirado, podeVerRachaEncerrado, SKILL_WEIGHT, POSITION_LABEL, POSITION_EMOJI, type JogadorManual, type PositionExt } from "@/hooks/useRacha";
 import {
   useLivePlacar,
   finalizarRacha,
@@ -127,6 +127,16 @@ function Index() {
     removeManual,
     toggleManualPaid,
   } = useRacha(activeRachaId);
+
+  // Racha que já passou (mais de 24h após a data/finalização) deixa de ser o
+  // "atual": volta pra tela de escolher racha. Continua em "Meus rachas".
+  useEffect(() => {
+    if (!activeRachaId || !racha || racha.id !== activeRachaId) return;
+    if (rachaExpirado(racha) && !podeVerRachaEncerrado(activeRachaId)) {
+      setActiveRachaId(null);
+      toast.info("Esse racha já passou. Escolha o próximo em Meus rachas.");
+    }
+  }, [racha, activeRachaId, setActiveRachaId]);
 
   useEffect(() => {
     if (!authLoading && !user) {

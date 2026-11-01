@@ -56,6 +56,38 @@ export type JogadorManual = {
   created_at: string;
 };
 
+/** Horas depois da data do racha (ou da finalização) em que ele deixa de ser o racha "atual". */
+export const RACHA_EXPIRA_HORAS = 24;
+
+/** Racha cuja data (ou finalização) já passou há mais de RACHA_EXPIRA_HORAS. */
+export function rachaExpirado(
+  r: { scheduled_at: string | null; finalizado_em?: string | null } | null | undefined,
+): boolean {
+  if (!r) return false;
+  const ref = r.finalizado_em ?? r.scheduled_at;
+  if (!ref) return false;
+  return Date.now() > new Date(ref).getTime() + RACHA_EXPIRA_HORAS * 3_600_000;
+}
+
+const VIEW_OLD_KEY = "racha-old-ok:";
+
+/** Marca que o usuário abriu de propósito um racha já encerrado (vale só nesta sessão). */
+export function permitirVerRachaEncerrado(id: string) {
+  try {
+    sessionStorage.setItem(VIEW_OLD_KEY + id, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function podeVerRachaEncerrado(id: string): boolean {
+  try {
+    return sessionStorage.getItem(VIEW_OLD_KEY + id) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function useUserRachas() {
   const { user } = useAuth();
   const [rachas, setRachas] = useState<Racha[]>([]);
