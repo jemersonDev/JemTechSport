@@ -64,6 +64,7 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cardFileInputRef = useRef<HTMLInputElement>(null);
 
+  const [ehOrganizador, setEhOrganizador] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [position, setPosition] = useState<PositionExt>("meia");
@@ -74,6 +75,19 @@ function PerfilPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [favoriteTeamId, setFavoriteTeamId] = useState<string | null>(null);
   const [cardStats, setCardStats] = useState({ partidas: 0, gols: 0, assistencias: 0, craque: 0, bagre: 0 });
+
+  // Painel do organizador só aparece pra quem criou algum racha.
+  useEffect(() => {
+    if (!user) {
+      setEhOrganizador(false);
+      return;
+    }
+    supabase
+      .from("rachas")
+      .select("id", { count: "exact", head: true })
+      .eq("admin_id", user.id)
+      .then(({ count }) => setEhOrganizador((count ?? 0) > 0));
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -649,6 +663,7 @@ function PerfilPage() {
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>
+          {ehOrganizador && (
           <Link
             to="/organizador"
             className="flex items-center gap-3 p-3 hover:bg-muted/50 rounded-md transition"
@@ -664,6 +679,7 @@ function PerfilPage() {
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>
+          )}
           {isAdmin && (
             <Link
               to="/admin"
