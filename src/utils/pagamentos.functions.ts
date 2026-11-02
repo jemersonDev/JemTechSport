@@ -19,6 +19,35 @@ import { obterTokenOrganizador } from "@/utils/mpConecta.functions";
  *      inscrição como paga assim que detecta a aprovação.
  */
 
+/**
+ * Cria o pagamento no Mercado Pago. Se o MP recusar o application_fee (acontece
+ * quando a conta do organizador é a mesma dona do app, ou o MP não aceita comissão
+ * nesse pagamento), tenta de novo sem comissão para o jogador conseguir pagar.
+ */
+async function postarPagamentoMp(token: string, corpo: Record<string, unknown>): Promise<Response> {
+  const post = (body: Record<string, unknown>) =>
+    fetch("https://api.mercadopago.com/v1/payments", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "X-Idempotency-Key": crypto.randomUUID(),
+      },
+      body: JSON.stringify(body),
+    });
+  let res = await post(corpo);
+  if (!res.ok && "application_fee" in corpo) {
+    const txt = await res.clone().text();
+    if (txt.includes("application_fee")) {
+      console.warn("MP recusou application_fee, tentando sem comissão:", txt);
+      const { application_fee: _ignorada, ...semComissao } = corpo;
+      void _ignorada;
+      res = await post(semComissao);
+    }
+  }
+  return res;
+}
+
 export const TAXA_FIXA_RACHA = 5.0;
 export const TAXA_POR_JOGADOR = 0.12;
 
@@ -143,7 +172,6 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
     const tokenParaCobranca = tokenOrganizador ?? accessToken;
 
-    const idempotencyKey = crypto.randomUUID();
     const payerEmail =
       (typeof claims.email === "string" && claims.email) || `user-${userId}@jemtech.local`;
 
@@ -159,15 +187,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
       corpoPagamento.application_fee = valorPlataforma;
     }
 
-    const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tokenParaCobranca}`,
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": idempotencyKey,
-      },
-      body: JSON.stringify(corpoPagamento),
-    });
+    const mpRes = await postarPagamentoMp(tokenParaCobranca, corpoPagamento);
 
     if (!mpRes.ok) {
       const errText = await mpRes.text();
@@ -308,7 +328,6 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
     const tokenOrganizador = await obterTokenOrganizador(racha.admin_id);
     const tokenParaCobranca = tokenOrganizador ?? accessToken;
 
-    const idempotencyKey = crypto.randomUUID();
     const payerEmail =
       (typeof claims.email === "string" && claims.email) || `user-${userId}@jemtech.local`;
 
@@ -324,15 +343,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       corpoPagamento.application_fee = valorPlataforma;
     }
 
-    const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${tokenParaCobranca}`,
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": idempotencyKey,
-      },
-      body: JSON.stringify(corpoPagamento),
-    });
+    const mpRes = await postarPagamentoMp(tokenParaCobranca, corpoPagamento);
 
     if (!mpRes.ok) {
       const errText = await mpRes.text();
