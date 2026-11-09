@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar, MapPin, Users, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { EscolhaPosicaoDialog } from "@/components/EscolhaPosicaoDialog";
+import { posicaoSalvaDoJogador, salvarPosicaoDoJogador, type PosicaoEntrada } from "@/hooks/useRacha";
 
 export const Route = createFileRoute("/r/$code")({
   component: SharedRachaPage,
@@ -39,6 +41,7 @@ function SharedRachaPage() {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [alreadyMember, setAlreadyMember] = useState(false);
+  const [askPos, setAskPos] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -80,9 +83,22 @@ function SharedRachaPage() {
     }
     if (!racha) return;
     setJoining(true);
+    const salva = await posicaoSalvaDoJogador(user.id);
+    if (!salva) {
+      // primeira vez: pergunta se joga na linha ou no gol
+      setJoining(false);
+      setAskPos(true);
+      return;
+    }
+    await entrar(salva);
+  };
+
+  const entrar = async (position: PosicaoEntrada) => {
+    if (!user || !racha) return;
+    setJoining(true);
     const { error } = await supabase
       .from("inscricoes")
-      .insert({ racha_id: racha.id, user_id: user.id, position: "linha" });
+      .insert({ racha_id: racha.id, user_id: user.id, position });
     if (error && !error.message.includes("duplicate")) {
       toast.error(error.message);
     } else {
@@ -90,6 +106,14 @@ function SharedRachaPage() {
       navigate({ to: "/rachas" });
     }
     setJoining(false);
+  };
+
+  const escolherPosicao = async (pos: PosicaoEntrada) => {
+    if (!user) return;
+    setJoining(true);
+    await salvarPosicaoDoJogador(user.id, pos);
+    setAskPos(false);
+    await entrar(pos);
   };
 
   if (loading || authLoading) {
@@ -193,6 +217,12 @@ function SharedRachaPage() {
           Convite enviado pelo organizador
         </div>
       </div>
+      <EscolhaPosicaoDialog
+        open={askPos}
+        busy={joining}
+        onPick={escolherPosicao}
+        onClose={() => setAskPos(false)}
+      />
     </div>
   );
 }

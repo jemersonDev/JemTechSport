@@ -428,7 +428,54 @@ export async function createRacha(input: {
   return { data: data as Racha, error: null };
 }
 
-export async function joinByInviteCode(code: string, userId: string) {
+export type PosicaoEntrada = "linha" | "goleiro";
+
+/**
+ * Posição que o jogador já escolheu antes: goleiro salvo no perfil, ou a
+ * posição da última inscrição dele. Retorna null se nunca escolheu (primeira vez).
+ */
+export async function posicaoSalvaDoJogador(userId: string): Promise<PosicaoEntrada | null> {
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("preferred_position, preferred_position_ext")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const p = prof as { preferred_position?: string | null; preferred_position_ext?: string | null } | null;
+  if (p?.preferred_position === "goleiro" || p?.preferred_position_ext === "goleiro") return "goleiro";
+
+  const { data: ult } = await supabase
+    .from("inscricoes")
+    .select("position")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const pos = (ult as { position?: string } | null)?.position;
+  return pos === "goleiro" || pos === "linha" ? pos : null;
+}
+
+/** Salva no perfil se o jogador joga na linha ou no gol. */
+export async function salvarPosicaoDoJogador(userId: string, pos: PosicaoEntrada) {
+  const patch =
+    pos === "goleiro"
+      ? { preferred_position: "goleiro", preferred_position_ext: "goleiro" }
+      : { preferred_position: "linha" };
+  await supabase.from("profiles").update(patch as never).eq("user_id", userId);
+  if (pos === "linha") {
+    // se o perfil estava como goleiro, volta pra uma posição de linha
+    await supabase
+      .from("profiles")
+      .update({ preferred_position_ext: "meia" } as never)
+      .eq("user_id", userId)
+      .eq("preferred_position_ext", "goleiro");
+  }
+}
+
+export async function joinByInviteCode(
+  code: string,
+  userId: string,
+  position: PosicaoEntrada = "linha",
+) {
   const cleaned = code.trim().toUpperCase();
   if (cleaned.length !== 6) return { data: null, error: "Código deve ter 6 caracteres" };
 
@@ -455,7 +502,7 @@ export async function joinByInviteCode(code: string, userId: string) {
     const { error: joinErr } = await supabase.from("inscricoes").insert({
       racha_id: racha.id,
       user_id: userId,
-      position: "linha",
+      position,
     });
     if (joinErr) return { data: null, error: joinErr.message };
   }

@@ -8,6 +8,9 @@ import {
   joinByInviteCode,
   rachaExpirado,
   permitirVerRachaEncerrado,
+  posicaoSalvaDoJogador,
+  salvarPosicaoDoJogador,
+  type PosicaoEntrada,
   type Racha,
 } from "@/hooks/useRacha";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +36,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
+import { EscolhaPosicaoDialog } from "@/components/EscolhaPosicaoDialog";
 import { shareRachaViaWhatsApp } from "@/utils/shareRacha";
 import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR, valorCobradoJogador } from "@/utils/pagamentos.functions";
 
@@ -666,17 +670,37 @@ function JoinRachaForm({
   const { user } = useAuth();
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [askPos, setAskPos] = useState(false);
 
-  const handleJoin = async () => {
+  const entrar = async (pos: PosicaoEntrada) => {
     if (!user) return;
     setBusy(true);
-    const { data, error } = await joinByInviteCode(code, user.id);
+    const { data, error } = await joinByInviteCode(code, user.id, pos);
     setBusy(false);
     if (error || !data) {
       toast.error(error ?? "Erro ao entrar");
       return;
     }
     onJoined(data);
+  };
+
+  const handleJoin = async () => {
+    if (!user) return;
+    setBusy(true);
+    const salva = await posicaoSalvaDoJogador(user.id);
+    setBusy(false);
+    if (!salva) {
+      setAskPos(true); // primeira vez: pergunta linha ou gol
+      return;
+    }
+    await entrar(salva);
+  };
+
+  const escolherPosicao = async (pos: PosicaoEntrada) => {
+    if (!user) return;
+    await salvarPosicaoDoJogador(user.id, pos);
+    setAskPos(false);
+    await entrar(pos);
   };
 
   return (
@@ -702,6 +726,12 @@ function JoinRachaForm({
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Entrar"}
         </Button>
       </div>
+      <EscolhaPosicaoDialog
+        open={askPos}
+        busy={busy}
+        onPick={escolherPosicao}
+        onClose={() => setAskPos(false)}
+      />
     </Card>
   );
 }
