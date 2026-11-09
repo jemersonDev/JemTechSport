@@ -47,7 +47,7 @@ import { TeamNameEditorDialog } from "@/components/TeamNameEditorDialog";
 import { getTeamMeta, type TeamMeta, type TeamNamesMap, type TeamSlot } from "@/lib/teamMeta";
 import { supabase } from "@/integrations/supabase/client";
 import { smartShuffle } from "@/utils/smartShuffle";
-import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR } from "@/utils/pagamentos.functions";
+import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR, valorCobradoJogador } from "@/utils/pagamentos.functions";
 import { toast } from "sonner";
 
 type TabId = "tactical" | "roster" | "match";
@@ -292,7 +292,7 @@ function Index() {
     // O organizador recebe o valor cheio (total / divisor) — a taxa da
     // plataforma soma POR CIMA no valor cobrado do jogador, pra ele nunca
     // precisar completar do próprio bolso.
-    return valorOrganizadorPorJogador + taxaPlataforma;
+    return valorCobradoJogador(valorOrganizadorPorJogador, taxaPlataforma);
   }, [totalValue, players, racha?.max_players]);
 
   const goalkeeperCount = useMemo(
@@ -1710,12 +1710,12 @@ function Index() {
                   const linhaCount = players.filter((p) => !p.isGoalkeeper).length;
                   const divisor = racha?.max_players && racha.max_players > 0 ? racha.max_players : linhaCount;
                   if (divisor === 0) return null;
-                  const taxa = TAXA_FIXA_RACHA / divisor + TAXA_POR_JOGADOR;
+                  const taxa = valuePerPerson - (parseFloat(totalValue.replace(",", ".")) || 0) / divisor;
                   return (
                     <p className="text-[10px] text-muted-foreground mt-1">
                       Você recebe R$ {(valuePerPerson - taxa).toFixed(2).replace(".", ",")} — os R$
-                      {" "}{taxa.toFixed(2).replace(".", ",")} restantes são a taxa da plataforma, já
-                      inclusos no valor que o jogador paga.
+                      {" "}{taxa.toFixed(2).replace(".", ",")} restantes são a taxa do app e a do PIX
+                      (Mercado Pago), já inclusas no valor que o jogador paga.
                     </p>
                   );
                 })()}
@@ -1937,8 +1937,8 @@ function Index() {
                   // quadra) — mas o valor de fato cobrado no PIX de cada
                   // jogador já vem com a taxa da plataforma somada em
                   // cima, igual ao que a tela de pagamento mostra.
-                  const taxaPorJogador = divisor > 0 ? TAXA_FIXA_RACHA / divisor + TAXA_POR_JOGADOR : 0;
-                  const valorComTaxa = valorBase + taxaPorJogador;
+                  const taxaApp = divisor > 0 ? TAXA_FIXA_RACHA / divisor + TAXA_POR_JOGADOR : 0;
+                  const valorComTaxa = divisor > 0 ? valorCobradoJogador(valorBase, taxaApp) : 0;
                   const pagos = linhaInscritos.filter((i) => i.paid);
                   const devendo = linhaInscritos.filter((i) => !i.paid);
                   const arrecadado = pagos.length * valorComTaxa;

@@ -115,7 +115,7 @@ export function PixPaymentDialog({ inscricaoId, open, onOpenChange, onPaid, tipo
               </span>
             </div>
             <div className="flex items-center justify-between text-white/50">
-              <span>Taxa da plataforma (JemTech)</span>
+              <span>Taxa do app + PIX</span>
               <span>+ R$ {valorTaxa.toFixed(2).replace(".", ",")}</span>
             </div>
             <div className="h-px bg-white/10 my-1" />

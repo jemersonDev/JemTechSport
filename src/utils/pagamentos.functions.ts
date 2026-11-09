@@ -50,6 +50,18 @@ async function postarPagamentoMp(token: string, corpo: Record<string, unknown>):
 
 export const TAXA_FIXA_RACHA = 5.0;
 export const TAXA_POR_JOGADOR = 0.12;
+/** Taxa do Mercado Pago sobre PIX (~0,99%). Ela é descontada de quem recebe, então entra no valor do jogador. */
+export const TAXA_MP_PIX = 0.0099;
+
+/**
+ * Valor cobrado do jogador para o organizador receber EXATAMENTE `valorOrg`
+ * depois de descontar a taxa do app (`taxaApp`) e a taxa do PIX do Mercado Pago.
+ * Arredonda pra cima no centavo pra nunca faltar.
+ */
+export function valorCobradoJogador(valorOrg: number, taxaApp: number): number {
+  const bruto = (valorOrg + taxaApp) / (1 - TAXA_MP_PIX);
+  return Math.ceil(bruto * 100 - 1e-9) / 100;
+}
 
 const InputSchema = z.object({
   inscricaoId: z.string().uuid(),
@@ -129,7 +141,12 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
     const valorPlataforma = ehOProprioOrganizador
       ? 0
       : +(TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR).toFixed(2);
-    const valorPorJogador = +(valorOrganizador + valorPlataforma).toFixed(2);
+    // Organizador pagando o próprio racha: sem taxa. Os demais pagam o valor
+    // da quadra + taxa do app + taxa do PIX, pro organizador receber o valor cheio.
+    const valorPorJogador = ehOProprioOrganizador
+      ? valorOrganizador
+      : valorCobradoJogador(valorOrganizador, valorPlataforma);
+    const valorTaxaExibida = +(valorPorJogador - valorOrganizador).toFixed(2);
 
     // 3) Verificar se já existe pagamento pendente para esta inscrição
     const { data: existing } = await supabaseAdmin
@@ -154,7 +171,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
         ticketUrl: existing.mp_ticket_url,
         valor: valorPorJogador,
         valorQuadra: valorOrganizador,
-        valorTaxa: valorPlataforma,
+        valorTaxa: valorTaxaExibida,
       };
     }
 
@@ -241,7 +258,7 @@ export const criarPagamentoPix = createServerFn({ method: "POST" })
       ticketUrl: td?.ticket_url ?? null,
       valor: valorPorJogador,
       valorQuadra: valorOrganizador,
-      valorTaxa: valorPlataforma,
+      valorTaxa: valorTaxaExibida,
     };
   });
 
@@ -300,7 +317,10 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
     }
     const ehOProprioOrganizador = userId === racha.admin_id;
     const valorPlataforma = ehOProprioOrganizador ? 0 : +TAXA_POR_JOGADOR.toFixed(2);
-    const valorPorJogador = +(valorOrganizador + valorPlataforma).toFixed(2);
+    const valorPorJogador = ehOProprioOrganizador
+      ? valorOrganizador
+      : valorCobradoJogador(valorOrganizador, valorPlataforma);
+    const valorTaxaExibida = +(valorPorJogador - valorOrganizador).toFixed(2);
 
     const { data: existing } = await supabaseAdmin
       .from("pagamentos")
@@ -321,7 +341,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
         ticketUrl: existing.mp_ticket_url,
         valor: valorPorJogador,
         valorQuadra: valorOrganizador,
-        valorTaxa: valorPlataforma,
+        valorTaxa: valorTaxaExibida,
       };
     }
 
@@ -396,7 +416,7 @@ export const criarPagamentoExtra = createServerFn({ method: "POST" })
       ticketUrl: td?.ticket_url ?? null,
       valor: valorPorJogador,
       valorQuadra: valorOrganizador,
-      valorTaxa: valorPlataforma,
+      valorTaxa: valorTaxaExibida,
     };
   });
 

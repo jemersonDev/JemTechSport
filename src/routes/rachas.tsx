@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { shareRachaViaWhatsApp } from "@/utils/shareRacha";
-import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR } from "@/utils/pagamentos.functions";
+import { TAXA_FIXA_RACHA, TAXA_POR_JOGADOR, valorCobradoJogador } from "@/utils/pagamentos.functions";
 
 export const Route = createFileRoute("/rachas")({
   component: RachasPage,
@@ -609,8 +609,9 @@ function CreateRachaForm({
         />
         {Number(totalValue.replace(",", ".")) > 0 && maxPlayers > 0 && (() => {
           const valorLiquido = Number(totalValue.replace(",", ".")) / maxPlayers;
-          const taxa = TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR;
-          const valorCobrado = valorLiquido + taxa;
+          const taxaApp = TAXA_FIXA_RACHA / maxPlayers + TAXA_POR_JOGADOR;
+          const valorCobrado = valorCobradoJogador(valorLiquido, taxaApp);
+          const taxa = valorCobrado - valorLiquido;
           return (
             <div className="text-[11px] text-muted-foreground space-y-0.5">
               <p>
@@ -621,8 +622,8 @@ function CreateRachaForm({
               </p>
               <p>
                 Você recebe os R$ {Number(totalValue.replace(",", ".")).toFixed(2).replace(".", ",")}
-                {" "}inteiros — a taxa da plataforma (R$ {taxa.toFixed(2).replace(".", ",")} por
-                jogador) já vem somada em cima, sem sair do seu valor.
+                {" "}inteiros — as taxas (R$ {taxa.toFixed(2).replace(".", ",")} por jogador, do app
+                e do PIX do Mercado Pago) já vêm somadas em cima, sem sair do seu valor.
               </p>
             </div>
           );
