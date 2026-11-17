@@ -114,6 +114,10 @@ function RachasPage() {
   }, [rachas]);
 
   const [mode, setMode] = useState<"list" | "create" | "join">("list");
+  // Rachas encerrados (passou 1 dia da data) somem da lista; dá pra reabrir num botão.
+  const [verEncerrados, setVerEncerrados] = useState(false);
+  const encerradosCount = rachas.filter((r) => rachaExpirado(r)).length;
+  const rachasVisiveis = verEncerrados ? rachas : rachas.filter((r) => !rachaExpirado(r));
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -165,19 +169,21 @@ function RachasPage() {
       <main className="max-w-2xl mx-auto p-4 space-y-4">
         {mode === "list" && (
           <>
-            {rachas.length === 0 ? (
+            {rachasVisiveis.length === 0 ? (
               <Card className="p-8 text-center space-y-3">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                   <Trophy className="w-7 h-7 text-primary" />
                 </div>
-                <h2 className="font-semibold">Nenhum racha ainda</h2>
+                <h2 className="font-semibold">
+                  {encerradosCount > 0 ? "Nenhum racha ativo" : "Nenhum racha ainda"}
+                </h2>
                 <p className="text-sm text-muted-foreground">
                   Crie um novo racha ou entre com um código de convite.
                 </p>
               </Card>
             ) : (
               <div className="space-y-3">
-                {[...rachas]
+                {[...rachasVisiveis]
                   .sort((a, b) => {
                     const ea = rachaExpirado(a) ? 1 : 0;
                     const eb = rachaExpirado(b) ? 1 : 0;
@@ -329,6 +335,17 @@ function RachasPage() {
                   );
                 })}
               </div>
+            )}
+
+            {encerradosCount > 0 && (
+              <button
+                onClick={() => setVerEncerrados((v) => !v)}
+                className="w-full text-center text-xs text-muted-foreground underline py-1"
+              >
+                {verEncerrados
+                  ? "Esconder rachas encerrados"
+                  : `Ver rachas encerrados (${encerradosCount})`}
+              </button>
             )}
 
             <div className="grid grid-cols-2 gap-3 pt-2">
