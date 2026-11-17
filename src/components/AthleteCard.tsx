@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Download, Share2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { removeBackgroundFromUrl } from "@/utils/removeBackground";
+
+const AUTO_REMOVER_FUNDO = false;
 import { generateImageBlob, reportShareError } from "@/utils/shareImage";
 import { ShareSheet } from "@/components/ShareSheet";
 
@@ -181,6 +183,10 @@ export function AthleteCard({
         };
 
 
+  // Remoção automática de fundo ao exibir o cartão fica DESLIGADA: ela baixava um
+  // modelo de ~25 MB do Hugging Face a cada visita e gerava erro de CORS no console
+  // quando o download era bloqueado. O fundo agora é removido só no upload da foto
+  // (Perfil), que já salva o PNG limpo (card-avatar.png).
   // Tenta remover fundo automaticamente quando há foto.
   // Se a URL já é o PNG limpo persistido pelo upload (card-avatar.png),
   // pula o reprocessamento e usa direto.
@@ -189,7 +195,7 @@ export function AthleteCard({
       setCleanAvatar(null);
       return;
     }
-    if (/card-avatar\.png(\?|$)/i.test(avatarUrl)) {
+    if (!AUTO_REMOVER_FUNDO || /card-avatar\.png(\?|$)/i.test(avatarUrl)) {
       setCleanAvatar(avatarUrl);
       setRemoving(false);
       return;
